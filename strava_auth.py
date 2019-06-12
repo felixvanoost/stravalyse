@@ -8,6 +8,7 @@ This file requires a Strava client ID and client secret to be stored in Credenti
 import os
 import requests
 from requests import Request
+import time
 import webbrowser
 
 CLIENT_INFO_FILE = 'ClientInfo.txt'
@@ -69,7 +70,7 @@ def read_tokens_from_file():
 
                 if line.startswith('STRAVA_TOKEN_EXPIRY_TIME ='):   # Locate the access token expiry time
                     expiry_time = line.split('=')[1]                # Split the line and select the right half (2nd element)
-                    expiry_time = refresh_token.strip()             # Strip any whitespace from the expiry time
+                    expiry_time = expiry_time.strip()               # Strip any whitespace from the expiry time
                     tokens['expiry_time'] = expiry_time             # Update the expiry time in the dictionary
     except IOError:
         return_code = 1
@@ -95,12 +96,34 @@ def write_tokens_to_file():
         file.write('STRAVA_REFRESH_TOKEN = {} \n'.format(tokens['refresh_token']))
         file.write('STRAVA_TOKEN_EXPIRY_TIME = {} \n'.format(tokens['expiry_time']))
 
+def refresh_expired_tokens():
+    """
+    Refreshes the access and refresh tokens.
+    """
+
+    print('Strava: Refreshing expired tokens')
+
+    base_address = 'https://www.strava.com/oauth/token'
+    data = {'client_id': client_info['id'],
+            'client_secret': client_info['secret'],
+            'grant_type': 'refresh_token',
+            'refresh_token': tokens['refresh_token']}
+
+    # POST the request and parse the JSON response
+    refresh_return = requests.post(base_address, data = data).json()
+
+    # Store the new tokens and expiry time in the dictionary
+    tokens['access_token'] = refresh_return.get('access_token')
+    tokens['refresh_token'] = refresh_return.get('refresh_token')
+    tokens['expiry_time'] = refresh_return.get('expires_at')
+
+    # Write the new tokens and expiry time to a text file for the next use
+    write_tokens_to_file()
+
 def get_auth_code():
     """
     Gets and returns the authorization code required to obtain the initial access and refresh tokens.
     """
-
-    print('Strava: Getting authorization code')
     
     base_address = 'https://www.strava.com/oauth/authorize'
     params = ({'client_id': client_info['id'],
@@ -126,8 +149,6 @@ def exchange_tokens(auth_code):
     Exchanges the authorization code against the initial access and refresh tokens.
     """
 
-    print('Strava: Getting initial access and refresh tokens')
-
     base_address = 'https://www.strava.com/oauth/token'
     data = {'client_id': client_info['id'],
             'client_secret': client_info['secret'],
@@ -147,53 +168,38 @@ def get_initial_tokens():
     Gets the initial access and refresh tokens and writes them to a text file.
     """
 
+    print('Strava: Getting initial tokens')
+
     # Get the authorization code and exchange it against the initial access and refresh tokens
     auth_code = get_auth_code()
     exchange_tokens(auth_code)
 
-    # Write the tokens and expiry time to a text file for the next use
+    # Write the initial tokens and expiry time to a text file for the next use
     write_tokens_to_file()
-
-def refresh_expired_access_token():
-    """
-    Refreshes the access token.
-    """
-
-    print('Strava: Refreshing access token')
-
-    base_address = 'https://www.strava.com/oauth/token'
-    data = {'client_id': client_info['id'],
-            'client_secret': client_info['secret'],
-            'grant_type': 'refresh_token',
-            'refresh_token': tokens['refresh_token']}
-
-    # POST the request and parse the JSON response
-    refresh_return = requests.post(base_address, data = data).json()
-
-    # Store the new access and refresh tokens in the dictionary
-    tokens['access_token'] = refresh_return.get('access_token')
-    tokens['refresh_token'] = refresh_return.get('refresh_token')
-    tokens['expiry_time'] = refresh_return.get('expires_at')
 
 def authenticate():
     """
     Authenticates the application to the Strava v3 API using OAuth2.
     Returns an access token for API access.
     """
+
+    print('Strava: Authenticating access to the API')
     
     access_token = 0
 
     # Read the Strava client information from the corresponding text file
     if read_client_info_from_file() is 0:
-
         # Read the Strava tokens and expiry time from the corresponding text file
         if read_tokens_from_file() is 0:
-
-            # TODO: Check token validity or get new tokens
-            print(tokens)
+            # Check if the access token has expired
+            if int(tokens['expiry_time']) <= time.time():
+                # Refresh the expired tokens
+                refresh_expired_tokens()
         else:
-        
             # Get the initial access and refresh tokens
             get_initial_tokens()
+    
+        print('Strava: Access to the API authenticated')
+        access_token = tokens['access_token']
 
     return access_token
