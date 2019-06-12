@@ -2,10 +2,9 @@
 
 Felix van Oost 2019
 
-Authenticates the application to the Strava v3 API using OAuth2
-This file requires a Strava client ID and client secret to be stored in Credentials.txt
+Authenticates the application to the Strava v3 API using OAuth2.
+This file requires a Strava client ID and client secret to be stored in Credentials.txt.
 """
-
 import requests
 from requests import Request
 import webbrowser
@@ -34,6 +33,34 @@ def read_strava_credentials():
                 client_secret = client_secret.strip()               # Strip any whitespace from the client secret
                 strava_credentials['client_secret'] = client_secret # Update the client secret in the dictionary
 
+def get_initial_auth_code():
+    """
+    Gets and returns the initial authorization code required to obtain the access and refresh tokens.
+    """
+
+    print("Strava: Getting initial authorization code")
+    
+    base_address = 'https://www.strava.com/oauth/authorize'
+
+    # Create a dictionary of parameters to request an authorization code from the Strava API
+    params = ({'client_id': strava_credentials['client_id'],
+               'redirect_uri': 'http://localhost',
+               'response_type': 'code',
+               'approval_prompt': 'auto',
+               'scope': 'activity:read_all'})
+
+    # Prepare the authorization code HTTP request and open it in a browser window
+    authorization_request = Request('GET', base_address, params = params).prepare()
+    webbrowser.open(authorization_request.url)
+
+    """
+    TODO: Get the authorization code back from the response automatically. Currently, the code must be copied from the URL
+          response in the browser window.
+    """
+    auth_code = input("Authorization code: ")
+
+    return auth_code
+
 def authenticate():
     """
     Authenticates the application to the Strava v3 API using OAuth2
@@ -41,3 +68,7 @@ def authenticate():
     
     # Read the Strava credentials from the text file
     read_strava_credentials()
+
+    # Get the initial authorization code required to obtain the access and refresh tokens
+    auth_code = get_initial_auth_code()
+    print(auth_code)
