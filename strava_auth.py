@@ -12,7 +12,7 @@ import webbrowser
 FILE_CREDENTIALS = 'Credentials.txt'
 
 # Dictionary for the Strava client credentials
-strava_credentials = {'client_id': '', 'client_secret': ''}
+strava_credentials = {}
 
 def read_strava_credentials():
     """
@@ -26,23 +26,21 @@ def read_strava_credentials():
             if line.startswith('STRAVA_CLIENT_ID ='):               # Locate the client ID
                 client_id = line.split('=')[1]                      # Split the line and select the right half (2nd element)
                 client_id = client_id.strip()                       # Strip any whitespace from the client ID
-                strava_credentials['client_id'] = client_id         # Update the client ID in the dictionary
+                strava_credentials['client_id'] = client_id         # Update the client ID in the credentials dictionary
 
             if line.startswith('STRAVA_CLIENT_SECRET ='):           # Locate the client secret
                 client_secret = line.split('=')[1]                  # Split the line and select the right half (2nd element)
                 client_secret = client_secret.strip()               # Strip any whitespace from the client secret
-                strava_credentials['client_secret'] = client_secret # Update the client secret in the dictionary
+                strava_credentials['client_secret'] = client_secret # Update the client secret in the credentials dictionary
 
 def get_initial_auth_code():
     """
     Gets and returns the initial authorization code required to obtain the access and refresh tokens.
     """
 
-    print("Strava: Getting initial authorization code")
+    print('Strava: Getting initial authorization code')
     
     base_address = 'https://www.strava.com/oauth/authorize'
-
-    # Create a dictionary of parameters to request an authorization code from the Strava API
     params = ({'client_id': strava_credentials['client_id'],
                'redirect_uri': 'http://localhost',
                'response_type': 'code',
@@ -57,9 +55,27 @@ def get_initial_auth_code():
     TODO: Get the authorization code back from the response automatically. Currently, the code must be copied from the URL
           response in the browser window.
     """
-    auth_code = input("Authorization code: ")
+    # Store the authorization code in the credentials dictionary
+    strava_credentials['auth_code'] = input("Authorization code: ")
 
-    return auth_code
+def exchange_tokens():
+    """
+    Exchanges the authorization code against access and refresh tokens.
+    """
+
+    print('Strava: Getting access and refresh tokens')
+
+    base_address = 'https://www.strava.com/oauth/token'
+    data = {'client_id': strava_credentials['client_id'],
+            'client_secret': strava_credentials['client_secret'],
+            'code': strava_credentials['auth_code'],
+            'grant_type': 'authorization_code'}
+    
+    auth_return = requests.post(base_address, data = data).json()
+
+    # Store the access and refresh tokens in the credentials dictionary
+    strava_credentials['access_token'] = auth_return.get('access_token')
+    strava_credentials['refresh_token'] = auth_return.get('refresh_token')
 
 def authenticate():
     """
@@ -70,5 +86,7 @@ def authenticate():
     read_strava_credentials()
 
     # Get the initial authorization code required to obtain the access and refresh tokens
-    auth_code = get_initial_auth_code()
-    print(auth_code)
+    get_initial_auth_code()
+
+    # Exchange the authorization code against the access and refresh tokens
+    exchange_tokens()
