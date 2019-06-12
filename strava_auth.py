@@ -2,15 +2,17 @@
 
 Felix van Oost 2019
 
-Authenticates the application to the Strava v3 API using OAuth2.
+Authenticates access to the Strava v3 API using OAuth2.
 This file requires a Strava client ID and client secret to be stored in Credentials.txt.
 """
+
 import os
 import requests
 from requests import Request
 import time
 import webbrowser
 
+# File paths
 CLIENT_INFO_FILE = 'ClientInfo.txt'
 TOKENS_FILE = 'Tokens.txt'
 
@@ -179,10 +181,8 @@ def get_initial_tokens():
 
 def get_access_token():
     """
-    Obtains and returns an OAuth2 access token for Strava v3 API.
+    Obtains and returns an OAuth2 access token for the Strava v3 API.
     """
-
-    print('Strava: Authenticating access to the API')
     
     access_token = ''
 
