@@ -17,4 +17,4 @@ from swagger_client.rest import ApiException
 # Main module
 if __name__ == "__main__":
 
-    strava_auth.authenticate()
+    access_token = strava_auth.get_access_token()

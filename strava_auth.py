@@ -177,15 +177,14 @@ def get_initial_tokens():
     # Write the initial tokens and expiry time to a text file for the next use
     write_tokens_to_file()
 
-def authenticate():
+def get_access_token():
     """
-    Authenticates the application to the Strava v3 API using OAuth2.
-    Returns an access token for API access.
+    Obtains and returns an OAuth2 access token for Strava v3 API.
     """
 
     print('Strava: Authenticating access to the API')
     
-    access_token = 0
+    access_token = ''
 
     # Read the Strava client information from the corresponding text file
     if read_client_info_from_file() is 0:
@@ -200,6 +199,6 @@ def authenticate():
             get_initial_tokens()
     
         print('Strava: Access to the API authenticated')
-        access_token = tokens['access_token']
+        access_token = str(tokens['access_token'])
 
     return access_token
