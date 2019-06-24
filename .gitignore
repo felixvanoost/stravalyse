@@ -106,3 +106,6 @@ venv.bak/
 # Strava client information and tokens
 *ClientInfo.txt
 *Tokens.txt
+
+# Strava activity data
+*StravaActivities.json
