@@ -189,7 +189,7 @@ class SummarySegment(object):
         :param activity_type: The activity_type of this SummarySegment.  # noqa: E501
         :type: str
         """
-        allowed_values = ["Ride", "Run"]  # noqa: E501
+        allowed_values = ["Ride", "Run", "Hike", "AlpineSki"]  # noqa: E501
         if activity_type not in allowed_values:
             raise ValueError(
                 "Invalid value for `activity_type` ({0}), must be one of {1}"  # noqa: E501
