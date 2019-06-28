@@ -1,8 +1,8 @@
-"""StravaHeatmap.py
+"""strava_activities.py
 
 Felix van Oost 2019
 
-This tool generates a heatmap of Strava activities using the HERE XYZ mapping service.
+Obtains and stores detailed activity data for all Strava activities. 
 """
 
 from datetime import datetime
@@ -109,13 +109,16 @@ def update_activities_list(activities_list, access_token):
             print('Strava: No new activities found')
             break
 
-# Main module
-if __name__ == "__main__":
+def get_activities():
+    """
+    Gets and stores a list of detailed activity data for all Strava activities.
+    Returns a local copy of the list.
+    """
 
     # Get an OAuth2 access token for the Strava v3 API
     access_token = strava_auth.get_access_token()
 
-    # Read the list of activities from the file and create a local copy
+    # Read the existing list of activities from the file and create a local copy
     activities = []
     read_activities_from_file(activities)
 
@@ -128,3 +131,5 @@ if __name__ == "__main__":
             time.sleep(API_RETRY_INTERVAL_SECONDS)
             continue
         break
+
+    return activities
