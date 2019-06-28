@@ -109,3 +109,6 @@ venv.bak/
 
 # Strava activity data
 *StravaActivities.json
+
+# Visual Studio code files
+.vscode/settings.json
