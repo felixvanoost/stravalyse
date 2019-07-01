@@ -6,6 +6,7 @@ Obtains and stores detailed activity data for all Strava activities.
 """
 
 from datetime import datetime
+import dateutil
 import json
 import os
 import strava_auth
@@ -24,9 +25,28 @@ STRAVA_ACTIVITIES_FILE = 'Data/StravaActivities.json'
 # Constants
 API_RETRY_INTERVAL_SECONDS = (2 * 60)
 
+def iso_to_datetime(obj):
+    """
+    JSON decoder hook to deserialise ISO 8601 strings into datetime objects.
+    """
+
+    dictionary = {}
+
+    for (key, value) in obj:
+        # Check if the object is a string and attempt to parse it into a datetime object
+        if isinstance(value, str):
+            try:
+                dictionary[key] = dateutil.parser.parse(value)
+            except ValueError:
+                dictionary[key] = value
+        else:
+            dictionary[key] = value
+
+    return dictionary
+
 class datetime_to_iso(json.JSONEncoder):
     """
-    Custom JSONEncoder subclass to serialise datetime objects into ISO 8601 strings.
+    Custom JSON encoder subclass to serialise datetime objects into ISO 8601 strings.
     """
     
     def default(self, obj):
@@ -42,17 +62,21 @@ def read_activities_from_file(activities_list):
     Reads the list of activities from a file in JSON format.
     """
 
+    print('Strava: Reading activities from {}'.format(STRAVA_ACTIVITIES_FILE))
+
     try:
         with open(STRAVA_ACTIVITIES_FILE, 'r') as file:
             for data in file.readlines():
-                activities_list.append(json.loads(data))
+                activities_list.append(json.loads(data, object_pairs_hook = iso_to_datetime))
     except FileNotFoundError:
         pass
 
-def write_activities_to_file(activities_list):
+def write_activities_to_file(activities):
     """
-    Writes the list of activities to a file in JSON format.
+    Writes an arbitrary list of activities to a file in JSON format.
     """
+
+    print('Strava: Writing activities to {}'.format(STRAVA_ACTIVITIES_FILE))
 
     # Create the Data folder if it does not already exist
     if not os.path.exists('Data'):
@@ -60,7 +84,7 @@ def write_activities_to_file(activities_list):
 
     # Append the activities to the file in JSON format
     with open(STRAVA_ACTIVITIES_FILE, 'a+') as file:
-        for data in activities_list:
+        for data in activities:
             file.write(json.dumps(data, cls = datetime_to_iso))
             file.write('\n')
 
@@ -86,6 +110,8 @@ def update_activities_list(activities_list, access_token):
     Updates the list of activities with any new activities since the start time of the
     last stored activity. Updates both the file and local copies of the list.
     """
+
+    print('Strava: Checking for new activities')
 
     # Create an instance of the Activities API class
     api_instance = swagger_client.ActivitiesApi()
@@ -122,7 +148,7 @@ def update_activities_list(activities_list, access_token):
             print('Strava: No new activities found')
             break
 
-def get_activities():
+def get_activities_list():
     """
     Gets and stores a list of detailed activity data for all Strava activities.
     Returns a local copy of the list.
@@ -132,17 +158,17 @@ def get_activities():
     access_token = strava_auth.get_access_token()
 
     # Read the existing list of activities from the file and create a local copy
-    activities = []
-    read_activities_from_file(activities)
+    activities_list = []
+    read_activities_from_file(activities_list)
 
     # Update the list of activities
     while True:
         try:
-            update_activities_list(activities, access_token)
+            update_activities_list(activities_list, access_token)
         except ApiException:
             print('Strava: API rate limit exceeded. Retrying in {} seconds.'.format(API_RETRY_INTERVAL_SECONDS))
             time.sleep(API_RETRY_INTERVAL_SECONDS)
             continue
         break
 
-    return activities
+    return activities_list
