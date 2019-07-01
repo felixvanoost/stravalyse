@@ -64,12 +64,20 @@ def read_activities_from_file(activities_list):
 
     print('Strava: Reading activities from {}'.format(STRAVA_ACTIVITIES_FILE))
 
+    activities_read = 0
     try:
         with open(STRAVA_ACTIVITIES_FILE, 'r') as file:
             for data in file.readlines():
+                print('Strava: Reading activity {}'.format(activities_read), end = "\r")
+
+                # Decode each JSON formatted line from the file and append it to the activities list
                 activities_list.append(json.loads(data, object_pairs_hook = iso_to_datetime))
+                activities_read += 1
     except FileNotFoundError:
         pass
+
+    # Empty new line to prevent the activity count display from being overwritten
+    print(end = "\n")
 
 def write_activities_to_file(activities):
     """
