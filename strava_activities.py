@@ -24,10 +24,24 @@ STRAVA_ACTIVITIES_FILE = 'Data/StravaActivities.json'
 # Constants
 API_RETRY_INTERVAL_SECONDS = (2 * 60)
 
+class datetime_to_iso(json.JSONEncoder):
+    """
+    Custom JSONEncoder subclass to serialise datetime objects into ISO 8601 strings.
+    """
+    
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            # Convert the datetime object into an ISO 8601 string
+            return obj.isoformat()
+        else:
+            # Encode the object normally
+            return json.JSONEncoder.default(self, obj)
+
 def read_activities_from_file(activities_list):
     """
     Reads the list of activities from a file in JSON format.
     """
+
     try:
         with open(STRAVA_ACTIVITIES_FILE, 'r') as file:
             for data in file.readlines():
@@ -47,7 +61,7 @@ def write_activities_to_file(activities_list):
     # Append the activities to the file in JSON format
     with open(STRAVA_ACTIVITIES_FILE, 'a+') as file:
         for data in activities_list:
-            file.write(json.dumps(data))
+            file.write(json.dumps(data, cls = datetime_to_iso))
             file.write('\n')
 
 def get_last_activity_start_time(activities_list):
@@ -60,10 +74,9 @@ def get_last_activity_start_time(activities_list):
 
     if activities_list:
         # Get the start time of the last activity in the list
-        last_activity_time_iso = activities_list[len(activities_list) - 1]['start_date']
+        last_activity_time_iso = str(activities_list[len(activities_list) - 1]['start_date'])
 
         # Convert the ISO 8601-formatted start time into an epoch
-        last_activity_time_iso = last_activity_time_iso.replace("Z", "+00:00")
         last_activity_time_epoch = datetime.fromisoformat(last_activity_time_iso).timestamp()
     
     return last_activity_time_epoch
