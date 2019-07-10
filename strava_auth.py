@@ -13,40 +13,11 @@ import time
 import webbrowser
 
 # File paths
-CLIENT_INFO_FILE = 'ClientInfo.txt'
 TOKENS_FILE = 'Tokens.txt'
 
 # Dictionaries for the Strava client information and tokens
 client_info = {}
 tokens = {}
-
-def read_client_info_from_file():
-    """
-    Reads the Strava client information (client ID and secret) from a text file and stores them for local use.
-    Returns 0 if the client information is successfully read and stored.
-    Returns 1 otherwise.
-    """
-
-    return_code = 0
-
-    # Open and parse the client information file
-    try:
-        with open(CLIENT_INFO_FILE, 'r') as file:
-            for line in file:
-                if line.startswith('STRAVA_CLIENT_ID ='):       # Locate the client ID
-                    client_id = line.split('=')[1]              # Split the line and select the right half (2nd element)
-                    client_id = client_id.strip()               # Strip any whitespace from the client ID
-                    client_info['id'] = client_id               # Update the client ID in the dictionary
-
-                if line.startswith('STRAVA_CLIENT_SECRET ='):   # Locate the client secret
-                    client_secret = line.split('=')[1]          # Split the line and select the right half (2nd element)
-                    client_secret = client_secret.strip()       # Strip any whitespace from the client secret
-                    client_info['secret'] = client_secret       # Update the client secret in the dictionary
-    except IOError:
-        print('Error: {} does not exist.'.format(CLIENT_INFO_FILE))
-        return_code = 1
-
-    return return_code
 
 def read_tokens_from_file():
     """
@@ -182,23 +153,36 @@ def get_initial_tokens():
 def get_access_token():
     """
     Obtains and returns an OAuth2 access token for the Strava v3 API.
+    Returns 0 if an access token cannot be generated.
     """
     
     access_token = ''
 
-    # Read the Strava client information from the corresponding text file
-    if read_client_info_from_file() is 0:
-        # Read the Strava tokens and expiry time from the corresponding text file
-        if read_tokens_from_file() is 0:
-            # Check if the access token has expired
-            if int(tokens['expiry_time']) <= time.time():
-                # Refresh the expired tokens
-                refresh_expired_tokens()
-        else:
-            # Get the initial access and refresh tokens
-            get_initial_tokens()
-    
-        print('Strava: Access to the API authenticated')
-        access_token = str(tokens['access_token'])
+    # Get and store the value of the STRAVA_CLIENT_ID environment variable
+    try:
+        client_info['id'] = os.environ['STRAVA_CLIENT_ID']
+    except KeyError:
+        print('Error: Add STRAVA_CLIENT_ID to the list of environment variables')
+        return 0
+
+    # Get and store the value of the STRAVA_CLIENT_SECRET environment variable
+    try:
+        client_info['secret'] = os.environ['STRAVA_CLIENT_SECRET']
+    except KeyError:
+        print('Error: Add STRAVA_CLIENT_SECRET to the list of environment variables')
+        return 0
+
+    # Read the Strava tokens and expiry time from the corresponding text file
+    if read_tokens_from_file() is 0:
+        # Check if the access token has expired
+        if int(tokens['expiry_time']) <= time.time():
+            # Refresh the expired tokens
+            refresh_expired_tokens()
+    else:
+        # Get the initial access and refresh tokens
+        get_initial_tokens()
+
+    print('Strava: Access to the API authenticated')
+    access_token = str(tokens['access_token'])
 
     return access_token

@@ -162,21 +162,23 @@ def get_activities_list():
     Returns a local copy of the list.
     """
 
+    activities_list = []
+
     # Get an OAuth2 access token for the Strava v3 API
     access_token = strava_auth.get_access_token()
 
-    # Read the existing list of activities from the file and create a local copy
-    activities_list = []
-    read_activities_from_file(activities_list)
+    if access_token is not 0:
+        # Read the existing list of activities from the file and create a local copy
+        read_activities_from_file(activities_list)
 
-    # Update the list of activities
-    while True:
-        try:
-            update_activities_list(activities_list, access_token)
-        except ApiException:
-            print('Strava: API rate limit exceeded. Retrying in {} seconds.'.format(API_RETRY_INTERVAL_SECONDS))
-            time.sleep(API_RETRY_INTERVAL_SECONDS)
-            continue
-        break
+        # Update the list of activities
+        while True:
+            try:
+                update_activities_list(activities_list, access_token)
+            except ApiException:
+                print('Strava: API rate limit exceeded. Retrying in {} seconds.'.format(API_RETRY_INTERVAL_SECONDS))
+                time.sleep(API_RETRY_INTERVAL_SECONDS)
+                continue
+            break
 
     return activities_list
