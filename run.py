@@ -11,4 +11,4 @@ import strava_activities
 if __name__ == "__main__":
 
     # Get a list of detailed activity data for all Strava activities
-    activities = strava_activities.get_activities()
+    activities = strava_activities.get_activities_list()

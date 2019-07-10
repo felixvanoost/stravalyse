@@ -6,7 +6,7 @@ Obtains and stores detailed activity data for all Strava activities.
 """
 
 from datetime import datetime
-import dateutil
+from dateutil import parser
 import json
 import os
 import strava_auth
@@ -36,7 +36,7 @@ def iso_to_datetime(obj):
         # Check if the object is a string and attempt to parse it into a datetime object
         if isinstance(value, str):
             try:
-                dictionary[key] = dateutil.parser.parse(value)
+                dictionary[key] = parser.parse(value)
             except ValueError:
                 dictionary[key] = value
         else:
