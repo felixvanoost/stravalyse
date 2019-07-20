@@ -103,12 +103,11 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# Strava client information and tokens
-*ClientInfo.txt
+# Strava API tokens
 *Tokens.txt
 
 # Strava activity data
-*StravaActivities.json
+/Data
 
-# Visual Studio code files
+# Visual Studio Code settings
 .vscode/settings.json
