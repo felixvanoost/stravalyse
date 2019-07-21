@@ -16,3 +16,6 @@ if __name__ == "__main__":
 
     # Create a pandas data frame from the activities list
     activities_data_frame = analysis.create_activities_data_frame(activities_list)
+
+    # Display summary statistics
+    analysis.display_summary_statistics(activities_data_frame)
