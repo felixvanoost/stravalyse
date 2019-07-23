@@ -7,27 +7,37 @@ Analyses and creates plots from Strava activity data.
 
 import pandas
 
-def display_summary_statistics(activities_data_frame):
+def generate_summary_statistics(x):
     """
-    Displays the following basic statistics for each activity type:
+    Generates the following basic statistics from the activities data frame:
     - Total and average distance
     - Total and average moving time
     - Total and average elevation gain
     - Average speed
     """
 
-    # Create a data frame of summary statistics by activity type
-    aggregation = {
-                   'type': {'Number of activities': 'count'},
-                   'distance': {'Total distance (km)': 'sum', 'Average distance (km)': 'mean'},
-                   'moving_time': {'Total moving time (mins)': 'sum', 'Average moving time (mins)': 'mean'},
-                   'total_elevation_gain': {'Total elevation gain (m)': 'sum', 'Average elevation gain (m)': 'mean'},
-                   'average_speed': {'Average speed (km/h)': 'mean'}
-                  }
-    summary_statistics = activities_data_frame.groupby('type').agg(aggregation)
+    rows = {
+            'Number of activities': x['type'].count(),
+            'Total distance (km)':  x['distance'].sum(),
+            'Average distance (km)':  x['distance'].mean(),
+            'Total moving time (hours)':  (x['moving_time'].sum() / 60),
+            'Average moving time (mins)':  x['moving_time'].mean(),
+            'Total elevation gain (km)':  (x['total_elevation_gain'].sum() / 1000),
+            'Average elevation gain (m)':  x['total_elevation_gain'].mean(),
+            'Average speed (km/h)':  x['average_speed'].mean()
+           }
 
-    # Drop the top level of columns to improve readability
-    summary_statistics.columns = summary_statistics.columns.droplevel(level = 0)
+    series = pandas.Series(rows, index = ['Number of activities', 'Total distance (km)', 'Average distance (km)', 'Total moving time (hours)',
+                                          'Average moving time (mins)', 'Total elevation gain (km)', 'Average elevation gain (m)', 'Average speed (km/h)'])
+
+    return series
+
+def display_summary_statistics(activities_data_frame):
+    """
+    Displays basic statistics for each activity type.
+    """
+
+    summary_statistics = activities_data_frame.groupby('type').apply(generate_summary_statistics)
 
     print()
     print('Summary statistics:')
