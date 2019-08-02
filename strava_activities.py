@@ -66,7 +66,7 @@ def read_activities_from_file(activities_list):
 
     activities_read = 0
     try:
-        with open(STRAVA_ACTIVITIES_FILE, 'r') as file:
+        with open(STRAVA_ACTIVITIES_FILE, 'r', encoding = 'utf8') as file:
             for data in file.readlines():
                 print('Strava: Reading activity {}'.format(activities_read), end = "\r")
 
@@ -91,9 +91,9 @@ def write_activities_to_file(activities):
         os.makedirs('Data')
 
     # Append the activities to the file in JSON format
-    with open(STRAVA_ACTIVITIES_FILE, 'a+') as file:
+    with open(STRAVA_ACTIVITIES_FILE, 'a+', encoding = 'utf8') as file:
         for data in activities:
-            file.write(json.dumps(data, cls = datetime_to_iso))
+            file.write(json.dumps(data, cls = datetime_to_iso, ensure_ascii = False))
             file.write('\n')
 
 def get_last_activity_start_time(activities_list):

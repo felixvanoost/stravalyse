@@ -52,8 +52,8 @@ def create_activities_map_file(activities_dataframe):
     activities_map_dataframe.loc[:, 'map_linestring'] = activities_map_dataframe.loc[:, 'map_points'].apply(LineString)
 
     # Create a GeoDataFrame from the activities map DataFrame
-    activities_map_geodataframe = GeoDataFrame(activities_map_dataframe[['id', 'type', 'distance', 'total_elevation_gain', 'map_linestring']], geometry = 'map_linestring')
+    activities_map_geodataframe = GeoDataFrame(activities_map_dataframe[['name', 'id', 'type', 'distance', 'total_elevation_gain', 'map_linestring']], geometry = 'map_linestring')
 
     # Export the GeoDataFrame to a file in GeoJSON format
     print('Geo: Exporting map data to {}'.format(STRAVA_ACTIVITIES_MAP_FILE))
-    activities_map_geodataframe.to_file(STRAVA_ACTIVITIES_MAP_FILE, driver = 'GeoJSON')
+    activities_map_geodataframe.to_file(STRAVA_ACTIVITIES_MAP_FILE, driver = 'GeoJSON', encoding = 'utf8')
