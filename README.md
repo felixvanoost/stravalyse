@@ -1,2 +1,2 @@
-# Strava-Heatmap-Tool
-A Python tool to create a heatmap of Strava activities using the HERE XYZ mapping platform
+# Strava-Analysis-Tool
+A Python tool to analyse and display Strava activity data
