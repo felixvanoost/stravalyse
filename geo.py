@@ -51,9 +51,19 @@ def create_activities_map_file(activities_dataframe):
     # Convert the Shapely points into LineStrings
     activities_map_dataframe.loc[:, 'map_linestring'] = activities_map_dataframe.loc[:, 'map_points'].apply(LineString)
 
-    # Create a GeoDataFrame from the activities map DataFrame
-    activities_map_geodataframe = GeoDataFrame(activities_map_dataframe[['name', 'id', 'type', 'distance', 'total_elevation_gain', 'map_linestring']], geometry = 'map_linestring')
+    # Convert the activity distances from m to km
+    activities_map_dataframe.loc[:, 'distance'] = activities_map_dataframe.loc[:, 'distance'] / 1000
+
+    # Create a GeoDataFrame from the activities map DataFrame and format the column names
+    activities_map_geodataframe = GeoDataFrame(activities_map_dataframe[['name', 'id', 'type', 'start_date_local_formatted', 'distance', 'moving_time_formatted', 'total_elevation_gain', 'map_linestring']], geometry='map_linestring')
+    activities_map_geodataframe.rename(columns={'name': 'Name',
+                                                'id': 'ID',
+                                                'type': 'Type',
+                                                'start_date_local_formatted': 'Start date',
+                                                'distance': 'Distance (km)',
+                                                'moving_time_formatted': 'Moving time',
+                                                'total_elevation_gain': 'Total elevation gain (m)'}, inplace=True)
 
     # Export the GeoDataFrame to a file in GeoJSON format
     print('Geo: Exporting map data to {}'.format(STRAVA_ACTIVITIES_MAP_FILE))
-    activities_map_geodataframe.to_file(STRAVA_ACTIVITIES_MAP_FILE, driver = 'GeoJSON', encoding = 'utf8')
+    activities_map_geodataframe.to_file(STRAVA_ACTIVITIES_MAP_FILE, driver='GeoJSON', encoding='utf8')
