@@ -87,7 +87,7 @@ def display_commute_statistics(activity_dataframe: pandas.DataFrame):
     Display basic commute statistics for each activity type.
 
     Arguments:
-    activity_dataframe - A pandas DataFrame containing the activity data
+    activity_dataframe - A pandas DataFrame containing the activity data.
     """
 
     commute_statistics = (activity_dataframe[activity_dataframe['commute'] == True]
@@ -105,7 +105,7 @@ def display_summary_statistics(activity_dataframe: pandas.DataFrame):
     Display basic statistics for each activity type.
 
     Arguments:
-    activity_dataframe - A pandas DataFrame containing the activity data
+    activity_dataframe - A pandas DataFrame containing the activity data.
     """
 
     summary_statistics = activity_dataframe.groupby('type').apply(_generate_summary_statistics)

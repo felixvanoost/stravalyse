@@ -27,4 +27,4 @@ if __name__ == "__main__":
     analysis.display_commute_statistics(activity_dataframe)
 
     # Create a GeoJSON file from the geographic activity data
-    geo.create_activities_map_file(activity_dataframe)
+    geo.export_geo_data_file(activity_dataframe)
