@@ -7,13 +7,13 @@ Main script for the Strava Analysis Tool.
 
 import analysis
 import geo
-import strava_activities
+import strava_data
 
 # Main module
 if __name__ == "__main__":
 
     # Get a list of detailed activity data for all Strava activities
-    activities_list = strava_activities.get_activities_list()
+    activities_list = strava_data.get_activity_data()
 
     # Create a pandas DataFrame from the activities list
     activities_dataframe = analysis.create_activities_data_frame(activities_list)
