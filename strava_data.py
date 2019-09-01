@@ -25,7 +25,7 @@ import swagger_client
 from swagger_client.rest import ApiException
 
 # File paths
-STRAVA_ACTIVITIES_FILE = 'Data/StravaActivities.json'
+STRAVA_ACTIVITY_DATA_FILE = 'Data/StravaActivityData.json'
 
 # Constants
 API_RETRY_INTERVAL_SECONDS = (2 * 60)
@@ -215,13 +215,13 @@ def get_activity_data() -> list:
 
     # Read the existing activity data from the file and store a local
     # copy as a list
-    activities = _read_activity_data_from_file(STRAVA_ACTIVITIES_FILE)
+    activities = _read_activity_data_from_file(STRAVA_ACTIVITY_DATA_FILE)
 
     if access_token:
         # Update the activity data
         while True:
             try:
-                _update_activity_data(access_token, STRAVA_ACTIVITIES_FILE, activities)
+                _update_activity_data(access_token, STRAVA_ACTIVITY_DATA_FILE, activities)
             except ApiException:
                 print('Strava: API rate limit exceeded. Retrying in {} minutes.'
                       .format(int(API_RETRY_INTERVAL_SECONDS / 60)))

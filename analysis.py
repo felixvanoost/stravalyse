@@ -94,10 +94,10 @@ def display_commute_statistics(activity_dataframe: pandas.DataFrame):
                          .groupby('type').apply(_generate_commute_statistics))
 
     pandas.set_option('display.max_rows', None)
-    print()
     print('Commute statistics:')
     print()
     print(commute_statistics.T)
+    print()
 
 
 def display_summary_statistics(activity_dataframe: pandas.DataFrame):
@@ -114,6 +114,7 @@ def display_summary_statistics(activity_dataframe: pandas.DataFrame):
     print('Summary statistics:')
     print()
     print(summary_statistics.T)
+    print()
 
 
 def create_activity_dataframe(activity_data: list) -> pandas.DataFrame:

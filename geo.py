@@ -15,7 +15,7 @@ import polyline
 from shapely.geometry import Point, LineString
 
 # File paths
-STRAVA_ACTIVITIES_MAP_FILE = 'Data/StravaActivitiesMap.geojson'
+STRAVA_GEO_DATA_FILE = 'Data/StravaGeoData.geojson'
 
 def _decode_polyline(x: pandas.Series) -> list:
     """
@@ -60,6 +60,8 @@ def export_geo_data_file(activity_dataframe: pandas.DataFrame):
     activity_dataframe - A pandas DataFrame containing the activity data.
     """
 
+    print('Geo: Processing geospatial data')
+
     # Convert the activity polylines into coordinates
     activity_dataframe.loc[:, 'map_coordinates'] = (activity_dataframe.loc[:, 'map']
         .apply(_decode_polyline))
@@ -101,5 +103,5 @@ def export_geo_data_file(activity_dataframe: pandas.DataFrame):
                                               inplace=True)
 
     # Export the GeoDataFrame to a file in GeoJSON format
-    print('Geo: Exporting geospatial data to {}'.format(STRAVA_ACTIVITIES_MAP_FILE))
-    activity_map_geodataframe.to_file(STRAVA_ACTIVITIES_MAP_FILE, driver='GeoJSON', encoding='utf8')
+    print('Geo: Exporting geospatial data to {}'.format(STRAVA_GEO_DATA_FILE))
+    activity_map_geodataframe.to_file(STRAVA_GEO_DATA_FILE, driver='GeoJSON', encoding='utf8')
