@@ -149,12 +149,12 @@ def _get_last_activity_start_time(activities: list) -> int:
 
 def _update_activity_data(access_token: str, file_path: str, activities: list):
     """
-    Update the file and list of activity data with any new activities
-    uploaded to Strava since the last stored activity.
+    Update the file and list of detailed activity data with any new
+    activities uploaded to Strava since the last stored activity.
 
     Arguments:
     access_token - An OAuth2 access token for the Strava v3 API.
-    activities - The list of activity data to be updated.
+    activities - The list of detailed activity data to be updated.
     """
 
     print('Strava: Checking for new activities')
@@ -207,7 +207,7 @@ def get_activity_data() -> list:
     Get and store a list of detailed data for all Strava activities.
     
     Return:
-    A list of activity data.
+    A list of detailed activity data.
     """
 
     # Get an OAuth2 access token for the Strava v3 API

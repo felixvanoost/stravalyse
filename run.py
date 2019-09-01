@@ -1,26 +1,30 @@
 """ run.py
 
-Felix van Oost 2019
-
 Main script for the Strava Analysis Tool.
+
+Felix van Oost 2019
 """
 
+# Local imports
 import analysis
 import geo
 import strava_data
 
 # Main module
 if __name__ == "__main__":
+    print('Strava Analysis Tool')
+    print('Felix van Oost 2019')
+    print()
 
     # Get a list of detailed activity data for all Strava activities
-    activities_list = strava_data.get_activity_data()
+    activity_data = strava_data.get_activity_data()
 
     # Create a pandas DataFrame from the activities list
-    activities_dataframe = analysis.create_activities_data_frame(activities_list)
+    activity_dataframe = analysis.create_activity_dataframe(activity_data)
 
     # Display summary and commute statistics
-    analysis.display_summary_statistics(activities_dataframe)
-    analysis.display_commute_statistics(activities_dataframe)
+    analysis.display_summary_statistics(activity_dataframe)
+    analysis.display_commute_statistics(activity_dataframe)
 
     # Create a GeoJSON file from the geographic activity data
-    geo.create_activities_map_file(activities_dataframe)
+    geo.create_activities_map_file(activity_dataframe)

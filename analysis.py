@@ -1,16 +1,31 @@
 """analysis.py
 
-Felix van Oost 2019
+Processes and analyses Strava athlete and activity data.
 
-Analyses and creates plots from Strava activity data.
+Functions:
+create_activity_dataframe()
+display_summary_statistics()
+display_commute_statistics()
+
+Felix van Oost 2019
 """
 
+# Standard library imports
 import datetime
+
+# Third-party imports
 import pandas
 
-def generate_commute_statistics(x):
+
+def _generate_commute_statistics(x: pandas.Series) -> pandas.Series:
     """
-    Generates the following basic commute statistics from the activities data frame:
+    Generate basic commute statistics from a given pandas Series.
+
+    Arguments:
+    x - The Series to generate basic commute statistics from. 
+
+    Return:
+    A Series containing the following commute statistics:
     - Number of commutes
     - Total and average commute distance
     - Total and average commute time
@@ -22,14 +37,24 @@ def generate_commute_statistics(x):
             'Total commute moving time (hours)': x['moving_time'].sum() / 3600,
             'Average commute moving time (mins)': x['moving_time'].mean() / 60}
 
-    series = pandas.Series(rows, index=['Number of commutes', 'Total commute distance (km)', 'Average commute distance (km)',
-                                        'Total commute moving time (hours)', 'Average commute moving time (mins)'])
+    series = pandas.Series(rows, index=['Number of commutes',
+                                        'Total commute distance (km)',
+                                        'Average commute distance (km)',
+                                        'Total commute moving time (hours)',
+                                        'Average commute moving time (mins)'])
 
     return series
 
-def generate_summary_statistics(x):
+
+def _generate_summary_statistics(x: pandas.Series) -> pandas.Series:
     """
-    Generates the following basic statistics from the activities data frame:
+    Generate basic statistics from a given pandas Series.
+
+    Arguments:
+    x - The Series to generate basic commute statistics from. 
+
+    Return:
+    A Series containing the following statistics:
     - Total and average distance
     - Total and average moving time
     - Total and average elevation gain
@@ -45,17 +70,28 @@ def generate_summary_statistics(x):
             'Average elevation gain (m)': x['total_elevation_gain'].mean(),
             'Average speed (km/h)': x['average_speed'].mean() * 3.6}
 
-    series = pandas.Series(rows, index=['Number of activities', 'Total distance (km)', 'Average distance (km)', 'Total moving time (hours)', 'Average moving time (mins)',
-                                          'Total elevation gain (km)', 'Average elevation gain (m)', 'Average speed (km/h)'])
+    series = pandas.Series(rows, index=['Number of activities',
+                                        'Total distance (km)',
+                                        'Average distance (km)',
+                                        'Total moving time (hours)',
+                                        'Average moving time (mins)',
+                                        'Total elevation gain (km)',
+                                        'Average elevation gain (m)',
+                                        'Average speed (km/h)'])
 
     return series
 
-def display_commute_statistics(activities_data_frame):
+
+def display_commute_statistics(activity_dataframe: pandas.DataFrame):
     """
-    Displays basic commute statistics for each activity type.
+    Display basic commute statistics for each activity type.
+
+    Arguments:
+    activity_dataframe - A pandas DataFrame containing the activity data
     """
 
-    commute_statistics = activities_data_frame[activities_data_frame['commute'] == True].groupby('type').apply(generate_commute_statistics)
+    commute_statistics = (activity_dataframe[activity_dataframe['commute'] == True]
+                         .groupby('type').apply(_generate_commute_statistics))
 
     pandas.set_option('display.max_rows', None)
     print()
@@ -63,33 +99,47 @@ def display_commute_statistics(activities_data_frame):
     print()
     print(commute_statistics.T)
 
-def display_summary_statistics(activities_data_frame):
+
+def display_summary_statistics(activity_dataframe: pandas.DataFrame):
     """
-    Displays basic statistics for each activity type.
+    Display basic statistics for each activity type.
+
+    Arguments:
+    activity_dataframe - A pandas DataFrame containing the activity data
     """
 
-    summary_statistics = activities_data_frame.groupby('type').apply(generate_summary_statistics)
+    summary_statistics = activity_dataframe.groupby('type').apply(_generate_summary_statistics)
 
     print()
     print('Summary statistics:')
     print()
     print(summary_statistics.T)
 
-def create_activities_data_frame(activities_list):
+
+def create_activity_dataframe(activity_data: list) -> pandas.DataFrame:
     """
-    Creates and returns a pandas data frame from the Strava activities list and
-    converts the measurement units to simplify visual interpretation.
+    Create and return a pandas DataFrame from the activity data list and
+    format the dates / times to simplify visual interpretation.
+
+    Arguments:
+    activity_data - A list of detailed activity data
+
+    Return:
+    A pandas DataFrame of formatted detailed activity data
     """
 
     # Configure pandas to display data to 2 decimal places
     pandas.set_option('precision', 2)
 
     # Create a pandas data frame from the Strava activities list
-    activities_data_frame = pandas.DataFrame.from_records(activities_list)
+    activity_dataframe = pandas.DataFrame.from_records(activity_data)
 
     # Format the activity start dates and moving / elapsed times
-    activities_data_frame.loc[:, 'start_date_local_formatted'] = activities_data_frame['start_date_local'].apply(lambda x: x.strftime('%e %B %Y, %H:%M:%S').strip())
-    activities_data_frame.loc[:, 'moving_time_formatted'] = activities_data_frame['moving_time'].apply(lambda x: str(datetime.timedelta(seconds=x)))
-    activities_data_frame.loc[:, 'elapsed_time_formatted'] = activities_data_frame['elapsed_time'].apply(lambda x: str(datetime.timedelta(seconds=x)))
+    activity_dataframe.loc[:, 'start_date_local_formatted'] = (activity_dataframe['start_date_local']
+        .apply(lambda x: x.strftime('%e %B %Y, %H:%M:%S').strip()))
+    activity_dataframe.loc[:, 'moving_time_formatted'] = (activity_dataframe['moving_time']
+        .apply(lambda x: str(datetime.timedelta(seconds=x))))
+    activity_dataframe.loc[:, 'elapsed_time_formatted'] = (activity_dataframe['elapsed_time']
+        .apply(lambda x: str(datetime.timedelta(seconds=x))))
 
-    return activities_data_frame
+    return activity_dataframe
