@@ -5,23 +5,33 @@ Main script for the Strava Analysis Tool.
 Felix van Oost 2019
 """
 
+# Standard library imports
+import argparse
+import sys
+
 # Local imports
 import analysis
 import geo
 import strava_data
 
 
-if __name__ == "__main__":
+def main():
     """
     Main method for the Strava Analysis Tool.
     """
-    
-    print('Strava Analysis Tool')
-    print('Felix van Oost 2019')
-    print()
+
+    # Parse the command line arguments
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-r', '--refresh_data',
+                        action='store_const',
+                        const=True,
+                        default=False,
+                        required=False,
+                        help='Get and store a fresh copy of the activity data')
+    args = parser.parse_args()
 
     # Get a list of detailed activity data for all Strava activities
-    activity_data = strava_data.get_activity_data()
+    activity_data = strava_data.get_activity_data(args.refresh_data)
 
     # Create a pandas DataFrame from the activity data
     activity_dataframe = analysis.create_activity_dataframe(activity_data)
@@ -32,3 +42,6 @@ if __name__ == "__main__":
 
     # Export a GeoJSON file of geospatial data from all activities
     geo.export_geo_data_file(activity_dataframe)
+
+if __name__ == "__main__":
+    main()

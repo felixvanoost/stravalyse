@@ -32,7 +32,7 @@ API_RETRY_INTERVAL_SECONDS = (2 * 60)
 
 
 def _iso_to_datetime(obj):
-    """ Deserialise ISO 8601 strings into datetime objects. """
+    """Deserialise ISO 8601 strings into datetime objects."""
 
     dictionary = {}
 
@@ -90,13 +90,13 @@ def _read_activity_data_from_file(file_path: str) -> list:
                 # Decode each line and append it to the list
                 activities.append(json.loads(line, object_pairs_hook=_iso_to_datetime))
                 activities_read += 1
-    except FileNotFoundError:
-        print('Strava: No activities found in {}'.format(file_path))
-        pass
 
-    # Print an empty new line to prevent the activity count display from
-    # being overwritten
-    print(end='\n')
+        # Print an empty new line to prevent the activity count display
+        # from being overwritten
+        print(end='\n')
+    except FileNotFoundError:
+        print('Strava: No activity data found in {}'.format(file_path))
+        pass
 
     return activities
 
@@ -110,7 +110,7 @@ def _write_activity_data_to_file(file_path: str, activities: list):
     activities - A list of activity data to write to the file.
     """
 
-    print('Strava: Writing activities to {}'.format(file_path))
+    print('Strava: Writing activity data to {}'.format(file_path))
 
     # Create the Data folder if it does not already exist
     if not os.path.exists('Data'):
@@ -202,10 +202,14 @@ def _update_activity_data(access_token: str, file_path: str, activities: list):
             break
 
 
-def get_activity_data() -> list:
+def get_activity_data(refresh: bool) -> list:
     """
     Get and store a list of detailed data for all Strava activities.
     
+    Arguments:
+    refresh - A Boolean to select whether to use and update the locally
+              stored activity data or get and store a fresh copy.
+
     Return:
     A list of detailed activity data.
     """
@@ -213,9 +217,20 @@ def get_activity_data() -> list:
     # Get an OAuth2 access token for the Strava v3 API
     access_token = strava_auth.get_access_token()
 
-    # Read the existing activity data from the file and store a local
-    # copy as a list
-    activities = _read_activity_data_from_file(STRAVA_ACTIVITY_DATA_FILE)
+    activities = []
+
+    if refresh:
+        print('Strava: Refreshing activity data')
+
+        # Force the activity data to be refreshed by deleting the file
+        try:
+            os.remove(STRAVA_ACTIVITY_DATA_FILE)
+        except OSError:
+            pass
+    else:
+        # Read the existing activity data from the file and store a
+        # local copy as a list
+        activities = _read_activity_data_from_file(STRAVA_ACTIVITY_DATA_FILE)
 
     if access_token:
         # Update the activity data
@@ -223,6 +238,7 @@ def get_activity_data() -> list:
             try:
                 _update_activity_data(access_token, STRAVA_ACTIVITY_DATA_FILE, activities)
             except ApiException:
+                # Wait for the API rate limit to be reset
                 print('Strava: API rate limit exceeded. Retrying in {} minutes.'
                       .format(int(API_RETRY_INTERVAL_SECONDS / 60)))
                 time.sleep(API_RETRY_INTERVAL_SECONDS)
