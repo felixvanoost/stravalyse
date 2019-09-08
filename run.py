@@ -6,7 +6,7 @@ Felix van Oost 2019
 """
 
 # Standard library imports
-import getopt
+import argparse
 import sys
 
 # Local imports
@@ -18,33 +18,20 @@ import strava_data
 def main():
     """
     Main method for the Strava Analysis Tool.
-
-    Options:
-    -r, --refresh_data - Select whether to use and update the locally
-                         stored activity data or get and store a fresh
-                         copy.
     """
-    
-    print('Strava Analysis Tool')
-    print('Felix van Oost 2019')
-    print()
 
-    # Parse the command line options
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], 'r', ['refresh_data'])
-    except getopt.GetoptError as error:
-        # Print error information and exit
-        print('Error: ' + str(error))
-        sys.exit(2)
-
-    refresh_data = False
-
-    for opt, arg in opts:
-        if opt in ('-r', '--refresh_data'):
-            refresh_data = True
+    # Parse the command line arguments
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-r', '--refresh_data',
+                        action='store_const',
+                        const=True,
+                        default=False,
+                        required=False,
+                        help='Get and store a fresh copy of the activity data')
+    args = parser.parse_args()
 
     # Get a list of detailed activity data for all Strava activities
-    activity_data = strava_data.get_activity_data(refresh_data)
+    activity_data = strava_data.get_activity_data(args.refresh_data)
 
     # Create a pandas DataFrame from the activity data
     activity_dataframe = analysis.create_activity_dataframe(activity_data)
