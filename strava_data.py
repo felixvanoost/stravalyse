@@ -32,7 +32,7 @@ API_RETRY_INTERVAL_SECONDS = (2 * 60)
 
 
 def _iso_to_datetime(obj):
-    """ Deserialise ISO 8601 strings into datetime objects. """
+    """Deserialise ISO 8601 strings into datetime objects."""
 
     dictionary = {}
 
@@ -90,13 +90,13 @@ def _read_activity_data_from_file(file_path: str) -> list:
                 # Decode each line and append it to the list
                 activities.append(json.loads(line, object_pairs_hook=_iso_to_datetime))
                 activities_read += 1
+
+        # Print an empty new line to prevent the activity count display
+        # from being overwritten
+        print(end='\n')
     except FileNotFoundError:
         print('Strava: No activity data found in {}'.format(file_path))
         pass
-
-    # Print an empty new line to prevent the activity count display from
-    # being overwritten
-    print(end='\n')
 
     return activities
 
