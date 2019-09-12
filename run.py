@@ -28,6 +28,12 @@ def main():
                         default=False,
                         required=False,
                         help='Get and store a fresh copy of the activity data')
+    parser.add_argument('-g', '--export_geo_data',
+                        action='store_const',
+                        const=True,
+                        default=False,
+                        required=False,
+                        help='Export the geospatial activity data in GeoJSON format')
     args = parser.parse_args()
 
     # Get a list of detailed activity data for all Strava activities
@@ -40,8 +46,10 @@ def main():
     analysis.display_summary_statistics(activity_dataframe)
     analysis.display_commute_statistics(activity_dataframe)
 
-    # Export a GeoJSON file of geospatial data from all activities
-    geo.export_geo_data_file(activity_dataframe)
+    if args.export_geo_data:
+        # Export the geospatial data from all activities in GeoJSON
+        # format
+        geo.export_geo_data_file(activity_dataframe)
 
 if __name__ == "__main__":
     main()
