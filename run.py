@@ -11,6 +11,7 @@ import sys
 
 # Local imports
 import analysis
+import here_xyz
 import geo
 import strava_data
 
@@ -45,6 +46,8 @@ def main():
     # Display summary and commute statistics
     analysis.display_summary_statistics(activity_dataframe)
     analysis.display_commute_statistics(activity_dataframe)
+
+    here_xyz.get_space_id()
 
     if args.export_geo_data:
         # Export the geospatial data from all activities in GeoJSON
