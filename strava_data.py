@@ -24,9 +24,6 @@ sys.path.append(os.path.abspath('API'))
 import swagger_client
 from swagger_client.rest import ApiException
 
-# File paths
-STRAVA_ACTIVITY_DATA_FILE = 'Data/StravaActivityData.json'
-
 # Constants
 API_RETRY_INTERVAL_SECONDS = (2 * 60)
 
@@ -202,11 +199,12 @@ def _update_activity_data(access_token: str, file_path: str, activities: list):
             break
 
 
-def get_activity_data(refresh: bool) -> list:
+def get_activity_data(file_path: str, refresh: bool) -> list:
     """
     Get and store a list of detailed data for all Strava activities.
     
     Arguments:
+    file_path - The path of the file to store the activity data to.
     refresh - A Boolean to select whether to use and update the locally
               stored activity data or get and store a fresh copy.
 
@@ -224,19 +222,19 @@ def get_activity_data(refresh: bool) -> list:
 
         # Force the activity data to be refreshed by deleting the file
         try:
-            os.remove(STRAVA_ACTIVITY_DATA_FILE)
+            os.remove(file_path)
         except OSError:
             pass
     else:
         # Read the existing activity data from the file and store a
         # local copy as a list
-        activities = _read_activity_data_from_file(STRAVA_ACTIVITY_DATA_FILE)
+        activities = _read_activity_data_from_file(file_path)
 
     if access_token:
         # Update the activity data
         while True:
             try:
-                _update_activity_data(access_token, STRAVA_ACTIVITY_DATA_FILE, activities)
+                _update_activity_data(access_token, file_path, activities)
             except ApiException:
                 # Wait for the API rate limit to be reset
                 print('Strava: API rate limit exceeded. Retrying in {} minutes.'
