@@ -56,5 +56,8 @@ def main():
         # format
         geo.export_geo_data_file(STRAVA_GEO_DATA_FILE, activity_dataframe)
 
+        # Upload the geospatial data to HERE XYZ
+        here_xyz.upload_geo_data()
+
 if __name__ == "__main__":
     main()
