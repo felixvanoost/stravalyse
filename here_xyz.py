@@ -64,27 +64,37 @@ def upload_geo_data(file_path: str):
                 data.
     """
 
-    # Get the ID of the space containing the geospatial activity data 
-    space_id = _get_space_id()
+    # Check whether the HERE CLI has been properly configured.
+    # The CLI will return an empty line if the HERE account information
+    # has been validated.
+    process = subprocess.Popen(['here', 'configure', 'verify'],
+                               shell=True, stdout=subprocess.PIPE, universal_newlines=True)
+    output = process.communicate()[0]
 
-    # Clear the space to prevent conflicts in overwriting existing data
-    print('HERE XYZ: Clearing space ID "{}"'.format(space_id))
-    process = subprocess.Popen(['here', 'xyz', 'clear', space_id.replace("'", "")],
-                               shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                               universal_newlines=True)
-    output = process.communicate(input='Y')[0]
+    if not output:
+        # Get the ID of the space containing the geospatial activity data 
+        space_id = _get_space_id()
 
-    if 'data cleared successfully' in output:
-        # Upload the geospatial data to the space
-        print('HERE XYZ: Uploading geospatial data to space ID "{}"'.format(space_id))
-        process = subprocess.Popen(['here', 'xyz', 'upload', space_id, '-f', file_path,
-                                   '-i', 'ID'],
-                                   shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-        output = process.communicate()[0]
+        # Clear the space to prevent conflicts in overwriting existing data
+        print('HERE XYZ: Clearing space ID "{}"'.format(space_id))
+        process = subprocess.Popen(['here', 'xyz', 'clear', space_id.replace("'", "")],
+                                shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                universal_newlines=True)
+        output = process.communicate(input='Y')[0]
 
-        if 'data upload to xyzspace' in output:
-            print('HERE XYZ: Geospatial data successfully uploaded to space ID "{}"'.format(space_id))
+        if 'data cleared successfully' in output:
+            # Upload the geospatial data to the space
+            print('HERE XYZ: Uploading geospatial data to space ID "{}"'.format(space_id))
+            process = subprocess.Popen(['here', 'xyz', 'upload', space_id, '-f', file_path,
+                                    '-i', 'ID'],
+                                    shell=True, stdout=subprocess.PIPE, universal_newlines=True)
+            output = process.communicate()[0]
+
+            if 'data upload to xyzspace' in output:
+                print('HERE XYZ: Geospatial data successfully uploaded to space ID "{}"'.format(space_id))
+            else:
+                print('HERE XYZ: Error uploading geospatial data to space ID "{}"'.format(space_id))
         else:
-            print('HERE XYZ: Error uploading geospatial data to space ID "{}"'.format(space_id))
+            print('HERE XYZ: Error clearing space ID "{}"'.format(space_id))
     else:
-        print('HERE XYZ: Error clearing space ID "{}"'.format(space_id))
+        print('Error: Configure HERE CLI using the "here configure" command')
