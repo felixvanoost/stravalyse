@@ -15,6 +15,10 @@ import here_xyz
 import geo
 import strava_data
 
+# File paths
+STRAVA_ACTIVITY_DATA_FILE = 'Data/StravaActivityData.json'
+STRAVA_GEO_DATA_FILE = 'Data/StravaGeoData.geojson'
+
 
 def main():
     """
@@ -38,7 +42,7 @@ def main():
     args = parser.parse_args()
 
     # Get a list of detailed activity data for all Strava activities
-    activity_data = strava_data.get_activity_data(args.refresh_data)
+    activity_data = strava_data.get_activity_data(STRAVA_ACTIVITY_DATA_FILE, args.refresh_data)
 
     # Create a pandas DataFrame from the activity data
     activity_dataframe = analysis.create_activity_dataframe(activity_data)
@@ -47,12 +51,10 @@ def main():
     analysis.display_summary_statistics(activity_dataframe)
     analysis.display_commute_statistics(activity_dataframe)
 
-    here_xyz.get_space_id()
-
     if args.export_geo_data:
         # Export the geospatial data from all activities in GeoJSON
         # format
-        geo.export_geo_data_file(activity_dataframe)
+        geo.export_geo_data_file(STRAVA_GEO_DATA_FILE, activity_dataframe)
 
 if __name__ == "__main__":
     main()
