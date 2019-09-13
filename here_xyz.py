@@ -12,9 +12,6 @@ Felix van Oost 2019
 # Local imports
 import subprocess
 
-# File paths
-STRAVA_GEO_DATA_FILE = 'Data/StravaGeoData.geojson'
-
 
 def _get_space_id() -> str:
     """
@@ -40,6 +37,7 @@ def _get_space_id() -> str:
             break
         elif 'Strava Activity Data' in line:
             space_id = line.split()[0]
+            print('HERE XYZ: Found space with ID "{}"'.format(space_id))
             break
 
     if not space_id:
@@ -51,7 +49,7 @@ def _get_space_id() -> str:
                                    shell=True, stdout=subprocess.PIPE, universal_newlines=True)
         output = process.communicate()
         space_id = str(output).split()[1]
-        print('HERE XYZ: Created a new space with ID "{}"'.format(space_id))
+        print('HERE XYZ: Created new space with ID "{}"'.format(space_id))
 
     return space_id
 
