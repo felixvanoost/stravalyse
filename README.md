@@ -30,6 +30,6 @@ When prompted, copy the `code` portion of the URL (`xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ### 3. HERE CLI (Optional)
 You will need to register for a free HERE account and install the [HERE CLI](https://github.com/heremaps/here-cli) if you want the tool to leverage the capabilities of the [HERE XYZ](https://xyz.here.com/) mapping platform. HERE XYZ provides a very slick way to visualise your Strava data with a variety of map styles and customized formatting rules. Here's a basic example:
 
-<iframe src="https://xyz.here.com/viewer/?project_id=d99c795f-b247-47f9-a67e-972255a02017" frameborder="0"></iframe>
+[![Demo Activity Map](Media/Demo%20Activity%20Map.JPG)](https://xyz.here.com/viewer/?project_id=d99c795f-b247-47f9-a67e-972255a02017)
 
 Once configured, the tool can automatically upload your Strava data to HERE XYZ to generate an up-to-date map of your activities. You can set rules to colour-code activities (by type or moving time, for instance) within HERE Studio, and clicking on an activity will bring up some useful basic information (try it!).
