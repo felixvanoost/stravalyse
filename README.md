@@ -33,3 +33,21 @@ You will need to register for a free HERE account and install the [HERE CLI](htt
 [![Demo Activity Map](Media/Demo%20Activity%20Map.JPG)](https://xyz.here.com/viewer/?project_id=d99c795f-b247-47f9-a67e-972255a02017)
 
 Once configured, the tool can automatically upload your Strava data to HERE XYZ to generate an up-to-date map of your activities. You can set rules to colour-code activities (by type or moving time, for instance) within HERE Studio, and clicking on an activity will bring up some useful basic information (try it!).
+
+# Usage
+
+Run the tool using the command:
+
+`python run.py`
+
+The following command line options are available:
+
+| Command | Description |
+| ------- | ------------|
+| `-r / --refresh_data` | Get and store a fresh copy of the activity data |
+| `-g / --export_geo_data` | Export the geospatial activity data in GeoJSON format |
+| `-gu / --export_upload_geo_data` | Export the geospatial activity data in GeoJSON format and upload it to the HERE XYZ mapping platform |
+
+These options can also be displayed from within the command line using the help command: 
+
+`python run.py -h` or `python run.py --help`
