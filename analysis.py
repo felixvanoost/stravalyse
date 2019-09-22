@@ -90,14 +90,17 @@ def display_commute_statistics(activity_dataframe: pandas.DataFrame):
     activity_dataframe - A pandas DataFrame containing the activity data.
     """
 
-    commute_statistics = (activity_dataframe[activity_dataframe['commute'] == True]
-                         .groupby('type').apply(_generate_commute_statistics))
+    commute_dataframe = activity_dataframe[activity_dataframe['commute'] == True]
 
-    pandas.set_option('display.max_rows', None)
-    print('Commute statistics:')
-    print()
-    print(commute_statistics.T)
-    print()
+    if not commute_dataframe.empty:
+        commute_statistics = commute_dataframe.groupby('type').apply(_generate_commute_statistics)
+
+        print('Commute statistics:')
+        print()
+        print(commute_statistics.T)
+        print()
+    else:
+        print('Analysis: No commutes found')
 
 
 def display_summary_statistics(activity_dataframe: pandas.DataFrame):
@@ -108,13 +111,16 @@ def display_summary_statistics(activity_dataframe: pandas.DataFrame):
     activity_dataframe - A pandas DataFrame containing the activity data.
     """
 
-    summary_statistics = activity_dataframe.groupby('type').apply(_generate_summary_statistics)
+    if not activity_dataframe.empty:
+        summary_statistics = activity_dataframe.groupby('type').apply(_generate_summary_statistics)
 
-    print()
-    print('Summary statistics:')
-    print()
-    print(summary_statistics.T)
-    print()
+        print()
+        print('Summary statistics:')
+        print()
+        print(summary_statistics.T)
+        print()
+    else:
+        print('Analysis: No activities found')
 
 
 def create_activity_dataframe(activity_data: list) -> pandas.DataFrame:
