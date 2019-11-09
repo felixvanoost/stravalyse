@@ -14,7 +14,42 @@ Felix van Oost 2019
 import datetime
 
 # Third-party imports
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import pandas
+import seaborn as sns
+
+
+def display_commute_plots(activity_dataframe: pandas.DataFrame):
+    """
+    Generate and display the following plots using data from activities
+    marked as commutes:
+
+    - Number of commuting days per year
+    - Total and average commuting distance per year
+    """
+
+    # Get only commute data
+    data = activity_dataframe[activity_dataframe['commute'] == True][['distance', 'start_date_local']]
+
+    # Convert the activity distances from m to km
+    data.loc[:, 'distance'] = data.loc[:, 'distance'] / 1000
+
+    # Extract the start date and year from the datetime objects
+    data.loc[:, 'start_date'] = pandas.DatetimeIndex(data['start_date_local']).to_period('D')
+    data.loc[:, 'start_year'] = pandas.DatetimeIndex(data['start_date_local']).year
+
+    # Plot the number of commuting days per year
+    ax = sns.countplot(x='start_year',
+                       data=data.groupby('start_date').agg({'start_year': 'min'}),
+                       color='deepskyblue')
+    ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.grid(b=True, which='major', linewidth=1.0)
+    ax.grid(b=True, which='minor', linewidth=0.5)
+    ax.set(title='Commuting days per year', ylabel='Commuting days', xlabel='Year')
+
+    plt.show()
 
 
 def _generate_commute_statistics(x: pandas.Series) -> pandas.Series:
