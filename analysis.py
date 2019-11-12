@@ -35,19 +35,23 @@ def display_commute_plots(activity_dataframe: pandas.DataFrame):
     # Convert the activity distances from m to km
     data.loc[:, 'distance'] = data.loc[:, 'distance'] / 1000
 
-    # Extract the start date and year from the datetime objects
+    # Extract the start date and year from the 'start_date_local' datetime objects
     data.loc[:, 'start_date'] = pandas.DatetimeIndex(data['start_date_local']).to_period('D')
     data.loc[:, 'start_year'] = pandas.DatetimeIndex(data['start_date_local']).year
 
+    # Group the data by start date to aggregate all the activities from one day into a single entry
+    data = data.groupby('start_date').agg({'start_year': 'min'})
+
     # Plot the number of commuting days per year
-    ax = sns.countplot(x='start_year',
-                       data=data.groupby('start_date').agg({'start_year': 'min'}),
-                       color='deepskyblue')
+    ax = sns.lineplot(x=data['start_year'].value_counts().index,
+                      y=data['start_year'].value_counts(),
+                      color='deepskyblue',
+                      markers=True)
+    ax.set(title='Commuting days per year', ylabel='Commuting days', xlabel='Year')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.grid(b=True, which='major', linewidth=1.0)
     ax.grid(b=True, which='minor', linewidth=0.5)
-    ax.set(title='Commuting days per year', ylabel='Commuting days', xlabel='Year')
 
     plt.show()
 
