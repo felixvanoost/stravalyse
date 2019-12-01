@@ -58,9 +58,6 @@ def main():
     analysis.display_summary_statistics(activity_dataframe)
     analysis.display_commute_statistics(activity_dataframe)
 
-    # Display plots
-    analysis.display_commute_plots(activity_dataframe)
-
     if args.export_geo_data or args.export_upload_geo_data:
         # Export the geospatial data from all activities in GeoJSON
         # format
@@ -69,6 +66,9 @@ def main():
         if args.export_upload_geo_data:
             # Upload the geospatial data to HERE XYZ
             here_xyz.upload_geo_data(STRAVA_GEO_DATA_FILE)
+
+    # Display plots
+    analysis.display_commute_plots(activity_dataframe)
 
 if __name__ == "__main__":
     main()
