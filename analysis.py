@@ -31,16 +31,16 @@ def display_commute_plots(activity_dataframe: pandas.DataFrame):
     """
 
     # Get only commute data
-    data = activity_dataframe[activity_dataframe['commute'] == True][['distance', 'start_date_local']]
+    commute_data = activity_dataframe[activity_dataframe['commute'] == True][['distance', 'start_date_local']]
 
     # Convert the activity distances from m to km
-    data.loc[:, 'distance'] = data.loc[:, 'distance'] / 1000
-
-    # Aggregate all the activities from one day into a single entry
-    data1 = data.groupby(pandas.DatetimeIndex(data['start_date_local']).to_period('D')).agg({'distance': ['sum', 'mean']}).reset_index()
+    commute_data.loc[:, 'distance'] = commute_data.loc[:, 'distance'] / 1000
 
     # Create a new figure with two subplots
     fig, (ax1, ax2) = plt.subplots(1, 2)
+
+    # Aggregate all the activities from one day into a single entry
+    data1 = commute_data.groupby(pandas.DatetimeIndex(commute_data['start_date_local']).to_period('D')).agg({'distance': 'mean'}).reset_index()
 
     # Plot the number of commuting days per year
     sns.lineplot(x=pandas.PeriodIndex(data1['start_date_local']).year.value_counts().index,
@@ -52,22 +52,34 @@ def display_commute_plots(activity_dataframe: pandas.DataFrame):
     ax1.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax1.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax1.grid(b=True, which='major', linewidth=1.0)
-    ax1.grid(b=True, which='minor', linewidth=0.5)
+    ax1.yaxis.grid(b=True, which='minor', linewidth=0.5)
 
-    # Plot the average commuting distance per year
-    sns.lineplot(x=pandas.PeriodIndex(data1['start_date_local']).year,
-                 y=data1['distance', 'mean'],
-                 color='deepskyblue',
+    data2 = commute_data.groupby(pandas.DatetimeIndex(commute_data['start_date_local']).to_period('Y')).agg({'distance': ['sum', 'mean']}).reset_index()
+
+    # Plot the total and average commuting distance per year
+    colours = {'sum': 'deepskyblue', 'mean': 'navy'}
+
+    sns.lineplot(x=pandas.PeriodIndex(data2['start_date_local']).year,
+                 y=data2['distance', 'sum'],
+                 color=colours['sum'],
                  markers=True,
-                 data=data,
                  ax=ax2)
-    ax2.set(title='Average commuting distance', ylabel='Distance (km)', xlabel='Year')
+    ax2.set(title='Commuting distance', xlabel='Year')
+    ax2.set_ylabel('Total distance (km)', color=colours['sum'])
     ax2.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax2.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax2.grid(b=True, which='major', linewidth=1.0)
-    ax2.grid(b=True, which='minor', linewidth=0.5)
+    ax2.yaxis.grid(b=True, which='minor', linewidth=0.5)
 
-    # Plot the average number of communtes per month
+    ax2_mean = plt.twinx()
+    sns.lineplot(x=pandas.PeriodIndex(data2['start_date_local']).year,
+                 y=data2['distance', 'mean'],
+                 color=colours['mean'],
+                 markers=True,
+                 ax=ax2_mean)
+    ax2_mean.set_ylabel('Average distance (km)', color=colours['mean'])
+
+    # Plot the average number of communtes per month (since start)
 
     plt.show()
 
