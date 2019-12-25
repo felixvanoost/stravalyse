@@ -6,6 +6,7 @@ Functions:
 create_activity_dataframe()
 display_summary_statistics()
 display_commute_statistics()
+display_commute_plots()
 
 Felix van Oost 2019
 """
@@ -16,75 +17,80 @@ import datetime
 # Third-party imports
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import pandas
+import pandas as pd
 import seaborn as sns
 
 
-def display_commute_plots(activity_dataframe: pandas.DataFrame):
+def _generate_commute_distance_monthly_plot(commute_data: pd.DataFrame, colours: dict):
     """
-    Generate and display the following plots using data from activities
-    marked as commutes:
-
-    - Number of commuting days per year
-    - Total and average commuting distance per year
-    - Number of commutes per month
     """
 
-    # Get only commute data
-    commute_data = activity_dataframe[activity_dataframe['commute'] == True][['distance', 'start_date_local']]
+    # Group the commute data by month
+    data = commute_data.groupby(pd.DatetimeIndex(commute_data['start_date_local']).to_period('M')).agg({'distance': 'count'})
 
-    # Convert the activity distances from m to km
-    commute_data.loc[:, 'distance'] = commute_data.loc[:, 'distance'] / 1000
-
-    # Create a new figure with two subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2)
-
-    # Aggregate all the activities from one day into a single entry
-    data1 = commute_data.groupby(pandas.DatetimeIndex(commute_data['start_date_local']).to_period('D')).agg({'distance': 'mean'}).reset_index()
-
-    # Plot the number of commuting days per year
-    sns.lineplot(x=pandas.PeriodIndex(data1['start_date_local']).year.value_counts().index,
-                 y=pandas.PeriodIndex(data1['start_date_local']).year.value_counts(),
-                 color='deepskyblue',
-                 markers=True,
-                 ax=ax1)
-    ax1.set(title='Commuting days', ylabel='Days', xlabel='Year')
-    ax1.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax1.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax1.grid(b=True, which='major', linewidth=1.0)
-    ax1.yaxis.grid(b=True, which='minor', linewidth=0.5)
-
-    data2 = commute_data.groupby(pandas.DatetimeIndex(commute_data['start_date_local']).to_period('Y')).agg({'distance': ['sum', 'mean']}).reset_index()
-
-    # Plot the total and average commuting distance per year
-    colours = {'sum': 'deepskyblue', 'mean': 'navy'}
-
-    sns.lineplot(x=pandas.PeriodIndex(data2['start_date_local']).year,
-                 y=data2['distance', 'sum'],
-                 color=colours['sum'],
-                 markers=True,
-                 ax=ax2)
-    ax2.set(title='Commuting distance', xlabel='Year')
-    ax2.set_ylabel('Total distance (km)', color=colours['sum'])
-    ax2.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax2.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax2.grid(b=True, which='major', linewidth=1.0)
-    ax2.yaxis.grid(b=True, which='minor', linewidth=0.5)
-
-    ax2_mean = plt.twinx()
-    sns.lineplot(x=pandas.PeriodIndex(data2['start_date_local']).year,
-                 y=data2['distance', 'mean'],
-                 color=colours['mean'],
-                 markers=True,
-                 ax=ax2_mean)
-    ax2_mean.set_ylabel('Average distance (km)', color=colours['mean'])
-
-    # Plot the average number of communtes per month (since start)
-
+    ax3 = sns.barplot(x=data.index.to_timestamp(),
+                      y=data['distance'],
+                      color='deepskyblue')
+    ax3.set(title='Commutes per month', ylabel='Count', xlabel='Month')
+    ax3.set_xticklabels(ax3.get_xticklabels(), rotation=45, horizontalalignment='right')
+    ax3.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax3.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax3.grid(b=True, which='major', linewidth=1.0)
+    ax3.grid(b=True, which='minor', linewidth=0.5)
+    print(data)
     plt.show()
 
 
-def _generate_commute_statistics(x: pandas.Series) -> pandas.Series:
+def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colours: dict):
+    """
+    """
+
+    # Group the commute data by year
+    data = commute_data.groupby(pd.DatetimeIndex(commute_data['start_date_local']).to_period('Y')).agg({'distance': ['sum', 'mean']})
+
+    # Generate and format the plot
+    sns.lineplot(x=data.index.year,
+                 y=data['distance', 'sum'],
+                 color=colours['commute_distance_sum'],
+                 marker='o',
+                 ax=ax)
+    ax.set(title='Commute distance', xlabel='Year')
+    ax.set_ylabel('Total distance (km)', color=colours['commute_distance_sum'])
+    ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.grid(b=True, which='major', linewidth=1.0)
+    ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
+
+    ax_mean = plt.twinx()
+    sns.lineplot(x=data.index.year,
+                 y=data['distance', 'mean'],
+                 color=colours['commute_distance_mean'],
+                 marker='o',
+                 ax=ax_mean)
+    ax_mean.set_ylabel('Average distance (km)', color=colours['commute_distance_mean'])
+
+
+def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colours: dict):
+    """
+    """
+    
+    # Group the commute data by day
+    data = commute_data.groupby(pd.DatetimeIndex(commute_data['start_date_local']).to_period('D')).agg({'distance': 'mean'})
+
+    # Generate and format the plot
+    sns.lineplot(x=data.index.year.value_counts().index,
+                 y=data.index.year.value_counts(),
+                 color=colours['commute_days'],
+                 marker='o',
+                 ax=ax)
+    ax.set(title='Commute days', ylabel='Days', xlabel='Year')
+    ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.grid(b=True, which='major', linewidth=1.0)
+    ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
+
+
+def _generate_commute_statistics(x: pd.Series) -> pd.Series:
     """
     Generate basic commute statistics from a given pandas Series.
 
@@ -104,7 +110,7 @@ def _generate_commute_statistics(x: pandas.Series) -> pandas.Series:
             'Total commute moving time (hours)': x['moving_time'].sum() / 3600,
             'Average commute moving time (mins)': x['moving_time'].mean() / 60}
 
-    series = pandas.Series(rows, index=['Number of commutes',
+    series = pd.Series(rows, index=['Number of commutes',
                                         'Total commute distance (km)',
                                         'Average commute distance (km)',
                                         'Total commute moving time (hours)',
@@ -113,7 +119,7 @@ def _generate_commute_statistics(x: pandas.Series) -> pandas.Series:
     return series
 
 
-def _generate_summary_statistics(x: pandas.Series) -> pandas.Series:
+def _generate_summary_statistics(x: pd.Series) -> pd.Series:
     """
     Generate basic statistics from a given pandas Series.
 
@@ -137,19 +143,52 @@ def _generate_summary_statistics(x: pandas.Series) -> pandas.Series:
             'Average elevation gain (m)': x['total_elevation_gain'].mean(),
             'Average speed (km/h)': x['average_speed'].mean() * 3.6}
 
-    series = pandas.Series(rows, index=['Number of activities',
-                                        'Total distance (km)',
-                                        'Average distance (km)',
-                                        'Total moving time (hours)',
-                                        'Average moving time (mins)',
-                                        'Total elevation gain (km)',
-                                        'Average elevation gain (m)',
-                                        'Average speed (km/h)'])
+    series = pd.Series(rows, index=['Number of activities',
+                                    'Total distance (km)',
+                                    'Average distance (km)',
+                                    'Total moving time (hours)',
+                                    'Average moving time (mins)',
+                                    'Total elevation gain (km)',
+                                    'Average elevation gain (m)',
+                                    'Average speed (km/h)'])
 
     return series
 
 
-def display_commute_statistics(activity_dataframe: pandas.DataFrame):
+def display_commute_plots(activity_dataframe: pd.DataFrame):
+    """
+    Generate and display the following plots using data from activities
+    marked as commutes:
+
+    - Number of commuting days per year
+    - Total and average commute distance per year
+    - Number of commutes per month
+    """
+
+    # Get only commute data
+    commute_data = activity_dataframe[activity_dataframe['commute'] == True][['distance', 'start_date_local']]
+
+    # Convert the activity distances from m to km
+    commute_data.loc[:, 'distance'] = commute_data.loc[:, 'distance'] / 1000
+
+    # Create a dictionary of colours for each plot
+    colours = {'commute_days': 'deepskyblue',
+               'commute_distance_sum': 'deepskyblue',
+               'commute_distance_mean': 'navy'}
+
+    # Create a new figure with two subplots
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    plt.rc('axes', axisbelow=True)
+
+    # Generate and display the plots
+    _generate_commute_days_plot(commute_data, ax1, colours)
+    _generate_commute_distance_plot(commute_data, ax2, colours)
+    plt.show()
+
+    _generate_commute_distance_monthly_plot(commute_data, colours)
+
+
+def display_commute_statistics(activity_dataframe: pd.DataFrame):
     """
     Display basic commute statistics for each activity type.
 
@@ -170,7 +209,7 @@ def display_commute_statistics(activity_dataframe: pandas.DataFrame):
         print('Analysis: No commutes found')
 
 
-def display_summary_statistics(activity_dataframe: pandas.DataFrame):
+def display_summary_statistics(activity_dataframe: pd.DataFrame):
     """
     Display basic statistics for each activity type.
 
@@ -190,7 +229,7 @@ def display_summary_statistics(activity_dataframe: pandas.DataFrame):
         print('Analysis: No activities found')
 
 
-def create_activity_dataframe(activity_data: list) -> pandas.DataFrame:
+def create_activity_dataframe(activity_data: list) -> pd.DataFrame:
     """
     Create and return a pandas DataFrame from the activity data list and
     format the dates / times to simplify visual interpretation.
@@ -203,10 +242,10 @@ def create_activity_dataframe(activity_data: list) -> pandas.DataFrame:
     """
 
     # Configure pandas to display data to 2 decimal places
-    pandas.set_option('precision', 2)
+    pd.set_option('precision', 2)
 
     # Create a pandas data frame from the Strava activities list
-    activity_dataframe = pandas.DataFrame.from_records(activity_data)
+    activity_dataframe = pd.DataFrame.from_records(activity_data)
 
     # Format the activity start dates and moving / elapsed times
     activity_dataframe.loc[:, 'start_date_local_formatted'] = (activity_dataframe['start_date_local']
