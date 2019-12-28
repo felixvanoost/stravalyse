@@ -23,7 +23,7 @@ import seaborn as sns
 
 def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colours: dict):
     """
-    Generate a plot of number of commutes per month.
+    Generate a bar plot of number of commutes per month.
 
     Arguments:
     commute_data - A pandas DataFrame containing the commute activity data.
@@ -35,6 +35,7 @@ def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, 
     data = commute_data.resample('M').count()
     data.index = data.index.to_period('M')
 
+    # Generate and format the bar plot
     sns.barplot(x=data.index,
                 y=data['distance'],
                 color=colours['commute_count'],
@@ -50,7 +51,7 @@ def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, 
 
 def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colours: dict):
     """
-    Generate a plot of total and mean commute distance per year.
+    Generate a line plot of total and mean commute distance per year.
 
     Arguments:
     commute_data - A pandas DataFrame containing the commute activity data.
@@ -61,7 +62,7 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
     # Group the commute data by year
     data = commute_data.resample('Y').agg({'distance': ['sum', 'mean']})
 
-    # Generate and format the total distance plot
+    # Generate and format the total distance line plot
     sns.lineplot(x=data.index.year,
                  y=data['distance', 'sum'],
                  color=colours['commute_distance_sum'],
@@ -74,7 +75,7 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
     ax.grid(b=True, which='major', linewidth=1.0)
     ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
 
-    # Generate and format the mean distance plot
+    # Generate and format the mean distance line plot
     ax_mean = ax.twinx()
     sns.lineplot(x=data.index.year,
                  y=data['distance', 'mean'],
@@ -86,7 +87,7 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
 
 def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colours: dict):
     """
-    Generate a plot of commute days per year.
+    Generate a line plot of commute days per year.
 
     Arguments:
     commute_data - A pandas DataFrame containing the commute activity data.
@@ -95,9 +96,10 @@ def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, c
     """
     
     # Group the commute data by day
-    data = commute_data.groupby(pd.DatetimeIndex(commute_data.index).to_period('D')).agg({'distance': 'mean'})
+    data = (commute_data.groupby(pd.DatetimeIndex(commute_data.index)
+            .to_period('D')).agg({'distance': 'mean'}))
 
-    # Generate and format the plot
+    # Generate and format the line plot
     sns.lineplot(x=data.index.year.value_counts().index,
                  y=data.index.year.value_counts(),
                  color=colours['commute_days'],
@@ -186,7 +188,8 @@ def display_commute_plots(activity_dataframe: pd.DataFrame):
     """
 
     # Get only commute data
-    commute_data = activity_dataframe[activity_dataframe['commute'] == True][['distance', 'start_date_local']]
+    commute_data = (activity_dataframe[activity_dataframe['commute'] == True]
+                   [['distance', 'start_date_local']])
     commute_data = commute_data.set_index('start_date_local')
 
     # Convert the activity distances from m to km
