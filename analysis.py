@@ -21,23 +21,23 @@ import pandas as pd
 import seaborn as sns
 
 
-def _generate_commute_distance_monthly_plot(commute_data: pd.DataFrame, colours: dict):
+def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colours: dict):
     """
     """
 
     # Group the commute data by month
     data = commute_data.groupby(pd.DatetimeIndex(commute_data['start_date_local']).to_period('M')).agg({'distance': 'count'})
 
-    ax3 = sns.barplot(x=data.index.to_timestamp(),
-                      y=data['distance'],
-                      color='deepskyblue')
-    ax3.set(title='Commutes per month', ylabel='Count', xlabel='Month')
-    ax3.set_xticklabels(ax3.get_xticklabels(), rotation=45, horizontalalignment='right')
-    ax3.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax3.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax3.grid(b=True, which='major', linewidth=1.0)
-    ax3.grid(b=True, which='minor', linewidth=0.5)
-    print(data)
+    sns.barplot(x=data.index.to_timestamp(),
+                y=data['distance'],
+                color=colours['commute_count'],
+                ax=ax)
+    ax.set(ylabel='Commutes per month', xlabel='Month')
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+    ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.grid(b=True, which='major', linewidth=1.0)
+    ax.grid(b=True, which='minor', linewidth=0.5)
     plt.show()
 
 
@@ -54,20 +54,20 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
                  color=colours['commute_distance_sum'],
                  marker='o',
                  ax=ax)
-    ax.set(title='Commute distance', xlabel='Year')
-    ax.set_ylabel('Total distance (km)', color=colours['commute_distance_sum'])
+    ax.set_xlabel('Year')
+    ax.set_ylabel('Total commute distance (km)', color=colours['commute_distance_sum'])
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.grid(b=True, which='major', linewidth=1.0)
     ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
 
-    ax_mean = plt.twinx()
+    ax_mean = ax.twinx()
     sns.lineplot(x=data.index.year,
                  y=data['distance', 'mean'],
                  color=colours['commute_distance_mean'],
                  marker='o',
                  ax=ax_mean)
-    ax_mean.set_ylabel('Average distance (km)', color=colours['commute_distance_mean'])
+    ax_mean.set_ylabel('Average commute distance (km)', color=colours['commute_distance_mean'])
 
 
 def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colours: dict):
@@ -83,7 +83,7 @@ def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, c
                  color=colours['commute_days'],
                  marker='o',
                  ax=ax)
-    ax.set(title='Commute days', ylabel='Days', xlabel='Year')
+    ax.set(ylabel='Commuting days', xlabel='Year')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.grid(b=True, which='major', linewidth=1.0)
@@ -174,18 +174,21 @@ def display_commute_plots(activity_dataframe: pd.DataFrame):
     # Create a dictionary of colours for each plot
     colours = {'commute_days': 'deepskyblue',
                'commute_distance_sum': 'deepskyblue',
-               'commute_distance_mean': 'navy'}
+               'commute_distance_mean': 'navy',
+               'commute_count': 'deepskyblue'}
 
-    # Create a new figure with two subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2)
+    # Create a new grid of subplots
+    ax1 = plt.subplot2grid((2, 2), (0, 0), rowspan=1, colspan=1)
+    ax2 = plt.subplot2grid((2, 2), (0, 1), rowspan=1, colspan=1)
+    ax3 = plt.subplot2grid((2, 2), (1, 0), rowspan=1, colspan=2)
     plt.rc('axes', axisbelow=True)
+    plt.suptitle('Commute Statistics', size=16)
 
     # Generate and display the plots
     _generate_commute_days_plot(commute_data, ax1, colours)
     _generate_commute_distance_plot(commute_data, ax2, colours)
+    _generate_commute_count_plot(commute_data, ax3, colours)
     plt.show()
-
-    _generate_commute_distance_monthly_plot(commute_data, colours)
 
 
 def display_commute_statistics(activity_dataframe: pd.DataFrame):
