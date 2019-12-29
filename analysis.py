@@ -207,7 +207,7 @@ def display_commute_plots(activity_dataframe: pd.DataFrame):
     ax3 = plt.subplot2grid((2, 2), (1, 0), rowspan=1, colspan=2)
 
     # Format the global plot
-    plt.suptitle('Commute Statistics', size=16)
+    plt.suptitle('Commutes', size=16)
 
     # Generate and display the plots
     _generate_commute_days_plot(commute_data, ax1, colours)
