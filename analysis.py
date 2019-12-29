@@ -182,9 +182,9 @@ def display_commute_plots(activity_dataframe: pd.DataFrame):
     Generate and display the following plots using data from activities
     marked as commutes:
 
-    - Number of commuting days per year
-    - Total and average commute distance per year
-    - Number of commutes per month
+    - Number of commute days per year (line plot)
+    - Total and average commute distance per year (line plot)
+    - Number of commutes per month (bar plot)
     """
 
     # Get only commute data
