@@ -27,12 +27,12 @@ def main():
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('-r', '--refresh_data',
+    parser.add_argument('-c', '--commute_plots',
                         action='store_const',
                         const=True,
                         default=False,
                         required=False,
-                        help='Get and store a fresh copy of the activity data')
+                        help='Generate and display plots of the commute data')
     parser.add_argument('-g', '--export_geo_data',
                         action='store_const',
                         const=True,
@@ -45,7 +45,13 @@ def main():
                         default=False,
                         required=False,
                         help=('Export the geospatial activity data in GeoJSON format and upload it'
-                              'to the HERE XYZ mapping platform'))
+                              ' to the HERE XYZ mapping platform'))
+    parser.add_argument('-r', '--refresh_data',
+                        action='store_const',
+                        const=True,
+                        default=False,
+                        required=False,
+                        help='Get and store a fresh copy of the activity data')
     args = parser.parse_args()
 
     # Get a list of detailed activity data for all Strava activities
@@ -66,6 +72,10 @@ def main():
         if args.export_upload_geo_data:
             # Upload the geospatial data to HERE XYZ
             here_xyz.upload_geo_data(STRAVA_GEO_DATA_FILE)
+    
+    if args.commute_plots:
+        # Generate and display plots of the commute data
+        analysis.display_commute_plots(activity_dataframe)
 
 if __name__ == "__main__":
     main()
