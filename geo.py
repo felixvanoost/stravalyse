@@ -26,10 +26,11 @@ def _decode_polyline(x: pandas.Series) -> list:
     A list of decoded coordinates from the polyline.
     """
 
-    if x['polyline'] is not None:
-        map_coordinates = polyline.decode(x['polyline'])
+    # Check for both null and empty polyline strings
+    if not x['polyline'] or x['polyline'] is None:
+        map_coordinates = None
     else:
-        map_coordinates = None    
+        map_coordinates = polyline.decode(x['polyline'])
     
     return map_coordinates
 
