@@ -33,10 +33,9 @@ def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, 
 
     # Group the commute data by month
     data = commute_data.resample('M').count()
-    data.index = data.index.to_period('M')
 
     # Generate and format the bar plot
-    sns.barplot(x=data.index,
+    sns.barplot(x=data.index.to_period('M'),
                 y=data['distance'],
                 color=colours['commute_count'],
                 ax=ax)
@@ -96,8 +95,7 @@ def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, c
     """
     
     # Group the commute data by day
-    data = (commute_data.groupby(pd.DatetimeIndex(commute_data.index)
-            .to_period('D')).agg({'distance': 'mean'}))
+    data = commute_data.groupby(commute_data.index.to_period('D')).agg({'distance': 'mean'})
 
     # Generate and format the line plot
     sns.lineplot(x=data.index.year.value_counts().index,

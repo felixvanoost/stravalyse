@@ -9,7 +9,7 @@ A full list of features and known issues is covered in the notes for each releas
 ## Installation
 
 ### 1. Python + Dependencies
-The tool is developed with Python 3.7. Its dependencies are tracked in `requirements.txt` (for Pip) and `spec-file.txt` (for the [Anaconda](https://www.anaconda.com/distribution/) distribution).
+The tool is developed with Python 3.7. Its dependencies are tracked in `requirements.txt` (for Pip) and `environment.yml` (for the [Anaconda](https://www.anaconda.com/distribution/) distribution).
 
 Anaconda is recommended for Windows users as it comes pre-installed with many of the required packages. It is also the preferred method for installing `GeoPandas`, which is leveraged for the processing and exporting of geospatial activity data. See the GeoPandas [Installation](http://geopandas.org/install.html) page for more information.
 
