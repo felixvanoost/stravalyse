@@ -27,16 +27,11 @@ def _get_space_id() -> str:
     print('HERE XYZ: Locating the Strava activity data space')
 
     # Get a list of existing spaces
-    process = subprocess.Popen(['here', 'xyz', 'list'],
-                               shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-
-    # Check whether a 'Strava Activity Data' space already exists
-    while True:
-        line = process.stdout.readline()
-        if not line:
-            break
-        elif 'Strava Activity Data' in line:
-            space_id = line.split()[0]
+    command = 'here xyz list'
+    for line in subprocess.check_output(command, shell=True).decode('utf-8').split('\n'):
+        # Check whether a 'Strava Activity Data' space already exists
+        if 'Strava Activity Data' in line:
+            space_id = line.split()[1]
             print('HERE XYZ: Found space with ID "{}"'.format(space_id))
             break
 
@@ -44,11 +39,8 @@ def _get_space_id() -> str:
         print('HERE XYZ: No existing space found')
 
         # Create a new space
-        process = subprocess.Popen(['here', 'xyz', 'create', '-t', 'Strava Activity Data', '-d',
-                                   'Created by Strava Heatmap Tool'],
-                                   shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-        output = process.communicate()
-        space_id = str(output).split()[1]
+        command = 'here xyz create -t "Strava Activity Data" -d "Created by Strava Heatmap Tool"'
+        space_id = subprocess.check_output(command, shell=True).decode('utf-8').split()[1]
         print('HERE XYZ: Created new space with ID "{}"'.format(space_id))
 
     return space_id
@@ -67,12 +59,11 @@ def upload_geo_data(file_path: str):
     # Check whether the HERE CLI has been properly configured.
     # The CLI will return an empty line if the HERE account information
     # has been validated.
-    process = subprocess.Popen(['here', 'configure', 'verify'],
-                               shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-    output = process.communicate()[0]
+    command = 'here configure verify'
+    configure_verify_output = subprocess.check_output(command, shell=True).decode('utf-8')
 
-    if not output:
-        # Get the ID of the space containing the geospatial activity data 
+    if not configure_verify_output:
+        # Get the ID of the space containing the geospatial activity data
         space_id = _get_space_id()
 
         # Clear the space to prevent conflicts in overwriting existing data
@@ -80,17 +71,17 @@ def upload_geo_data(file_path: str):
         process = subprocess.Popen(['here', 'xyz', 'clear', space_id.replace("'", "")],
                                 shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                 universal_newlines=True)
-        output = process.communicate(input='Y')[0]
+        process.stdout.reconfigure(encoding='utf-8')
+        clear_space_output = process.communicate(input='Y')[0]
 
-        if 'data cleared successfully' in output:
+        if 'data cleared successfully' in clear_space_output:
             # Upload the geospatial data to the space
             print('HERE XYZ: Uploading geospatial data to space ID "{}"'.format(space_id))
-            process = subprocess.Popen(['here', 'xyz', 'upload', space_id, '-f', file_path,
-                                    '-i', 'ID'],
-                                    shell=True, stdout=subprocess.PIPE, universal_newlines=True)
-            output = process.communicate()[0]
+            command = 'here xyz upload ' + space_id + ' -f ' + file_path + ' -i ID'
+            upload_output = subprocess.check_output(command, shell=True).decode('utf-8')
+            print(upload_output)
 
-            if 'data upload to xyzspace' in output:
+            if 'data upload to xyzspace' in upload_output:
                 print('HERE XYZ: Geospatial data successfully uploaded to space ID "{}"'.format(space_id))
             else:
                 print('HERE XYZ: Error uploading geospatial data to space ID "{}"'.format(space_id))
