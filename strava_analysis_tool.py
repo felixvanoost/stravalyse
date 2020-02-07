@@ -1,13 +1,12 @@
-""" run.py
+""" strava_analysis_tool.py
 
-Main script for the Strava Analysis Tool.
+Main module for the Strava Analysis Tool.
 
-Felix van Oost 2019
+Felix van Oost 2020
 """
 
 # Standard library imports
 import argparse
-import sys
 
 # Local imports
 import analysis
@@ -72,10 +71,11 @@ def main():
         if args.export_upload_geo_data:
             # Upload the geospatial data to HERE XYZ
             here_xyz.upload_geo_data(STRAVA_GEO_DATA_FILE)
-    
+
     if args.commute_plots:
         # Generate and display plots of the commute data
         analysis.display_commute_plots(activity_dataframe)
+
 
 if __name__ == "__main__":
     main()
