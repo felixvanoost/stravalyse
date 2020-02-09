@@ -46,6 +46,7 @@ The following command line options are available:
 | ------- | ------------|
 | `-a / --activity_counts_plot` | Generate and display a plot of activity counts over time |
 | `-c / --commute_plots` | Generate and display plots of the commute data |
+| `-d / --mean_distance_plot` | Generate and display a plot of the mean activity distance over time |
 | `-g / --export_geo_data` | Export the geospatial activity data in GeoJSON format |
 | `-gu / --export_upload_geo_data` | Export the geospatial activity data in GeoJSON format and upload it to the HERE XYZ mapping platform |
 | `-r / --refresh_data` | Get and store a fresh copy of the activity data |
