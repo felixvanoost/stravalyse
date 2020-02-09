@@ -26,6 +26,12 @@ def main():
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-a', '--activity_counts_plot',
+                        action='store_const',
+                        const=True,
+                        default=False,
+                        required=False,
+                        help='Generate and display a plot of activity counts over time')
     parser.add_argument('-c', '--commute_plots',
                         action='store_const',
                         const=True,
@@ -71,6 +77,10 @@ def main():
         if args.export_upload_geo_data:
             # Upload the geospatial data to HERE XYZ
             here_xyz.upload_geo_data(STRAVA_GEO_DATA_FILE)
+
+    if args.activity_counts_plot:
+        # Generate and display a plot of activity counts over time
+        analysis.display_activity_counts_plot(activity_dataframe)
 
     if args.commute_plots:
         # Generate and display plots of the commute data

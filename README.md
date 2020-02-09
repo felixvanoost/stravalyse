@@ -44,9 +44,11 @@ The following command line options are available:
 
 | Command | Description |
 | ------- | ------------|
-| `-r / --refresh_data` | Get and store a fresh copy of the activity data |
+| `-a / --activity_counts_plot` | Generate and display a plot of activity counts over time |
+| `-c / --commute_plots` | Generate and display plots of the commute data |
 | `-g / --export_geo_data` | Export the geospatial activity data in GeoJSON format |
 | `-gu / --export_upload_geo_data` | Export the geospatial activity data in GeoJSON format and upload it to the HERE XYZ mapping platform |
+| `-r / --refresh_data` | Get and store a fresh copy of the activity data |
 
 These options can also be displayed from within the command line using the help command: 
 
