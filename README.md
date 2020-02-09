@@ -34,11 +34,11 @@ You will need to register for a free HERE account and install the [HERE CLI](htt
 
 Once configured, the tool can automatically upload your Strava data to HERE XYZ to generate an up-to-date map of your activities. You can set rules to colour-code activities (by type or moving time, for instance) within HERE Studio, and clicking on an activity will bring up some useful basic information (try it!).
 
-# Usage
+## Usage
 
 Run the tool using the command:
 
-`python run.py`
+`python strava_analysis_tool.py`
 
 The following command line options are available:
 
@@ -53,4 +53,14 @@ The following command line options are available:
 
 These options can also be displayed from within the command line using the help command: 
 
-`python run.py -h` or `python run.py --help`
+`python strava_analysis_tool.py -h` or `python strava_analysis_tool.py --help`
+
+### Plots
+
+From release v1.2.0 onwards, the tool is capable of generating some basic plots from your Strava data. The types of plots currently supported are described in the release notes, but here are some examples:
+
+![Demo Activity Counts Plot](Media/Demo%20Activity%20Counts%20Plot.JPG)
+
+![Demo Commute Plots](Media/Demo%20Commute%20Plots.JPG)
+
+![Demo Mean Distance Plot](Media/Demo%20Mean%20Distance%20Plot.JPG)
