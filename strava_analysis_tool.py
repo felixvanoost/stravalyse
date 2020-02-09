@@ -38,6 +38,12 @@ def main():
                         default=False,
                         required=False,
                         help='Generate and display plots of the commute data')
+    parser.add_argument('-d', '--mean_distance_plot',
+                        action='store_const',
+                        const=True,
+                        default=False,
+                        required=False,
+                        help='Generate and display a plot of the mean activity distance over time')
     parser.add_argument('-g', '--export_geo_data',
                         action='store_const',
                         const=True,
@@ -80,11 +86,15 @@ def main():
 
     if args.activity_counts_plot:
         # Generate and display a plot of activity counts over time
-        analysis.display_activity_counts_plot(activity_dataframe)
+        analysis.display_activity_count_plot(activity_dataframe)
 
     if args.commute_plots:
         # Generate and display plots of the commute data
         analysis.display_commute_plots(activity_dataframe)
+
+    if args.mean_distance_plot:
+        # Generate and display a plot of the mean activity distance over time
+        analysis.display_mean_distance_plot(activity_dataframe)
 
 
 if __name__ == "__main__":

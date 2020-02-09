@@ -8,6 +8,7 @@ display_summary_statistics()
 display_commute_statistics()
 display_commute_plots()
 display_activity_counts_plot()
+display_mean_distance_plot()
 
 Felix van Oost 2020
 """
@@ -22,7 +23,36 @@ import pandas as pd
 import seaborn as sns
 
 
-def _generate_activity_counts_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colours: str):
+def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colours: str):
+    """
+    Generate a bar plot of mean activity distance over time (by type).
+
+    Arguments:
+    activity data - A pandas DataFrame containing the activity data.
+    ax - A set of matplotlib axes to generate the plot on.
+    colours - A name of the colour palette to generate the plot with.
+    """
+
+    # Group the activity data by month and calculate the mean distance of each activity type
+    data = activity_data.groupby([activity_data.index.to_period('Y'), 'type']).mean().reset_index()
+
+    # Generate and format the bar plot
+    sns.barplot(x='start_date_local',
+                y='distance',
+                hue='type',
+                data=data,
+                palette=colours,
+                ax=ax)
+    ax.set(title='Mean activity distance over time', ylabel='Mean distance (km)', xlabel='Year')
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+    ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.grid(b=True, which='major', linewidth=1.0)
+    ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
+    ax.set_axisbelow(True)
+
+
+def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colours: str):
     """
     Generate a bar plot of activity counts over time (by type).
 
@@ -37,9 +67,10 @@ def _generate_activity_counts_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axe
                          .size().to_frame('count').reset_index())
 
     # Generate and format the bar plot
-    sns.barplot(x=data['start_date_local'],
-                y=data['count'],
-                hue=data['type'],
+    sns.barplot(x='start_date_local',
+                y='count',
+                hue='type',
+                data=data,
                 palette=colours,
                 ax=ax)
     ax.set(title='Activities over time', ylabel='Number of activities', xlabel='Month')
@@ -205,7 +236,32 @@ def _generate_summary_statistics(x: pd.Series) -> pd.Series:
     return series
 
 
-def display_activity_counts_plot(activity_dataframe: pd.DataFrame):
+def display_mean_distance_plot(activity_dataframe: pd.DataFrame):
+    """
+    Generate and display a bar plot of mean activity distance over time (by type).
+
+    Arguments:
+    activity_dataframe - A pandas DataFrame containing the activity data.
+    """
+
+    # Get only the activity types and start dates
+    activity_data = activity_dataframe[['distance', 'type', 'start_date_local']]
+    activity_data = activity_data.set_index('start_date_local')
+
+    # Convert the activity distances from m to km
+    activity_data.loc[:, 'distance'] = activity_data.loc[:, 'distance'] / 1000
+
+    # Create an empty set of axes
+    fig = plt.figure()
+    fig.set_tight_layout(True)
+    ax = fig.add_subplot(1, 1, 1)
+
+    # Generate and display the plot
+    _generate_mean_distance_plot(activity_data, ax, 'muted')
+    plt.show()
+
+
+def display_activity_count_plot(activity_dataframe: pd.DataFrame):
     """
     Generate and display a bar plot of activity counts over time (by type).
 
@@ -223,7 +279,7 @@ def display_activity_counts_plot(activity_dataframe: pd.DataFrame):
     ax = fig.add_subplot(1, 1, 1)
 
     # Generate and display the plot
-    _generate_activity_counts_plot(activity_data, ax, 'muted')
+    _generate_activity_count_plot(activity_data, ax, 'muted')
     plt.show()
 
 
