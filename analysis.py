@@ -7,7 +7,7 @@ create_activity_dataframe()
 display_summary_statistics()
 display_commute_statistics()
 display_commute_plots()
-display_activity_counts_plot()
+display_activity_count_plot()
 display_mean_distance_plot()
 
 Felix van Oost 2020
