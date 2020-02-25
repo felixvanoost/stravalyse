@@ -63,22 +63,24 @@ def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
 
     print('Geo: Processing geospatial data')
 
-    # Convert the activity polylines into coordinates
-    activity_dataframe.loc[:, 'map_coordinates'] = (activity_dataframe.loc[:, 'map']
-        .apply(_decode_polyline))
+    # Create a copy of the activity DataFrame containing only outdoor
+    # (non-trainer) activities
+    activity_map_dataframe = activity_dataframe.loc[activity_dataframe['trainer'] == False].copy()
 
-    # Create a new DataFrame containing only activities with geospatial
-    # data
-    activity_map_dataframe = (activity_dataframe.loc[activity_dataframe.map_coordinates
-        .isnull() == False, :].copy())
+    # Convert the activity polylines into coordinates
+    activity_map_dataframe.loc[:, 'map_coordinates'] = (activity_map_dataframe.loc[:, 'map']
+                                                       .apply(_decode_polyline))
+
+    # Select only activities with geospatial data
+    activity_map_dataframe = activity_map_dataframe.loc[activity_map_dataframe['map_coordinates'].isnull() == False]
 
     # Convert the coordinates into Shapely points
     activity_map_dataframe.loc[:, 'map_points'] = (activity_map_dataframe.loc[:,'map_coordinates']
-        .apply(_create_shapely_point))
+                                                  .apply(_create_shapely_point))
 
     # Convert the Shapely points into LineStrings
     activity_map_dataframe.loc[:, 'map_linestring'] = (activity_map_dataframe.loc[:, 'map_points']
-        .apply(LineString))
+                                                      .apply(LineString))
 
     # Convert the activity distances from m to km
     activity_map_dataframe.loc[:, 'distance'] = activity_map_dataframe.loc[:, 'distance'] / 1000
