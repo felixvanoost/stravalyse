@@ -22,8 +22,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
+#sns.set(rc={'axes.facecolor':'#1d1d1d', 'figure.facecolor':'#1d1d1d'})
 
-def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colours: str):
+# Universal colour palette for generating plots
+universal_colour_palette = ["#2980B9", "#3498DB", "#ECF0F1", "#E74C3C", "#2C3E50"]
+
+def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
     """
     Generate a bar plot of mean activity distance over time (by type).
 
@@ -41,7 +45,7 @@ def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
                 y='distance',
                 hue='type',
                 data=data,
-                palette=colours,
+                palette=colour_palette,
                 ax=ax)
     ax.set(title='Mean activity distance over time', ylabel='Mean distance (km)', xlabel='Year')
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
@@ -52,7 +56,7 @@ def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
     ax.set_axisbelow(True)
 
 
-def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colours: str):
+def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
     """
     Generate a bar plot of activity counts over time (by type).
 
@@ -71,7 +75,7 @@ def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes
                 y='count',
                 hue='type',
                 data=data,
-                palette=colours,
+                palette=colour_palette,
                 ax=ax)
     ax.set(title='Activities over time', ylabel='Number of activities', xlabel='Month')
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
@@ -82,7 +86,7 @@ def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes
     ax.set_axisbelow(True)
 
 
-def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colours: dict):
+def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
     """
     Generate a bar plot of number of commutes per month.
 
@@ -98,7 +102,7 @@ def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, 
     # Generate and format the bar plot
     sns.barplot(x=data.index.to_period('M'),
                 y=data['distance'],
-                color=colours['commute_count'],
+                color=colour_palette[0],
                 ax=ax)
     ax.set(ylabel='Number of commutes', xlabel='Month')
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
@@ -109,7 +113,7 @@ def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, 
     ax.set_axisbelow(True)
 
 
-def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colours: dict):
+def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
     """
     Generate a line plot of total and mean commute distance per year.
 
@@ -125,11 +129,11 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
     # Generate and format the total distance line plot
     sns.lineplot(x=data.index.year,
                  y=data['distance', 'sum'],
-                 color=colours['commute_distance_sum'],
+                 color=colour_palette[0],
                  marker='o',
                  ax=ax)
     ax.set_xlabel('Year')
-    ax.set_ylabel('Total commute distance (km)', color=colours['commute_distance_sum'])
+    ax.set_ylabel('Total commute distance (km)', color=colour_palette[0])
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.grid(b=True, which='major', linewidth=1.0)
@@ -139,13 +143,13 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
     ax_mean = ax.twinx()
     sns.lineplot(x=data.index.year,
                  y=data['distance', 'mean'],
-                 color=colours['commute_distance_mean'],
+                 color=colour_palette[1],
                  marker='o',
                  ax=ax_mean)
-    ax_mean.set_ylabel('Average commute distance (km)', color=colours['commute_distance_mean'])
+    ax_mean.set_ylabel('Average commute distance (km)', color=colour_palette[1])
 
 
-def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colours: dict):
+def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
     """
     Generate a line plot of commute days per year.
 
@@ -161,7 +165,7 @@ def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, c
     # Generate and format the line plot
     sns.lineplot(x=data.index.year.value_counts().index,
                  y=data.index.year.value_counts(),
-                 color=colours['commute_days'],
+                 palette=colour_palette,
                  marker='o',
                  ax=ax)
     ax.set(ylabel='Commute days', xlabel='Year')
@@ -261,7 +265,7 @@ def display_mean_distance_plot(activity_dataframe: pd.DataFrame):
     ax = fig.add_subplot(1, 1, 1)
 
     # Generate and display the plot
-    _generate_mean_distance_plot(activity_data, ax, 'muted')
+    _generate_mean_distance_plot(activity_data, ax, universal_colour_palette)
     plt.show()
 
 
@@ -283,7 +287,7 @@ def display_activity_count_plot(activity_dataframe: pd.DataFrame):
     ax = fig.add_subplot(1, 1, 1)
 
     # Generate and display the plot
-    _generate_activity_count_plot(activity_data, ax, 'muted')
+    _generate_activity_count_plot(activity_data, ax, universal_colour_palette)
     plt.show()
 
 
@@ -311,12 +315,6 @@ def display_commute_plots(activity_dataframe: pd.DataFrame):
     # Convert the activity distances from m to km
     commute_data.loc[:, 'distance'] = commute_data.loc[:, 'distance'] / 1000
 
-    # Create a dictionary of colours for each plot
-    colours = {'commute_days': 'deepskyblue',
-               'commute_distance_sum': 'deepskyblue',
-               'commute_distance_mean': 'navy',
-               'commute_count': 'deepskyblue'}
-
     # Create a new grid of subplots
     ax1 = plt.subplot2grid((2, 2), (0, 0), rowspan=1, colspan=1)
     ax2 = plt.subplot2grid((2, 2), (0, 1), rowspan=1, colspan=1)
@@ -326,9 +324,9 @@ def display_commute_plots(activity_dataframe: pd.DataFrame):
     plt.suptitle('Commutes', size=16)
 
     # Generate and display the plots
-    _generate_commute_days_plot(commute_data, ax1, colours)
-    _generate_commute_distance_plot(commute_data, ax2, colours)
-    _generate_commute_count_plot(commute_data, ax3, colours)
+    _generate_commute_days_plot(commute_data, ax1, universal_colour_palette)
+    _generate_commute_distance_plot(commute_data, ax2, universal_colour_palette)
+    _generate_commute_count_plot(commute_data, ax3, universal_colour_palette)
     plt.show()
 
 
