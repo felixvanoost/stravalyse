@@ -244,8 +244,12 @@ def display_mean_distance_plot(activity_dataframe: pd.DataFrame):
     activity_dataframe - A pandas DataFrame containing the activity data.
     """
 
-    # Get only the activity types and start dates
-    activity_data = activity_dataframe[['distance', 'type', 'start_date_local']]
+    # Create a list of stationary activities to exclude from the plot
+    exclude_list = ['Crossfit', 'RockClimbing', 'WeightTraining', 'Workout', 'Yoga']
+
+    # Get only the activity distances, types, and start dates
+    activity_data = (activity_dataframe[~activity_dataframe['type'].isin(exclude_list)]
+                                       [['distance', 'type', 'start_date_local']])
     activity_data = activity_data.set_index('start_date_local')
 
     # Convert the activity distances from m to km
