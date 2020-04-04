@@ -77,13 +77,11 @@ def upload_geo_data(file_path: str):
         if 'data cleared successfully' in clear_space_output:
             # Upload the geospatial data to the space
             print('HERE XYZ: Uploading geospatial data to space ID "{}"'.format(space_id))
-            command = 'here xyz upload ' + space_id + ' -f ' + file_path + ' -i ID'
+            command = 'here xyz upload ' + space_id + ' -f ' + file_path + ' -s -i ID'
             upload_output = subprocess.check_output(command, shell=True).decode('utf-8')
             print(upload_output)
 
-            if 'data upload to xyzspace' in upload_output:
-                print('HERE XYZ: Geospatial data successfully uploaded to space ID "{}"'.format(space_id))
-            else:
+            if not 'features uploaded to XYZ space' in upload_output:
                 print('HERE XYZ: Error uploading geospatial data to space ID "{}"'.format(space_id))
         else:
             print('HERE XYZ: Error clearing space ID "{}"'.format(space_id))
