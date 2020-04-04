@@ -25,7 +25,7 @@ import seaborn as sns
 #sns.set(rc={'axes.facecolor':'#1d1d1d', 'figure.facecolor':'#1d1d1d'})
 
 # Universal colour palette for generating plots
-universal_colour_palette = ["#2980B9", "#3498DB", "#ECF0F1", "#E74C3C", "#2C3E50"]
+universal_colour_palette = ["#2C3E50", "#E74C3C", "#ECF0F1", "#3498DB", "#2980B9", "#195962", "#F56F6C", "#FFFFFF", "#252932", "#191C21"]
 
 def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
     """
@@ -34,7 +34,7 @@ def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
     Arguments:
     activity data - A pandas DataFrame containing the activity data.
     ax - A set of matplotlib axes to generate the plot on.
-    colours - A name of the colour palette to generate the plot with.
+    colour_palette - The colour palette to generate the plot with.
     """
 
     # Group the activity data by month and calculate the mean distance of each activity type
@@ -63,7 +63,7 @@ def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes
     Arguments:
     activity data - A pandas DataFrame containing the activity data.
     ax - A set of matplotlib axes to generate the plot on.
-    colours - A name of the colour palette to generate the plot with.
+    colour_palette - The colour palette to generate the plot with.
     """
 
     # Group the activity data by month and calculate the count of each activity type
@@ -93,7 +93,7 @@ def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, 
     Arguments:
     commute_data - A pandas DataFrame containing the commute activity data.
     ax - A set of matplotlib axes to generate the plot on.
-    colours - A dictionary of colours to generate the plot with.
+    colour_palette - The colour palette to generate the plot with.
     """
 
     # Group the commute data by month
@@ -120,7 +120,7 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
     Arguments:
     commute_data - A pandas DataFrame containing the commute activity data.
     ax - A set of matplotlib axes to generate the plot on.
-    colours - A dictionary of colours to generate the plot with.
+    colour_palette - The colour palette to generate the plot with.
     """
 
     # Group the commute data by year
@@ -156,7 +156,7 @@ def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, c
     Arguments:
     commute_data - A pandas DataFrame containing the commute activity data.
     ax - A set of matplotlib axes to generate the plot on.
-    colours - A dictionary of colours to generate the plot with.
+    colour_palette - The colour palette to generate the plot with.
     """
     
     # Group the commute data by day
