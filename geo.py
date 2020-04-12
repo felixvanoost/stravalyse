@@ -5,7 +5,7 @@ Exports geospatial data for all Strava activities in GeoJSON format.
 Functions:
 export_geo_data_file()
 
-Felix van Oost 2019
+Felix van Oost 2020
 """
 
 # Third-party imports
@@ -63,16 +63,20 @@ def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
 
     print('Geo: Processing geospatial data')
 
-    # Create a copy of the activity DataFrame containing only outdoor
-    # (non-trainer) activities
-    activity_map_dataframe = activity_dataframe.loc[activity_dataframe['trainer'] == False].copy()
+    # Create a copy of the activity DataFrame containing only real
+    # outdoor (non-trainer and non-virtual) activities
+    exclude_list = ['VirtualRide', 'VirtualRun']
+    activity_map_dataframe = (activity_dataframe.loc[(activity_dataframe['trainer'] == False) &
+                                                     (~activity_dataframe['type'].isin(exclude_list))]
+                                                     .copy())
 
     # Convert the activity polylines into coordinates
     activity_map_dataframe.loc[:, 'map_coordinates'] = (activity_map_dataframe.loc[:, 'map']
                                                        .apply(_decode_polyline))
 
     # Select only activities with geospatial data
-    activity_map_dataframe = activity_map_dataframe.loc[activity_map_dataframe['map_coordinates'].isnull() == False]
+    activity_map_dataframe = activity_map_dataframe.loc[activity_map_dataframe['map_coordinates']
+                                                        .isnull() == False]
 
     # Convert the coordinates into Shapely points
     activity_map_dataframe.loc[:, 'map_points'] = (activity_map_dataframe.loc[:,'map_coordinates']
