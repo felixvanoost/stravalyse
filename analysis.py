@@ -22,10 +22,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-#sns.set(rc={'axes.facecolor':'#1d1d1d', 'figure.facecolor':'#1d1d1d'})
-
 # Universal colour palette for generating plots
-universal_colour_palette = ["#2C3E50", "#E74C3C", "#ECF0F1", "#3498DB", "#2980B9", "#195962", "#F56F6C", "#FFFFFF", "#252932", "#191C21"]
+universal_colour_palette = ["#2C3E50", "#E74C3C", "#ECF0F1", "#3498DB", "#2980B9",
+                            "#195962", "#F56F6C", "#FFFFFF", "#252932", "#191C21"]
 
 def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
     """
