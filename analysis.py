@@ -303,8 +303,11 @@ def display_commute_plots(activity_dataframe: pd.DataFrame):
     # Get only commute data
     commute_data = (activity_dataframe[activity_dataframe['commute'] == True]
                    [['distance', 'start_date_local']])
-    commute_data = commute_data.set_index('start_date_local')
 
+    if commute_data.empty:
+        return None
+
+    commute_data = commute_data.set_index('start_date_local')
     # Convert the activity distances from m to km
     commute_data.loc[:, 'distance'] = commute_data.loc[:, 'distance'] / 1000
 
