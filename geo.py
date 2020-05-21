@@ -94,19 +94,16 @@ def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
     activity_map_geodataframe = GeoDataFrame(activity_map_dataframe[['name',
                                                                      'id',
                                                                      'type',
-                                                                     'start_date_local_formatted',
+                                                                     'start_date_local',
                                                                      'distance',
                                                                      'moving_time_formatted',
                                                                      'total_elevation_gain',
                                                                      'map_linestring']],
                                                                      geometry='map_linestring')
-    activity_map_geodataframe.rename(columns={'name': 'Name',
-                                              'id': 'ID',
-                                              'type': 'Type',
-                                              'start_date_local_formatted': 'Start date',
-                                              'distance': 'Distance (km)',
-                                              'moving_time_formatted': 'Moving time',
-                                              'total_elevation_gain': 'Total elevation gain (m)'},
+    activity_map_geodataframe.rename(columns={'start_date_local': 'local start date',
+                                              'distance': 'distance (km)',
+                                              'moving_time_formatted': 'moving time',
+                                              'total_elevation_gain': 'total elevation gain (m)'},
                                               inplace=True)
 
     # Export the GeoDataFrame to a file in GeoJSON format
