@@ -77,7 +77,8 @@ def upload_geo_data(file_path: str):
         if 'data cleared successfully' in clear_space_output:
             # Upload the geospatial data to the space
             print('HERE XYZ: Uploading geospatial data to space ID "{}"'.format(space_id))
-            command = 'here xyz upload ' + space_id + ' -f ' + file_path + ' -s -i ID'
+            command = ('here xyz upload ' + space_id + ' --file ' + file_path + ' --stream ' +
+                       '--id "id" --date "local start date" --datetag "year,month,weekday"')
             upload_output = subprocess.check_output(command, shell=True).decode('utf-8')
             print(upload_output)
 

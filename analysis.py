@@ -392,8 +392,6 @@ def create_activity_dataframe(activity_data: list) -> pd.DataFrame:
     activity_dataframe = pd.DataFrame.from_records(activity_data)
 
     # Format the activity start dates and moving / elapsed times
-    activity_dataframe.loc[:, 'start_date_local_formatted'] = (activity_dataframe['start_date_local']
-        .apply(lambda x: x.strftime('%e %B %Y, %H:%M:%S').strip()))
     activity_dataframe.loc[:, 'moving_time_formatted'] = (activity_dataframe['moving_time']
         .apply(lambda x: str(datetime.timedelta(seconds=x))))
     activity_dataframe.loc[:, 'elapsed_time_formatted'] = (activity_dataframe['elapsed_time']
