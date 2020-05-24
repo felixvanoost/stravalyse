@@ -22,9 +22,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-# Universal colour palette for generating plots
-universal_colour_palette = ["#2C3E50", "#E74C3C", "#ECF0F1", "#3498DB", "#2980B9",
-                            "#195962", "#F56F6C", "#FFFFFF", "#252932", "#191C21"]
 
 def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
     """
@@ -239,12 +236,13 @@ def _generate_summary_statistics(x: pd.Series) -> pd.Series:
     return series
 
 
-def display_mean_distance_plot(activity_dataframe: pd.DataFrame):
+def display_mean_distance_plot(activity_dataframe: pd.DataFrame, colour_palette: list):
     """
     Generate and display a bar plot of mean activity distance over time (by type).
 
     Arguments:
     activity_dataframe - A pandas DataFrame containing the activity data.
+    colour_palette - The colour palette to generate the plot with.
     """
 
     # Create a list of stationary activities to exclude from the plot
@@ -264,16 +262,17 @@ def display_mean_distance_plot(activity_dataframe: pd.DataFrame):
     ax = fig.add_subplot(1, 1, 1)
 
     # Generate and display the plot
-    _generate_mean_distance_plot(activity_data, ax, universal_colour_palette)
+    _generate_mean_distance_plot(activity_data, ax, colour_palette)
     plt.show()
 
 
-def display_activity_count_plot(activity_dataframe: pd.DataFrame):
+def display_activity_count_plot(activity_dataframe: pd.DataFrame, colour_palette: list):
     """
     Generate and display a bar plot of activity counts over time (by type).
 
     Arguments:
     activity_dataframe - A pandas DataFrame containing the activity data.
+    colour_palette - The colour palette to generate the plot with.
     """
 
     # Get only the activity types and start dates
@@ -286,11 +285,11 @@ def display_activity_count_plot(activity_dataframe: pd.DataFrame):
     ax = fig.add_subplot(1, 1, 1)
 
     # Generate and display the plot
-    _generate_activity_count_plot(activity_data, ax, universal_colour_palette)
+    _generate_activity_count_plot(activity_data, ax, colour_palette)
     plt.show()
 
 
-def display_commute_plots(activity_dataframe: pd.DataFrame):
+def display_commute_plots(activity_dataframe: pd.DataFrame, colour_palette: list):
     """
     Generate and display the following plots using data from activities
     marked as commutes:
@@ -301,6 +300,7 @@ def display_commute_plots(activity_dataframe: pd.DataFrame):
 
     Arguments:
     activity_dataframe - A pandas DataFrame containing the activity data.
+    colour_palette - The colour palette to generate the plot with.
     """
 
     # Get only commute data
@@ -323,9 +323,9 @@ def display_commute_plots(activity_dataframe: pd.DataFrame):
     plt.suptitle('Commutes', size=16)
 
     # Generate and display the plots
-    _generate_commute_days_plot(commute_data, ax1, universal_colour_palette)
-    _generate_commute_distance_plot(commute_data, ax2, universal_colour_palette)
-    _generate_commute_count_plot(commute_data, ax3, universal_colour_palette)
+    _generate_commute_days_plot(commute_data, ax1, colour_palette)
+    _generate_commute_distance_plot(commute_data, ax2, colour_palette)
+    _generate_commute_count_plot(commute_data, ax3, colour_palette)
     plt.show()
 
 

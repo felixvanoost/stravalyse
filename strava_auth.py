@@ -17,9 +17,6 @@ import webbrowser
 import requests
 from requests import Request
 
-# File paths
-STRAVA_TOKENS_FILE = 'Tokens.txt'
-
 
 def _read_tokens_from_file(file_path: str) -> dict:
     """
@@ -203,9 +200,12 @@ def _get_initial_tokens(client_info: dict) -> dict:
     return tokens
 
 
-def get_access_token() -> str:
+def get_access_token(file_path: str) -> str:
     """
     Obtain and return an OAuth2 access token for the Strava v3 API.
+
+    Arguments:
+    file_path - The path of the file to store the access tokens to.
 
     Return:
     The access token as a string if access to the API is successfully
@@ -229,19 +229,19 @@ def get_access_token() -> str:
         print('Error: Add STRAVA_CLIENT_SECRET to the list of environment variables')
         return None
 
-    # Read the authentication tokens and expiry time from the text file
-    tokens = _read_tokens_from_file(STRAVA_TOKENS_FILE)
+    # Read the authentication tokens and expiry time from the file
+    tokens = _read_tokens_from_file(file_path)
     if tokens:
         # Refresh the tokens if the access token has expired and write
         # them to the file
         if int(tokens['expiry_time']) <= time.time():
             tokens = _refresh_expired_tokens(client_info, tokens)
-            _write_tokens_to_file(STRAVA_TOKENS_FILE, tokens)
+            _write_tokens_to_file(file_path, tokens)
     else:
         # Get the initial authentication tokens and write them to the
         # file
         tokens = _get_initial_tokens(client_info)
-        _write_tokens_to_file(STRAVA_TOKENS_FILE, tokens)
+        _write_tokens_to_file(file_path, tokens)
 
     print('Strava: Access to the API authenticated')
     access_token = str(tokens['access_token'])

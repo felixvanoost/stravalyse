@@ -71,7 +71,10 @@ def main():
     config = toml.load(CONFIG_FILE_PATH)
 
     # Get a list of detailed activity data for all Strava activities
-    activity_data = strava_data.get_activity_data(config['paths']['activity_data_file'], args.refresh_data)
+    activity_data = strava_data.get_activity_data(config['paths']['tokens_file'],
+                                                  config['paths']['activity_data_file'],
+                                                  config['strava']['retry_interval_sec'],
+                                                  args.refresh_data)
 
     # Create a pandas DataFrame from the activity data
     activity_dataframe = analysis.create_activity_dataframe(activity_data)
@@ -91,15 +94,18 @@ def main():
 
     if args.activity_count_plot:
         # Generate and display a plot of activity counts over time
-        analysis.display_activity_count_plot(activity_dataframe)
+        analysis.display_activity_count_plot(activity_dataframe,
+                                             config['analysis']['plot_colour_palette'])
 
     if args.commute_plots:
         # Generate and display plots of the commute data
-        analysis.display_commute_plots(activity_dataframe)
+        analysis.display_commute_plots(activity_dataframe,
+                                       config['analysis']['plot_colour_palette'])
 
     if args.mean_distance_plot:
         # Generate and display a plot of the mean activity distance over time
-        analysis.display_mean_distance_plot(activity_dataframe)
+        analysis.display_mean_distance_plot(activity_dataframe,
+                                            config['analysis']['plot_colour_palette'])
 
 
 if __name__ == "__main__":

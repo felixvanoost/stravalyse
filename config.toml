@@ -1,5 +1,13 @@
 # Configuration file for the Strava Analysis Tool.
 
 [paths]
+tokens_file = 'Tokens.txt'
 activity_data_file = 'Data/StravaActivityData.json'
 geo_data_file = 'Data/StravaGeoData.geojson'
+
+[strava]
+retry_interval_sec = 120
+
+[analysis]
+plot_colour_palette = ["#2C3E50", "#E74C3C", "#ECF0F1", "#3498DB", "#2980B9",
+                       "#195962", "#F56F6C", "#FFFFFF", "#252932", "#191C21"]

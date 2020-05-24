@@ -24,9 +24,6 @@ sys.path.append(os.path.abspath('API'))
 import swagger_client
 from swagger_client.rest import ApiException
 
-# Constants
-API_RETRY_INTERVAL_SECONDS = (2 * 60)
-
 
 def _iso_to_datetime(obj):
     """Deserialise ISO 8601 strings into datetime objects."""
@@ -199,12 +196,17 @@ def _update_activity_data(access_token: str, file_path: str, activities: list):
             break
 
 
-def get_activity_data(file_path: str, refresh: bool) -> list:
+def get_activity_data(tokens_file_path: str, data_file_path: str, retry_interval_sec: int,
+                      refresh: bool) -> list:
     """
     Get and store a list of detailed data for all Strava activities.
     
     Arguments:
-    file_path - The path of the file to store the activity data to.
+    tokens_file_path - The path of the file to store the Strava access 
+                       tokens to.
+    data_file_path - The path of the file to store the activity data to.
+    retry_interval_sec - The API retry interval in seconds (if the rate
+                         limit is exceeded).
     refresh - A Boolean to select whether to use and update the locally
               stored activity data or get and store a fresh copy.
 
@@ -213,7 +215,7 @@ def get_activity_data(file_path: str, refresh: bool) -> list:
     """
 
     # Get an OAuth2 access token for the Strava v3 API
-    access_token = strava_auth.get_access_token()
+    access_token = strava_auth.get_access_token(tokens_file_path)
 
     activities = []
 
@@ -222,24 +224,24 @@ def get_activity_data(file_path: str, refresh: bool) -> list:
 
         # Force the activity data to be refreshed by deleting the file
         try:
-            os.remove(file_path)
+            os.remove(data_file_path)
         except OSError:
             pass
     else:
         # Read the existing activity data from the file and store a
         # local copy as a list
-        activities = _read_activity_data_from_file(file_path)
+        activities = _read_activity_data_from_file(data_file_path)
 
     if access_token:
         # Update the activity data
         while True:
             try:
-                _update_activity_data(access_token, file_path, activities)
+                _update_activity_data(access_token, data_file_path, activities)
             except ApiException:
                 # Wait for the API rate limit to be reset
                 print('Strava: API rate limit exceeded. Retrying in {} minutes.'
-                      .format(int(API_RETRY_INTERVAL_SECONDS / 60)))
-                time.sleep(API_RETRY_INTERVAL_SECONDS)
+                      .format(int(retry_interval_sec / 60)))
+                time.sleep(retry_interval_sec)
                 continue
             break
     else:
