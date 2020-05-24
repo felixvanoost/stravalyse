@@ -8,15 +8,17 @@ Felix van Oost 2020
 # Standard library imports
 import argparse
 
+# Third-party imports
+import toml
+
 # Local imports
 import analysis
 import here_xyz
 import geo
 import strava_data
 
-# File paths
-STRAVA_ACTIVITY_DATA_FILE = 'Data/StravaActivityData.json'
-STRAVA_GEO_DATA_FILE = 'Data/StravaGeoData.geojson'
+# Configuration file path
+CONFIG_FILE_PATH = 'config.toml'
 
 
 def main():
@@ -65,8 +67,11 @@ def main():
                         help='Get and store a fresh copy of the activity data')
     args = parser.parse_args()
 
+    # Load the tool configuration from config.toml
+    config = toml.load(CONFIG_FILE_PATH)
+
     # Get a list of detailed activity data for all Strava activities
-    activity_data = strava_data.get_activity_data(STRAVA_ACTIVITY_DATA_FILE, args.refresh_data)
+    activity_data = strava_data.get_activity_data(config['paths']['activity_data_file'], args.refresh_data)
 
     # Create a pandas DataFrame from the activity data
     activity_dataframe = analysis.create_activity_dataframe(activity_data)
@@ -78,11 +83,11 @@ def main():
     if args.export_geo_data or args.export_upload_geo_data:
         # Export the geospatial data from all activities in GeoJSON
         # format
-        geo.export_geo_data_file(STRAVA_GEO_DATA_FILE, activity_dataframe)
+        geo.export_geo_data_file(config['paths']['geo_data_file'], activity_dataframe)
 
         if args.export_upload_geo_data:
             # Upload the geospatial data to HERE XYZ
-            here_xyz.upload_geo_data(STRAVA_GEO_DATA_FILE)
+            here_xyz.upload_geo_data(config['paths']['geo_data_file'])
 
     if args.activity_count_plot:
         # Generate and display a plot of activity counts over time

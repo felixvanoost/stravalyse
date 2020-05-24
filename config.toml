@@ -1,0 +1,5 @@
+# Configuration file for the Strava Analysis Tool.
+
+[paths]
+activity_data_file = 'Data/StravaActivityData.json'
+geo_data_file = 'Data/StravaGeoData.geojson'
