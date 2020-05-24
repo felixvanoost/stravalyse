@@ -9,9 +9,33 @@ A full list of features and known issues is covered in the notes for each releas
 ## Installation
 
 ### 1. Python + Dependencies
-The tool is developed with Python 3.7. Its dependencies are tracked in `requirements.txt` (for Pip) and `environment.yml` (for the [Anaconda](https://www.anaconda.com/distribution/) distribution).
+The tool is developed with Python 3.8. Its dependencies are tracked in `requirements.txt` (for Pip) and `environment.yml` (for the [Anaconda](https://www.anaconda.com/distribution/) distribution).
 
 Anaconda is recommended for Windows users as it comes pre-installed with many of the required packages. It is also the preferred method for installing `GeoPandas`, which is leveraged for the processing and exporting of geospatial activity data. See the GeoPandas [Installation](http://geopandas.org/install.html) page for more information.
+
+#### Option 1: Environment setup using Python
+
+Create and activate a new virtual environment in Python using the commands:
+
+```
+python -m venv [path-to-environment]
+python [path-to-environment]/bin/activate
+```
+
+Then install the required dependencies using:
+
+```
+pip install -r requirements.txt 
+```
+
+#### Option 2: Environment setup using Anaconda
+
+Create and activate a new environment in Anaconda with the required dependencies using the commands:
+
+```
+conda env create -f environment.yml
+conda activate strava-analysis-tool-env
+```
 
 ### 2. Strava API Access
 The tool needs to be registered as an app with Strava to obtain access the Strava API. You can do this as follows:
@@ -54,6 +78,8 @@ The following command line options are available:
 These options can also be displayed from within the command line using the help command: 
 
 `python strava_analysis_tool.py -h` or `python strava_analysis_tool.py --help`
+
+All user-configurable parameters, such as file paths and the colour palette used to generate any plots, are stored in the file `config.toml`.
 
 ### Plots
 
