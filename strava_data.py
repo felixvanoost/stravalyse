@@ -35,7 +35,7 @@ def _iso_to_datetime(obj):
         # datetime object
         if isinstance(value, str):
             try:
-                dictionary[key] = parser.parse(value)
+                dictionary[key] = parser.isoparse(value)
             except ValueError:
                 dictionary[key] = value
         else:
@@ -49,7 +49,7 @@ class _datetime_to_iso(json.JSONEncoder):
     Custom JSON encoder subclass to serialise datetime objects into ISO
     8601 strings.
     """
-    
+
     def default(self, obj):
         if isinstance(obj, datetime):
             # Convert the datetime object into an ISO 8601 string
@@ -137,7 +137,7 @@ def _get_last_activity_start_time(activities: list) -> int:
 
         # Convert the ISO 8601-formatted start time into an epoch
         last_activity_time_epoch = int(datetime.fromisoformat(last_activity_time_iso).timestamp())
-    
+
     return last_activity_time_epoch
 
 
@@ -200,9 +200,9 @@ def get_activity_data(tokens_file_path: str, data_file_path: str, retry_interval
                       refresh: bool) -> list:
     """
     Get and store a list of detailed data for all Strava activities.
-    
+
     Arguments:
-    tokens_file_path - The path of the file to store the Strava access 
+    tokens_file_path - The path of the file to store the Strava access
                        tokens to.
     data_file_path - The path of the file to store the activity data to.
     retry_interval_sec - The API retry interval in seconds (if the rate
