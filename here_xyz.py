@@ -9,7 +9,7 @@ upload_geo_data()
 Felix van Oost 2019
 """
 
-# Local imports
+# Local
 import subprocess
 
 
@@ -40,7 +40,7 @@ def _get_space_id() -> str:
 
         # Create a new space
         command = 'here xyz create -t "Strava Activity Data" -d "Created by Strava Heatmap Tool"'
-        space_id = subprocess.check_output(command, shell=True).decode('utf-8').split()[1]
+        space_id = subprocess.check_output(command, shell=True).decode('utf-8').split()[2]
         print('HERE XYZ: Created new space with ID "{}"'.format(space_id))
 
     return space_id
@@ -68,11 +68,11 @@ def upload_geo_data(file_path: str):
 
         # Clear the space to prevent conflicts in overwriting existing data
         print('HERE XYZ: Clearing space ID "{}"'.format(space_id))
-        process = subprocess.Popen(['here', 'xyz', 'clear', space_id.replace("'", "")],
+        process = subprocess.Popen(['here xyz clear {}'.format(space_id)],
                                 shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                 universal_newlines=True)
         process.stdout.reconfigure(encoding='utf-8')
-        clear_space_output = process.communicate(input='Y')[0]
+        clear_space_output, _ = process.communicate(input='Y')
 
         if 'data cleared successfully' in clear_space_output:
             # Upload the geospatial data to the space

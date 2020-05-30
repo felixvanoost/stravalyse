@@ -8,12 +8,12 @@ get_access_token()
 Felix van Oost 2019
 """
 
-# Standard library imports
+# Standard library
 import os
 import time
 import webbrowser
 
-# Third-party imports
+# Third-party
 import requests
 from requests import Request
 

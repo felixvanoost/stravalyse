@@ -5,13 +5,13 @@ Main module for the Strava Analysis Tool.
 Felix van Oost 2020
 """
 
-# Standard library imports
+# Standard library
 import argparse
 
-# Third-party imports
+# Third-party
 import toml
 
-# Local imports
+# Local
 import analysis
 import here_xyz
 import geo
@@ -26,7 +26,6 @@ def main():
     Main method for the Strava Analysis Tool.
     """
 
-    # Parse the command line arguments
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-a', '--activity_count_plot',
                         action='store_const',
@@ -73,7 +72,6 @@ def main():
     # Get a list of detailed activity data for all Strava activities
     activity_data = strava_data.get_activity_data(config['paths']['tokens_file'],
                                                   config['paths']['activity_data_file'],
-                                                  config['strava']['retry_interval_sec'],
                                                   args.refresh_data)
 
     # Create a pandas DataFrame from the activity data
