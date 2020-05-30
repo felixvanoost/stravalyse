@@ -29,6 +29,7 @@ def _iso_to_datetime(obj):
     """Deserialise ISO 8601 strings into datetime objects."""
 
     dictionary = {}
+
     for (key, value) in obj:
         # Check if the object is a string and attempt to parse it into a
         # datetime object
@@ -195,8 +196,7 @@ def _update_activity_data(access_token: str, file_path: str, activities: list):
             break
 
 
-def get_activity_data(tokens_file_path: str, data_file_path: str, retry_interval_sec: int,
-                      refresh: bool) -> list:
+def get_activity_data(tokens_file_path: str, data_file_path: str, refresh: bool) -> list:
     """
     Get and store a list of detailed data for all Strava activities.
 
@@ -204,8 +204,6 @@ def get_activity_data(tokens_file_path: str, data_file_path: str, retry_interval
     tokens_file_path - The path of the file to store the Strava access
                        tokens to.
     data_file_path - The path of the file to store the activity data to.
-    retry_interval_sec - The API retry interval in seconds (if the rate
-                         limit is exceeded).
     refresh - A Boolean to select whether to use and update the locally
               stored activity data or get and store a fresh copy.
 
@@ -236,11 +234,16 @@ def get_activity_data(tokens_file_path: str, data_file_path: str, retry_interval
         while True:
             try:
                 _update_activity_data(access_token, data_file_path, activities)
-            except ApiException:
-                # Wait for the API rate limit to be reset
-                print('Strava: API rate limit exceeded. Retrying in {} minutes.'
-                      .format(int(retry_interval_sec / 60)))
-                time.sleep(retry_interval_sec)
+            except ApiException as e:
+                daily_limit = int(e.headers['X-RateLimit-Limit'].split(',')[1])
+                daily_usage = int(e.headers['X-RateLimit-Usage'].split(',')[1])
+
+                if daily_usage >= daily_limit:
+                    print('Strava: API daily limit exceeded. Exiting.')
+                    break 
+
+                print('Strava: API 15 minute limit exceeded, Retrying in 15 minutes.')
+                time.sleep(900)
                 continue
             break
     else:
