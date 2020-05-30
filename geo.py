@@ -8,7 +8,7 @@ export_geo_data_file()
 Felix van Oost 2020
 """
 
-# Third-party imports
+# Third-party
 from geopandas import GeoDataFrame
 import pandas
 import polyline

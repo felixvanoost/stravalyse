@@ -13,10 +13,10 @@ display_mean_distance_plot()
 Felix van Oost 2020
 """
 
-# Standard library imports
+# Standard library
 import datetime
 
-# Third-party imports
+# Third-party
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd

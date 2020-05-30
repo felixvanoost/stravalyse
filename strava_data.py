@@ -29,7 +29,6 @@ def _iso_to_datetime(obj):
     """Deserialise ISO 8601 strings into datetime objects."""
 
     dictionary = {}
-
     for (key, value) in obj:
         # Check if the object is a string and attempt to parse it into a
         # datetime object
