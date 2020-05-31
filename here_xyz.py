@@ -41,7 +41,7 @@ def _get_space_id() -> str:
 
         # Create a new space
         command = [shutil.which('here'), 'xyz', 'create', '-t', '"Strava Activity Data"', '-d',
-                   '"Created by Strava Heatmap Tool"']
+                   '"Created by Strava Analysis Tool"']
         space_id = subprocess.check_output(command).decode('utf-8').split()[2]
         print('HERE XYZ: Created new space with ID "{}"'.format(space_id))
 
