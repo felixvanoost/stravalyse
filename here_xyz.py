@@ -78,8 +78,8 @@ def upload_geo_data(file_path: str):
             # Upload the geospatial data to the space
             print('HERE XYZ: Uploading geospatial data to space ID "{}"'.format(space_id))
             command = ([shutil.which('here'), 'xyz', 'upload', space_id, '--file', file_path,
-                       '--stream', '--id', '"id"', '--date', '"local start date"', '--datetag',
-                       'year,month,weekday'])
+                        '--stream', '--id', '"id"', '--date', '"local start date"', '--datetag',
+                        'year,month,weekday'])
             upload_output = subprocess.check_output(command).decode('utf-8')
             print('HERE XYZ: ' + upload_output)
 
