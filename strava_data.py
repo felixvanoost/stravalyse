@@ -24,6 +24,7 @@ sys.path.append(os.path.abspath('API'))
 import swagger_client
 from swagger_client.rest import ApiException
 
+API_RATE_LIMIT_ERROR = 429
 
 def _iso_to_datetime(obj):
     """Deserialise ISO 8601 strings into datetime objects."""
@@ -235,17 +236,20 @@ def get_activity_data(tokens_file_path: str, data_file_path: str, refresh: bool)
             try:
                 _update_activity_data(access_token, data_file_path, activities)
             except ApiException as e:
-                daily_limit = int(e.headers['X-RateLimit-Limit'].split(',')[1])
-                daily_usage = int(e.headers['X-RateLimit-Usage'].split(',')[1])
+                if e.status == API_RATE_LIMIT_ERROR:
+                    daily_limit = int(e.headers['X-RateLimit-Limit'].split(',')[1])
+                    daily_usage = int(e.headers['X-RateLimit-Usage'].split(',')[1])
 
-                if daily_usage >= daily_limit:
-                    print('Strava: API daily limit exceeded. Exiting.')
-                    break 
+                    if daily_usage >= daily_limit:
+                        print('Strava: API daily limit exceeded. Exiting.')
+                        break 
 
-                print('Strava: API 15 minute limit exceeded, Retrying in 15 minutes.')
-                time.sleep(900)
-                continue
-            break
+                    print('Strava: API 15 minute limit exceeded, Retrying in 15 minutes.')
+                    time.sleep(900)
+                    continue
+                else:
+                    print(f"Strava error: {e.status}. Message: {e.reason}.")
+                    break
     else:
         print('Strava: Access to the API could not be authenticated.',
               'Only existing locally-stored activities will be processed.')
