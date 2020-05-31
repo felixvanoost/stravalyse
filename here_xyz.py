@@ -69,8 +69,8 @@ def upload_geo_data(file_path: str):
         # Clear the space to prevent conflicts in overwriting existing data
         print('HERE XYZ: Clearing space ID "{}"'.format(space_id))
         process = subprocess.Popen(['here xyz clear {}'.format(space_id)],
-                                shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                universal_newlines=True)
+                                   shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                   universal_newlines=True)
         process.stdout.reconfigure(encoding='utf-8')
         clear_space_output, _ = process.communicate(input='Y')
 

@@ -8,17 +8,17 @@ get_activity_data()
 Felix van Oost 2019
 """
 
-# Standard library imports
+# Standard library
 from datetime import datetime
 import json
 import os
 import sys
 import time
 
-# Third-party imports
+# Third-party
 from dateutil import parser
 
-# Local imports
+# Local
 import strava_auth
 sys.path.append(os.path.abspath('API'))
 import swagger_client
@@ -45,7 +45,7 @@ def _iso_to_datetime(obj):
     return dictionary
 
 
-class _datetime_to_iso(json.JSONEncoder):
+class _DatetimeToIso(json.JSONEncoder):
     """
     Custom JSON encoder subclass to serialise datetime objects into ISO
     8601 strings.
@@ -91,7 +91,6 @@ def _read_activity_data_from_file(file_path: str) -> list:
         print(end='\n')
     except FileNotFoundError:
         print('Strava: No activity data found in {}'.format(file_path))
-        pass
 
     return activities
 
@@ -114,7 +113,7 @@ def _write_activity_data_to_file(file_path: str, activities: list):
     # Append the activities to the file in JSON format
     with open(file_path, 'a+', encoding='utf8') as file:
         for activity in activities:
-            file.write(json.dumps(activity, cls=_datetime_to_iso, ensure_ascii=False))
+            file.write(json.dumps(activity, cls=_DatetimeToIso, ensure_ascii=False))
             file.write('\n')
 
 
@@ -235,21 +234,22 @@ def get_activity_data(tokens_file_path: str, data_file_path: str, refresh: bool)
         while True:
             try:
                 _update_activity_data(access_token, data_file_path, activities)
-            except ApiException as e:
-                if e.status == API_RATE_LIMIT_ERROR:
-                    daily_limit = int(e.headers['X-RateLimit-Limit'].split(',')[1])
-                    daily_usage = int(e.headers['X-RateLimit-Usage'].split(',')[1])
+            except ApiException as error:
+                if error.status == API_RATE_LIMIT_ERROR:
+                    daily_limit = int(error.headers['X-RateLimit-Limit'].split(',')[1])
+                    daily_usage = int(error.headers['X-RateLimit-Usage'].split(',')[1])
 
                     if daily_usage >= daily_limit:
-                        print('Strava: API daily limit exceeded. Exiting.')
-                        break 
+                        print('Strava: API daily rate limit exceeded. Exiting.')
+                        break
 
-                    print('Strava: API 15 minute limit exceeded, Retrying in 15 minutes.')
+                    print('Strava: API 15 minute rate limit exceeded. Retrying in 15 minutes.')
                     time.sleep(900)
                     continue
                 else:
-                    print(f"Strava error: {e.status}. Message: {e.reason}.")
+                    print(f'Strava error: {error.status}. Message: {error.reason}.')
                     break
+            break
     else:
         print('Strava: Access to the API could not be authenticated.',
               'Only existing locally-stored activities will be processed.')

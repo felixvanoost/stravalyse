@@ -31,7 +31,7 @@ def _decode_polyline(x: pandas.Series) -> list:
         map_coordinates = None
     else:
         map_coordinates = polyline.decode(x['polyline'])
-    
+
     return map_coordinates
 
 def _create_shapely_point(coordinates: pandas.Series) -> Point:
@@ -67,24 +67,24 @@ def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
     # outdoor (non-trainer and non-virtual) activities
     exclude_list = ['VirtualRide', 'VirtualRun']
     activity_map_dataframe = (activity_dataframe.loc[(activity_dataframe['trainer'] == False) &
-                                                     (~activity_dataframe['type'].isin(exclude_list))]
-                                                     .copy())
+                                                     (~activity_dataframe['type']
+                                                      .isin(exclude_list))].copy())
 
     # Convert the activity polylines into coordinates
     activity_map_dataframe.loc[:, 'map_coordinates'] = (activity_map_dataframe.loc[:, 'map']
-                                                       .apply(_decode_polyline))
+                                                        .apply(_decode_polyline))
 
     # Select only activities with geospatial data
     activity_map_dataframe = activity_map_dataframe.loc[activity_map_dataframe['map_coordinates']
                                                         .isnull() == False]
 
     # Convert the coordinates into Shapely points
-    activity_map_dataframe.loc[:, 'map_points'] = (activity_map_dataframe.loc[:,'map_coordinates']
-                                                  .apply(_create_shapely_point))
+    activity_map_dataframe.loc[:, 'map_points'] = (activity_map_dataframe.loc[:, 'map_coordinates']
+                                                   .apply(_create_shapely_point))
 
     # Convert the Shapely points into LineStrings
     activity_map_dataframe.loc[:, 'map_linestring'] = (activity_map_dataframe.loc[:, 'map_points']
-                                                      .apply(LineString))
+                                                       .apply(LineString))
 
     # Convert the activity distances from m to km
     activity_map_dataframe.loc[:, 'distance'] = activity_map_dataframe.loc[:, 'distance'] / 1000
@@ -99,12 +99,12 @@ def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
                                                                      'moving_time_formatted',
                                                                      'total_elevation_gain',
                                                                      'map_linestring']],
-                                                                     geometry='map_linestring')
+                                             geometry='map_linestring')
     activity_map_geodataframe.rename(columns={'start_date_local': 'local start date',
                                               'distance': 'distance (km)',
                                               'moving_time_formatted': 'moving time',
                                               'total_elevation_gain': 'total elevation gain (m)'},
-                                              inplace=True)
+                                     inplace=True)
 
     # Export the GeoDataFrame to a file in GeoJSON format
     print('Geo: Exporting geospatial data to {}'.format(file_path))

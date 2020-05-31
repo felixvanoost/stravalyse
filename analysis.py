@@ -23,7 +23,8 @@ import pandas as pd
 import seaborn as sns
 
 
-def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
+def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
+                                 colour_palette: list):
     """
     Generate a bar plot of mean activity distance over time (by type).
 
@@ -52,7 +53,8 @@ def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
     ax.set_axisbelow(True)
 
 
-def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
+def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
+                                  colour_palette: list):
     """
     Generate a bar plot of activity counts over time (by type).
 
@@ -64,7 +66,7 @@ def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes
 
     # Group the activity data by month and calculate the count of each activity type
     data = (activity_data.groupby([activity_data.index.to_period('M'), 'type'])
-                         .size().to_frame('count').reset_index())
+            .size().to_frame('count').reset_index())
 
     # Generate and format the bar plot
     sns.barplot(x='start_date_local',
@@ -82,7 +84,8 @@ def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes
     ax.set_axisbelow(True)
 
 
-def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
+def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
+                                 colour_palette: list):
     """
     Generate a bar plot of number of commutes per month.
 
@@ -109,7 +112,8 @@ def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, 
     ax.set_axisbelow(True)
 
 
-def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
+def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
+                                    colour_palette: list):
     """
     Generate a line plot of total and mean commute distance per year.
 
@@ -145,7 +149,8 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
     ax_mean.set_ylabel('Average commute distance (km)', color=colour_palette[1])
 
 
-def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, colour_palette: list):
+def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
+                                colour_palette: list):
     """
     Generate a line plot of commute days per year.
 
@@ -154,7 +159,7 @@ def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes, c
     ax - A set of matplotlib axes to generate the plot on.
     colour_palette - The colour palette to generate the plot with.
     """
-    
+
     # Group the commute data by day
     data = commute_data.groupby(commute_data.index.to_period('D')).agg({'distance': 'mean'})
 
@@ -176,7 +181,7 @@ def _generate_commute_statistics(x: pd.Series) -> pd.Series:
     Generate basic commute statistics from a given pandas Series.
 
     Arguments:
-    x - The Series to generate basic commute statistics from. 
+    x - The Series to generate basic commute statistics from.
 
     Return:
     A Series containing the following commute statistics:
@@ -192,10 +197,10 @@ def _generate_commute_statistics(x: pd.Series) -> pd.Series:
             'Average commute moving time (mins)': x['moving_time'].mean() / 60}
 
     series = pd.Series(rows, index=['Number of commutes',
-                                        'Total commute distance (km)',
-                                        'Average commute distance (km)',
-                                        'Total commute moving time (hours)',
-                                        'Average commute moving time (mins)'])
+                                    'Total commute distance (km)',
+                                    'Average commute distance (km)',
+                                    'Total commute moving time (hours)',
+                                    'Average commute moving time (mins)'])
 
     return series
 
@@ -205,7 +210,7 @@ def _generate_summary_statistics(x: pd.Series) -> pd.Series:
     Generate basic statistics from a given pandas Series.
 
     Arguments:
-    x - The Series to generate basic commute statistics from. 
+    x - The Series to generate basic commute statistics from.
 
     Return:
     A Series containing the following statistics:
@@ -250,7 +255,7 @@ def display_mean_distance_plot(activity_dataframe: pd.DataFrame, colour_palette:
 
     # Get only the activity distances, types, and start dates
     activity_data = (activity_dataframe[~activity_dataframe['type'].isin(exclude_list)]
-                                       [['distance', 'type', 'start_date_local']])
+                     [['distance', 'type', 'start_date_local']])
     activity_data = activity_data.set_index('start_date_local')
 
     # Convert the activity distances from m to km
@@ -305,7 +310,7 @@ def display_commute_plots(activity_dataframe: pd.DataFrame, colour_palette: list
 
     # Get only commute data
     commute_data = (activity_dataframe[activity_dataframe['commute'] == True]
-                   [['distance', 'start_date_local']])
+                    [['distance', 'start_date_local']])
 
     if commute_data.empty:
         return None

@@ -22,10 +22,10 @@ def _read_tokens_from_file(file_path: str) -> dict:
     """
     Read the authentication tokens and expiry time from a text file and
     return them as a dictionary.
-    
+
     Arguments:
     file_path - The path of the file to read the tokens from.
-    
+
     Return:
     A dictionary containing the authentication tokens and expiry time.
     An empty dictionary if the file cannot be read from successfully.
@@ -48,7 +48,6 @@ def _read_tokens_from_file(file_path: str) -> dict:
                     pass
     except IOError:
         print('Strava: No authentication tokens found')
-        pass
 
     return tokens
 
@@ -137,7 +136,7 @@ def _get_auth_code(client_info: dict) -> str:
     authorization_request = Request('GET', base_address, params=params).prepare()
     webbrowser.open(authorization_request.url)
 
-    
+
     # TODO: Get the authorization code back from the response
     # automatically. Currently, the code must be manually copied from
     # the URL response in the browser window.
@@ -150,7 +149,7 @@ def _exchange_tokens(client_info: dict, auth_code: str) -> dict:
     """
     Exchange the authorization code against the initial authentication
     tokens.
-    
+
     Arguments:
     client_info - A dictionary containing the client ID and secret.
     auth_code - The authorization code as a string.
@@ -165,7 +164,7 @@ def _exchange_tokens(client_info: dict, auth_code: str) -> dict:
             'client_secret': client_info['secret'],
             'code': auth_code,
             'grant_type': 'authorization_code'}
-    
+
     # POST the request and parse the JSON response
     auth_return = requests.post(base_address, data=data).json()
 
