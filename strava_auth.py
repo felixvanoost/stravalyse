@@ -12,6 +12,7 @@ Felix van Oost 2019
 import os
 import time
 import webbrowser
+import sys
 
 # Third-party
 import requests
@@ -218,15 +219,13 @@ def get_access_token(file_path: str) -> str:
     try:
         client_info['id'] = os.environ['STRAVA_CLIENT_ID']
     except KeyError:
-        print('Error: Add STRAVA_CLIENT_ID to the list of environment variables')
-        return None
+        sys.exit('ERROR: Add STRAVA_CLIENT_ID to the list of environment variables')
 
     # Store the STRAVA_CLIENT_SECRET environment variable
     try:
         client_info['secret'] = os.environ['STRAVA_CLIENT_SECRET']
     except KeyError:
-        print('Error: Add STRAVA_CLIENT_SECRET to the list of environment variables')
-        return None
+        sys.exit('ERROR: Add STRAVA_CLIENT_SECRET to the list of environment variables')
 
     # Read the authentication tokens and expiry time from the file
     tokens = _read_tokens_from_file(file_path)
