@@ -87,7 +87,8 @@ def main():
             args.date_range_start = args.date_range_start.replace(tzinfo=datetime.timezone.utc)
 
             # Add the start date to the date mask
-            date_mask = date_mask & (activity_dataframe['start_date_local'] >= args.date_range_start)
+            date_mask = (date_mask &
+                         (activity_dataframe['start_date_local'] >= args.date_range_start))
 
         if args.date_range_end is not None:
             # Add timezone information to the end date
@@ -97,7 +98,8 @@ def main():
                 sys.exit('ERROR: End date must be later than start date')
             else:
                 # Add the end date to the date mask
-                date_mask = date_mask & (activity_dataframe['start_date_local'] <= args.date_range_end)
+                date_mask = (date_mask &
+                             (activity_dataframe['start_date_local'] <= args.date_range_end))
 
         # Apply the date mask to the activity DataFrame
         activity_dataframe = activity_dataframe[date_mask]
