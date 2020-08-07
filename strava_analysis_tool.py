@@ -59,16 +59,16 @@ def main():
                         default=None,
                         required=False,
                         type=datetime.datetime.fromisoformat,
-                        help='Specify the start of a date range')
+                        help='Specify the start of a date range in ISO format')
     parser.add_argument('--date_range_end',
                         action='store',
                         default=None,
                         required=False,
                         type=datetime.datetime.fromisoformat,
-                        help='Specify the end of a date range')
+                        help='Specify the end of a date range in ISO format')
     args = parser.parse_args()
 
-    # Load the tool configuration from config.toml
+    # Load the TOML configuration
     config = toml.load(CONFIG_FILE_PATH)
 
     # Get a list of detailed data for all Strava activities
