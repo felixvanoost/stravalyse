@@ -7,6 +7,8 @@ Felix van Oost 2020
 
 # Standard library
 import argparse
+import datetime
+import sys
 
 # Third-party
 import toml
@@ -28,54 +30,79 @@ def main():
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-a', '--activity_count_plot',
-                        action='store_const',
-                        const=True,
-                        default=False,
+                        action='store_true',
                         required=False,
                         help='Generate and display a plot of activity counts over time')
     parser.add_argument('-c', '--commute_plots',
-                        action='store_const',
-                        const=True,
-                        default=False,
+                        action='store_true',
                         required=False,
                         help='Generate and display plots of the commute data')
     parser.add_argument('-d', '--mean_distance_plot',
-                        action='store_const',
-                        const=True,
-                        default=False,
+                        action='store_true',
                         required=False,
                         help='Generate and display a plot of the mean activity distance over time')
     parser.add_argument('-g', '--export_geo_data',
-                        action='store_const',
-                        const=True,
-                        default=False,
+                        action='store_true',
                         required=False,
                         help='Export the geospatial activity data in GeoJSON format')
     parser.add_argument('-gu', '--export_upload_geo_data',
-                        action='store_const',
-                        const=True,
-                        default=False,
+                        action='store_true',
                         required=False,
                         help=('Export the geospatial activity data in GeoJSON format and upload it'
                               ' to the HERE XYZ mapping platform'))
     parser.add_argument('-r', '--refresh_data',
-                        action='store_const',
-                        const=True,
-                        default=False,
+                        action='store_true',
                         required=False,
                         help='Get and store a fresh copy of the activity data')
+    parser.add_argument('--date_range_start',
+                        action='store',
+                        default=None,
+                        required=False,
+                        type=datetime.datetime.fromisoformat,
+                        help='Specify the start of a date range in ISO format')
+    parser.add_argument('--date_range_end',
+                        action='store',
+                        default=None,
+                        required=False,
+                        type=datetime.datetime.fromisoformat,
+                        help='Specify the end of a date range in ISO format')
     args = parser.parse_args()
 
-    # Load the tool configuration from config.toml
+    # Load the TOML configuration
     config = toml.load(CONFIG_FILE_PATH)
 
-    # Get a list of detailed activity data for all Strava activities
+    # Get a list of detailed data for all Strava activities
     activity_data = strava_data.get_activity_data(config['paths']['tokens_file'],
                                                   config['paths']['activity_data_file'],
                                                   args.refresh_data)
 
     # Create a pandas DataFrame from the activity data
     activity_dataframe = analysis.create_activity_dataframe(activity_data)
+
+    if args.date_range_start is not None or args.date_range_end is not None:
+        date_mask = [True] * len(activity_dataframe)
+
+        if args.date_range_start is not None:
+            # Add timezone information to the start date
+            args.date_range_start = args.date_range_start.replace(tzinfo=datetime.timezone.utc)
+
+            # Add the start date to the date mask
+            date_mask = (date_mask &
+                         (activity_dataframe['start_date_local'] >= args.date_range_start))
+
+        if args.date_range_end is not None:
+            # Add timezone information to the end date
+            args.date_range_end = args.date_range_end.replace(tzinfo=datetime.timezone.utc)
+
+            if args.date_range_start is not None and args.date_range_end < args.date_range_start:
+                sys.exit('ERROR: End date must be later than start date')
+            else:
+                # Add the end date to the date mask
+                date_mask = (date_mask &
+                             (activity_dataframe['start_date_local'] <= args.date_range_end))
+
+        # Apply the date mask to the activity DataFrame
+        activity_dataframe = activity_dataframe[date_mask]
 
     # Display summary and commute statistics
     analysis.display_summary_statistics(activity_dataframe)
