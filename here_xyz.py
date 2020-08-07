@@ -12,6 +12,7 @@ Felix van Oost 2019
 # Standard library
 import shutil
 import subprocess
+import sys
 
 
 def _get_space_id() -> str:
@@ -83,9 +84,9 @@ def upload_geo_data(file_path: str):
             upload_output = subprocess.check_output(command).decode('utf-8')
             print('HERE XYZ: ' + upload_output)
 
-            if not 'features uploaded to XYZ space' in upload_output:
+            if not 'upload completed successfully' in upload_output:
                 print('HERE XYZ: Error uploading geospatial data to space ID "{}"'.format(space_id))
         else:
             print('HERE XYZ: Error clearing space ID "{}"'.format(space_id))
     else:
-        print('Error: Configure HERE CLI using the "here configure" command')
+        sys.exit('ERROR: Configure HERE CLI using the "here configure" command')
