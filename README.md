@@ -74,6 +74,8 @@ The following command line options are available:
 | `-g / --export_geo_data` | Export the geospatial activity data in GeoJSON format |
 | `-gu / --export_upload_geo_data` | Export the geospatial activity data in GeoJSON format and upload it to the HERE XYZ mapping platform |
 | `-r / --refresh_data` | Get and store a fresh copy of the activity data |
+| `--date_range_start` | Specify the start of a date range in ISO format |
+| `--date_range_end` | Specify the end of a date range in ISO format |
 
 These options can also be displayed from within the command line using the help command: 
 
