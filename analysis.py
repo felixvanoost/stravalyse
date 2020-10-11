@@ -9,6 +9,7 @@ display_commute_statistics()
 display_commute_plots()
 display_activity_count_plot()
 display_mean_distance_plot()
+display_moving_time_heatmap()
 
 Felix van Oost 2020
 """
@@ -19,6 +20,7 @@ import datetime
 # Third-party
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
 
@@ -241,6 +243,57 @@ def _generate_summary_statistics(x: pd.Series) -> pd.Series:
     return series
 
 
+def _generate_moving_time_heatmap(*args, **kwargs):
+    """
+    Generate a heatmap of moving time for a single activity type.
+    """
+    data = kwargs.pop('data')
+    sns.heatmap(data.pivot(index=args[1], columns=args[0], values=args[2]), **kwargs)
+
+
+def display_moving_time_heatmap(activity_dataframe: pd.DataFrame, colour_palette: list,
+                                heatmap_column_wrap: int):
+    """
+    Generate and display a heatmap of activity moving time over time (by type).
+
+    Arguments:
+    activity_dataframe - A pandas DataFrame containing the activity data.
+    colour_palette - The colour palette to generate the heatmap with.
+    """
+
+    activity_data = activity_dataframe[['type', 'moving_time', 'start_date_local']].copy()
+
+    # Convert the activity moving times from seconds to hours
+    activity_data.loc[:, 'moving_time'] = activity_data.loc[:, 'moving_time'] / 3600
+
+    # Get the range of activity start years and unique activity types in the data set
+    year_min = activity_data['start_date_local'].dt.year.min()
+    year_max = activity_data['start_date_local'].dt.year.max()
+    types = activity_data['type'].unique()
+
+    # Extract the activity start year and month from the start dates
+    activity_data.loc[:, 'year'] = activity_data['start_date_local'].dt.year
+    activity_data.loc[:, 'month'] = activity_data['start_date_local'].dt.month
+
+    # Group the activity data by activity type, year, and month
+    activity_data = activity_data.groupby(['type', 'year', 'month']).sum().reset_index()
+    activity_data = activity_data.set_index(['type', 'year', 'month'])
+
+    # Fill in missing values in the activity data
+    years = np.arange(year_min, year_max + 1, dtype=np.int)
+    months = np.arange(1, 12 + 1, dtype=np.int)
+    activity_data = activity_data.reindex(index=pd.MultiIndex.from_product([types, years, months],
+                                          names=activity_data.index.names),
+                                          fill_value=0)
+    activity_data = activity_data.reset_index()
+
+    # Create and plot a FacetGrid of heatmaps grouped by activity type
+    fg = sns.FacetGrid(activity_data, col='type', col_wrap=heatmap_column_wrap)
+    fg = fg.map_dataframe(_generate_moving_time_heatmap, 'year', 'month', 'moving_time',
+                          annot=True, cbar=True, cmap=colour_palette)
+    plt.show()
+
+
 def display_mean_distance_plot(activity_dataframe: pd.DataFrame, colour_palette: list):
     """
     Generate and display a bar plot of mean activity distance over time (by type).
@@ -316,6 +369,7 @@ def display_commute_plots(activity_dataframe: pd.DataFrame, colour_palette: list
         return None
 
     commute_data = commute_data.set_index('start_date_local')
+
     # Convert the activity distances from m to km
     commute_data.loc[:, 'distance'] = commute_data.loc[:, 'distance'] / 1000
 

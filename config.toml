@@ -8,3 +8,5 @@ geo_data_file = 'Data/StravaGeoData.geojson'
 [analysis]
 plot_colour_palette = ["#2C3E50", "#E74C3C", "#ECF0F1", "#3498DB", "#2980B9",
                        "#195962", "#F56F6C", "#FFFFFF", "#252932", "#191C21"]
+heatmap_colour_palette = "viridis"
+heatmap_column_wrap = 5

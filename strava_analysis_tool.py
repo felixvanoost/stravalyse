@@ -50,6 +50,10 @@ def main():
                         required=False,
                         help=('Export the geospatial activity data in GeoJSON format and upload it'
                               ' to the HERE XYZ mapping platform'))
+    parser.add_argument('-m', '--moving_time_heatmap',
+                        action='store_true',
+                        required=False,
+                        help='Generate and display a heatmap of moving time for each activity type')
     parser.add_argument('-r', '--refresh_data',
                         action='store_true',
                         required=False,
@@ -131,6 +135,12 @@ def main():
         # Generate and display a plot of the mean activity distance over time
         analysis.display_mean_distance_plot(activity_dataframe,
                                             config['analysis']['plot_colour_palette'])
+
+    if args.moving_time_heatmap:
+        # Generate and display a heatmap of moving time for each activity type
+        analysis.display_moving_time_heatmap(activity_dataframe,
+                                             config['analysis']['heatmap_colour_palette'],
+                                             config['analysis']['heatmap_column_wrap'])
 
 
 if __name__ == "__main__":
