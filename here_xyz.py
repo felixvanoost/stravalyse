@@ -1,12 +1,12 @@
 """here_xyz.py
 
-Uploads and manages the geospatial data from Strava activities with the
-HERE XYZ mapping platform.
+Uploads and manages the geospatial data from Strava activities with the HERE XYZ
+mapping platform.
 
 Functions:
 upload_geo_data()
 
-Felix van Oost 2019
+Felix van Oost 2021
 """
 
 # Standard library
@@ -60,7 +60,7 @@ def upload_geo_data(file_path: str):
 
     Arguments:
     file_path - The path of the file containing the geospatial activity
-                data.
+                data in GeoJSON format.
     """
 
     try:
@@ -78,4 +78,4 @@ def upload_geo_data(file_path: str):
     # Upload the geospatial data to the space
     space.add_features_geojson(file_path, encoding='utf-8', features_size=500, chunk_size=5)
 
-    print("[HERE XYZ]: Successfully uploaded geospatial data to space ID '{}'".format(space.info['id']))
+    print("[HERE XYZ]: Data successfully uploaded to space ID '{}'".format(space.info['id']))
