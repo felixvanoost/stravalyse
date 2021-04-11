@@ -9,7 +9,7 @@ A full list of features and known issues is covered in the notes for each releas
 ## Installation
 
 ### 1. Python + Dependencies
-The tool is developed with Python 3.8. Its dependencies are tracked in `requirements.txt` (for Pip) and `environment.yml` (for the [Anaconda](https://www.anaconda.com/distribution/) distribution).
+The tool is developed with Python 3.9. Its dependencies are tracked in `requirements.txt` (for Pip) and `environment.yml` (for the [Anaconda](https://www.anaconda.com/distribution/) distribution).
 
 Anaconda is recommended for Windows users as it comes pre-installed with many of the required packages. It is also the preferred method for installing `GeoPandas`, which is leveraged for the processing and exporting of geospatial activity data. See the GeoPandas [Installation](http://geopandas.org/install.html) page for more information.
 
@@ -25,7 +25,7 @@ python [path-to-environment]/bin/activate
 Then install the required dependencies using:
 
 ```
-pip install -r requirements.txt 
+pip install -r requirements.txt
 ```
 
 #### Option 2: Environment setup using Anaconda
@@ -51,12 +51,14 @@ After authorizing access, the browser will redirect to an invalid page (`http://
 
 When prompted, copy the `code` portion of the URL (`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`) and paste it into the console. The tool will get and refresh its own OAuth2 tokens, so this only needs to be done once.
 
-### 3. HERE CLI (Optional)
-You will need to register for a free HERE account and install the [HERE CLI](https://github.com/heremaps/here-cli) if you want the tool to leverage the capabilities of the [HERE XYZ](https://xyz.here.com/) mapping platform. HERE XYZ provides a very slick way to visualise your Strava data with a variety of map styles and customized formatting rules. Here's a basic example:
+### 3. HERE account
+You will need to register for a free HERE developer account if you want the tool to leverage the capabilities of the [HERE Studio](https://studio.here.com/) mapping platform. HERE Studio provides a very slick way to visualise your Strava data with a variety of map styles and customized formatting rules. Here's a basic example:
 
-[![Demo Activity Map](Media/Demo%20Activity%20Map.JPG)](https://xyz.here.com/viewer/?project_id=d99c795f-b247-47f9-a67e-972255a02017)
+[![Demo Activity Map](Media/Demo%20Activity%20Map.JPG)](https://studio.here.com/viewer/?project_id=d99c795f-b247-47f9-a67e-972255a02017)
 
-Once configured, the tool can automatically upload your Strava data to HERE XYZ to generate an up-to-date map of your activities. You can set rules to colour-code activities (by type or moving time, for instance) within HERE Studio, and clicking on an activity will bring up some useful basic information (try it!).
+Once configured, the tool can automatically upload your Strava data to HERE to generate an up-to-date map of your activities. You can set rules to colour-code activities (by type or moving time, for instance) within the HERE Studio web app, and clicking on an activity will bring up some useful basic information (try it!).
+
+After creating a developer account, generate a new access token with all permissions for all spaces using [this](https://xyz.api.here.com/token-ui/accessmgmt.html) link and copy the token into an environment variable named `XYZ_TOKEN`.
 
 ## Usage
 
@@ -78,7 +80,7 @@ The following command line options are available:
 | `--date_range_start` | Specify the start of a date range in ISO format |
 | `--date_range_end` | Specify the end of a date range in ISO format |
 
-These options can also be displayed from within the command line using the help command: 
+These options can also be displayed from within the command line using the help command:
 
 `python strava_analysis_tool.py -h` or `python strava_analysis_tool.py --help`
 
