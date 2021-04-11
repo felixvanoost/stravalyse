@@ -406,7 +406,7 @@ def display_commute_statistics(activity_dataframe: pd.DataFrame):
         print(commute_statistics.T)
         print()
     else:
-        print('Analysis: No commutes found')
+        print('[Analysis]: No commutes found')
 
 
 def display_summary_statistics(activity_dataframe: pd.DataFrame):
@@ -426,7 +426,7 @@ def display_summary_statistics(activity_dataframe: pd.DataFrame):
         print(summary_statistics.T)
         print()
     else:
-        print('Analysis: No activities found')
+        print('[Analysis]: No activities found')
 
 
 def create_activity_dataframe(activity_data: list) -> pd.DataFrame:

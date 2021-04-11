@@ -32,7 +32,7 @@ def _read_tokens_from_file(file_path: str) -> dict:
     An empty dictionary if the file cannot be read from successfully.
     """
 
-    print('Strava: Reading authentication tokens from {}'.format(file_path))
+    print("[Strava]: Reading authentication tokens from '{}'".format(file_path))
 
     tokens = {}
 
@@ -63,7 +63,7 @@ def _write_tokens_to_file(file_path: str, tokens: dict):
              expiry time to write to the file.
     """
 
-    print('[Strava]: Writing authentication tokens to {}'.format(file_path))
+    print("[Strava]: Writing authentication tokens to '{}'".format(file_path))
 
     # Delete the tokens file to remove any expired tokens
     try:
@@ -190,7 +190,7 @@ def _get_initial_tokens(client_info: dict) -> dict:
     time.
     """
 
-    print('Strava: Getting initial authentication tokens')
+    print('[Strava]: Getting initial authentication tokens')
 
     # Get the authorization code and exchange it against the initial
     # access and refresh tokens
