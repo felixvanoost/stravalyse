@@ -32,7 +32,7 @@ def _read_tokens_from_file(file_path: str) -> dict:
     An empty dictionary if the file cannot be read from successfully.
     """
 
-    print('Strava: Reading authentication tokens from {}'.format(file_path))
+    print("[Strava]: Reading authentication tokens from '{}'".format(file_path))
 
     tokens = {}
 
@@ -48,7 +48,7 @@ def _read_tokens_from_file(file_path: str) -> dict:
                 else:
                     pass
     except IOError:
-        print('Strava: No authentication tokens found')
+        print('[Strava]: No authentication tokens found')
 
     return tokens
 
@@ -63,7 +63,7 @@ def _write_tokens_to_file(file_path: str, tokens: dict):
              expiry time to write to the file.
     """
 
-    print('Strava: Writing authentication tokens to {}'.format(file_path))
+    print("[Strava]: Writing authentication tokens to '{}'".format(file_path))
 
     # Delete the tokens file to remove any expired tokens
     try:
@@ -93,7 +93,7 @@ def _refresh_expired_tokens(client_info: dict, expired_tokens: dict) -> dict:
     time.
     """
 
-    print('Strava: Refreshing expired authentication tokens')
+    print('[Strava]: Refreshing expired authentication tokens')
 
     base_address = 'https://www.strava.com/oauth/token'
     data = {'client_id': client_info['id'],
@@ -190,7 +190,7 @@ def _get_initial_tokens(client_info: dict) -> dict:
     time.
     """
 
-    print('Strava: Getting initial authentication tokens')
+    print('[Strava]: Getting initial authentication tokens')
 
     # Get the authorization code and exchange it against the initial
     # access and refresh tokens
@@ -219,13 +219,13 @@ def get_access_token(file_path: str) -> str:
     try:
         client_info['id'] = os.environ['STRAVA_CLIENT_ID']
     except KeyError:
-        sys.exit('ERROR: Add STRAVA_CLIENT_ID to the list of environment variables')
+        sys.exit('[ERROR]: Add STRAVA_CLIENT_ID to the list of environment variables')
 
     # Store the STRAVA_CLIENT_SECRET environment variable
     try:
         client_info['secret'] = os.environ['STRAVA_CLIENT_SECRET']
     except KeyError:
-        sys.exit('ERROR: Add STRAVA_CLIENT_SECRET to the list of environment variables')
+        sys.exit('[ERROR]: Add STRAVA_CLIENT_SECRET to the list of environment variables')
 
     # Read the authentication tokens and expiry time from the file
     tokens = _read_tokens_from_file(file_path)
@@ -241,7 +241,7 @@ def get_access_token(file_path: str) -> str:
         tokens = _get_initial_tokens(client_info)
         _write_tokens_to_file(file_path, tokens)
 
-    print('Strava: Access to the API authenticated')
+    print('[Strava]: Access to the API authenticated')
     access_token = str(tokens['access_token'])
 
     return access_token

@@ -99,7 +99,7 @@ def main():
             args.date_range_end = args.date_range_end.replace(tzinfo=datetime.timezone.utc)
 
             if args.date_range_start is not None and args.date_range_end < args.date_range_start:
-                sys.exit('ERROR: End date must be later than start date')
+                sys.exit('[ERROR]: End date must be later than start date')
             else:
                 # Add the end date to the date mask
                 date_mask = (date_mask &

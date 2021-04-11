@@ -61,7 +61,7 @@ def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
     activity_dataframe - A pandas DataFrame containing the activity data.
     """
 
-    print('Geo: Processing geospatial data')
+    print('[Geo]: Processing geospatial data')
 
     # Create a copy of the activity DataFrame containing only real
     # outdoor (non-trainer and non-virtual) activities
@@ -107,5 +107,5 @@ def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
                                      inplace=True)
 
     # Export the GeoDataFrame to a file in GeoJSON format
-    print('Geo: Exporting geospatial data to {}'.format(file_path))
+    print('[Geo]: Exporting geospatial data to {}'.format(file_path))
     activity_map_geodataframe.to_file(file_path, driver='GeoJSON', encoding='utf8')

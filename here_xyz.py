@@ -1,92 +1,81 @@
 """here_xyz.py
 
-Uploads and manages the geospatial data from Strava activities with the
-HERE XYZ mapping platform.
+Uploads and manages the geospatial data from Strava activities with the HERE XYZ
+mapping platform.
 
 Functions:
 upload_geo_data()
 
-Felix van Oost 2019
+Felix van Oost 2021
 """
 
 # Standard library
-import shutil
-import subprocess
+import os
 import sys
 
+# Third-party
+import xyzspaces
 
-def _get_space_id() -> str:
+
+def _get_space(xyz) -> object:
     """
-    Get and return the ID of the space containing the Strava activity
-    data or create a new space if one does not currently exist.
+    Get and return an instance of the space containing the Strava activity data
+    or create a new space if one does not currently exist.
 
     Return:
-    The ID of the space containing the Strava activity data.
+    An instance of the space containing the Strava activity data.
     """
 
-    space_id = None
-
-    print('HERE XYZ: Locating the Strava activity data space')
+    print('[HERE XYZ]: Locating the Strava activity data space')
 
     # Get a list of existing spaces
-    command = [shutil.which('here'), 'xyz', 'list']
-    for line in subprocess.check_output(command).decode('utf-8').split('\n'):
-        # Check whether a 'Strava Activity Data' space already exists
-        if 'Strava Activity Data' in line:
-            space_id = line.split()[1]
-            print('HERE XYZ: Found space with ID "{}"'.format(space_id))
+    spaces_list = xyz.spaces.list(owner='me')
+
+    # Search for an existing space with the name 'Strava Activity Data'
+    for space in spaces_list:
+        if space['title'] == 'Strava Activity Data':
+            space_id = space['id']
+
+            print("[HERE XYZ]: Found space with ID '{}'".format(space_id))
+
+            space_obj = xyz.spaces.from_id(space_id)
             break
 
-    if not space_id:
-        print('HERE XYZ: No existing space found')
+    if not space_obj:
+        print('[HERE XYZ]: No existing space found')
 
         # Create a new space
-        command = [shutil.which('here'), 'xyz', 'create', '-t', '"Strava Activity Data"', '-d',
-                   '"Created by Strava Analysis Tool"']
-        space_id = subprocess.check_output(command).decode('utf-8').split()[2]
-        print('HERE XYZ: Created new space with ID "{}"'.format(space_id))
+        space_obj = xyz.spaces.new(title='Strava Activity Data',
+                                   description='Created by Strava Analysis Tool')
 
-    return space_id
+        print("[HERE XYZ]: Created new space with ID '{}'".format(space_obj.info['id']))
+
+    return space_obj
 
 
 def upload_geo_data(file_path: str):
     """
-    Upload the geospatial data from Strava activities to the HERE XYZ
-    mapping platform.
+    Upload the geospatial data from Strava activities to the HERE XYZ mapping
+    platform.
 
     Arguments:
     file_path - The path of the file containing the geospatial activity
-                data.
+                data in GeoJSON format.
     """
 
-    # Check whether the HERE CLI has been properly configured.
-    # The CLI will return an empty line if the HERE account information
-    # has been validated.
-    command = [shutil.which('here'), 'configure', 'verify']
-    configure_verify_output = subprocess.check_output(command).decode('utf-8')
+    try:
+        xyz_token = os.environ['XYZ_TOKEN']
+    except KeyError:
+        sys.exit('[ERROR]: Add XYZ_TOKEN to your environment variables')
 
-    if not configure_verify_output:
-        # Get the ID of the space containing the geospatial activity data
-        space_id = _get_space_id()
+    xyz = xyzspaces.XYZ(credentials=xyz_token)
 
-        # Clear the space to prevent conflicts in overwriting existing data
-        print('HERE XYZ: Clearing space ID "{}"'.format(space_id))
-        process = subprocess.Popen([shutil.which('here'), 'xyz', 'clear', space_id],
-                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, encoding='utf-8')
-        clear_space_output, _ = process.communicate(input='Y')
+    # Get the space containing the geospatial activity data
+    space = _get_space(xyz)
 
-        if 'data cleared successfully' in clear_space_output:
-            # Upload the geospatial data to the space
-            print('HERE XYZ: Uploading geospatial data to space ID "{}"'.format(space_id))
-            command = ([shutil.which('here'), 'xyz', 'upload', space_id, '--file', file_path,
-                        '--stream', '--id', '"id"', '--date', '"local start date"', '--datetag',
-                        'year,month,weekday'])
-            upload_output = subprocess.check_output(command).decode('utf-8')
-            print('HERE XYZ: ' + upload_output)
+    print("[HERE XYZ]: Uploading geospatial data to space ID '{}'".format(space.info['id']))
 
-            if not 'upload completed successfully' in upload_output:
-                print('HERE XYZ: Error uploading geospatial data to space ID "{}"'.format(space_id))
-        else:
-            print('HERE XYZ: Error clearing space ID "{}"'.format(space_id))
-    else:
-        sys.exit('ERROR: Configure HERE CLI using the "here configure" command')
+    # Upload the geospatial data to the space
+    space.add_features_geojson(file_path, encoding='utf-8', features_size=500, chunk_size=5)
+
+    print("[HERE XYZ]: Data successfully uploaded to space ID '{}'".format(space.info['id']))

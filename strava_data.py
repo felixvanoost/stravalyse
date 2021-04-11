@@ -73,14 +73,14 @@ def _read_activity_data_from_file(file_path: str) -> list:
     An empty list if the file cannot be read from successfully.
     """
 
-    print('Strava: Reading activities from {}'.format(file_path))
+    print("[Strava]: Reading activities from '{}'".format(file_path))
 
     activities = []
     activities_read = 0
     try:
         with open(file_path, 'r', encoding='utf8') as file:
             for line in file.readlines():
-                print('Strava: Reading activity {}'.format(activities_read), end='\r')
+                print('[Strava]: Reading activity {}'.format(activities_read), end='\r')
 
                 # Decode each line and append it to the list
                 activities.append(json.loads(line, object_pairs_hook=_iso_to_datetime))
@@ -90,7 +90,7 @@ def _read_activity_data_from_file(file_path: str) -> list:
         # from being overwritten
         print(end='\n')
     except FileNotFoundError:
-        print('Strava: No activity data found in {}'.format(file_path))
+        print("[Strava]: No activity data found in '{}'".format(file_path))
 
     return activities
 
@@ -104,7 +104,7 @@ def _write_activity_data_to_file(file_path: str, activities: list):
     activities - A list of activity data to write to the file.
     """
 
-    print('Strava: Writing activity data to {}'.format(file_path))
+    print("[Strava]: Writing activity data to '{}'".format(file_path))
 
     # Create the Data folder if it does not already exist
     if not os.path.exists('Data'):
@@ -151,7 +151,7 @@ def _update_activity_data(access_token: str, file_path: str, activities: list):
     activities - The list of detailed activity data to be updated.
     """
 
-    print('Strava: Checking for new activities')
+    print('[Strava]: Checking for new activities')
 
     # Create an instance of the Activities API class
     api_instance = swagger_client.ActivitiesApi()
@@ -171,7 +171,7 @@ def _update_activity_data(access_token: str, file_path: str, activities: list):
             activities_in_page = []
 
             for activity in page:
-                print('Strava: Getting detailed activity data for {}'.format(activity.name))
+                print("[Strava]: Getting detailed activity data for '{}'".format(activity.name))
 
                 # Get detailed activity data for each activity in the
                 # page
@@ -192,7 +192,7 @@ def _update_activity_data(access_token: str, file_path: str, activities: list):
 
             page_count += 1
         else:
-            print('Strava: No new activities found')
+            print('[Strava]: No new activities found')
             break
 
 
@@ -217,7 +217,7 @@ def get_activity_data(tokens_file_path: str, data_file_path: str, refresh: bool)
     activities = []
 
     if refresh:
-        print('Strava: Refreshing activity data')
+        print('[Strava]: Refreshing activity data')
 
         # Force the activity data to be refreshed by deleting the file
         try:
@@ -240,18 +240,18 @@ def get_activity_data(tokens_file_path: str, data_file_path: str, refresh: bool)
                     daily_usage = int(error.headers['X-RateLimit-Usage'].split(',')[1])
 
                     if daily_usage >= daily_limit:
-                        print('Strava: API daily rate limit exceeded. Exiting.')
+                        print('[Strava]: API daily rate limit exceeded. Exiting.')
                         break
 
-                    print('Strava: API 15 minute rate limit exceeded. Retrying in 15 minutes.')
+                    print('[Strava]: API 15 minute rate limit exceeded. Retrying in 15 minutes.')
                     time.sleep(900)
                     continue
                 else:
-                    print(f'Strava error: {error.status}. Message: {error.reason}.')
+                    print(f'[Error]: {error.status}. Message: {error.reason}.')
                     break
             break
     else:
-        print('Strava: Access to the API could not be authenticated.',
+        print('[Strava]: Access to the API could not be authenticated.',
               'Only existing locally-stored activities will be processed.')
 
     return activities
