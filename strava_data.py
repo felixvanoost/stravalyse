@@ -80,7 +80,7 @@ def _read_activity_data_from_file(file_path: str) -> list:
     try:
         with open(file_path, 'r', encoding='utf8') as file:
             for line in file.readlines():
-                print("[Strava]: Reading activity '{}'".format(activities_read), end='\r')
+                print('[Strava]: Reading activity {}'.format(activities_read), end='\r')
 
                 # Decode each line and append it to the list
                 activities.append(json.loads(line, object_pairs_hook=_iso_to_datetime))
