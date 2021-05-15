@@ -45,11 +45,10 @@ def main():
                         action='store_true',
                         required=False,
                         help='Export the geospatial activity data in GeoJSON format')
-    parser.add_argument('-gu', '--export_upload_geo_data',
+    parser.add_argument('-u', '--upload_geo_data',
                         action='store_true',
                         required=False,
-                        help=('Export the geospatial activity data in GeoJSON format and upload it'
-                              ' to the HERE XYZ mapping platform'))
+                        help=('Upload the geospatial activity data to HERE XYZ'))
     parser.add_argument('-m', '--moving_time_heatmap',
                         action='store_true',
                         required=False,
@@ -112,14 +111,18 @@ def main():
     analysis.display_summary_statistics(activity_dataframe)
     analysis.display_commute_statistics(activity_dataframe)
 
-    if args.export_geo_data or args.export_upload_geo_data:
-        # Export the geospatial data from all activities in GeoJSON
-        # format
-        geo.export_geo_data_file(config['paths']['geo_data_file'], activity_dataframe)
+    if args.export_geo_data or args.upload_geo_data:
 
-        if args.export_upload_geo_data:
+        # Create a GeoDataFrame containing the geospatial data from all activities
+        activity_geodataframe = geo.create_geodataframe(activity_dataframe)
+
+        if args.export_geo_data:
+            # Export the geospatial data in GeoJSON format
+            geo.export_geo_data_file(config['paths']['geo_data_file'], activity_geodataframe)
+
+        if args.upload_geo_data:
             # Upload the geospatial data to HERE XYZ
-            here_xyz.upload_geo_data(config['paths']['geo_data_file'])
+            here_xyz.upload_geo_data(activity_geodataframe)
 
     if args.activity_count_plot:
         # Generate and display a plot of activity counts over time

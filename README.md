@@ -74,7 +74,7 @@ The following command line options are available:
 | `-c / --commute_plots` | Generate and display plots of the commute data |
 | `-d / --mean_distance_plot` | Generate and display a plot of the mean activity distance over time |
 | `-g / --export_geo_data` | Export the geospatial activity data in GeoJSON format |
-| `-gu / --export_upload_geo_data` | Export the geospatial activity data in GeoJSON format and upload it to the HERE XYZ mapping platform |
+| `-u / --upload_geo_data` | Upload the geospatial activity data to HERE XYZ |
 | `-m / --moving_time_heatmap` | Generate and display a heatmap of moving time for each activity type |
 | `-r / --refresh_data` | Get and store a fresh copy of the activity data |
 | `--date_range_start` | Specify the start of a date range in ISO format |

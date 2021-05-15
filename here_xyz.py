@@ -14,6 +14,7 @@ import os
 import sys
 
 # Third-party
+from geopandas import GeoDataFrame
 import xyzspaces
 
 
@@ -53,14 +54,13 @@ def _get_space(xyz) -> object:
     return space_obj
 
 
-def upload_geo_data(file_path: str):
+def upload_geo_data(activity_geodataframe: GeoDataFrame):
     """
     Upload the geospatial data from Strava activities to the HERE XYZ mapping
     platform.
 
     Arguments:
-    file_path - The path of the file containing the geospatial activity
-                data in GeoJSON format.
+    activity_geodataframe - pandas GeoDataFrame containing the geospatial activity data.
     """
 
     try:
@@ -76,6 +76,6 @@ def upload_geo_data(file_path: str):
     print("[HERE XYZ]: Uploading geospatial data to space ID '{}'".format(space.info['id']))
 
     # Upload the geospatial data to the space
-    space.add_features_geojson(file_path, encoding='utf-8', features_size=500, chunk_size=5)
+    space.add_features_geopandas(activity_geodataframe, features_size=500, chunk_size=5)
 
     print("[HERE XYZ]: Data successfully uploaded to space ID '{}'".format(space.info['id']))
