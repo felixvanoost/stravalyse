@@ -47,13 +47,17 @@ def _create_shapely_point(coordinates: pandas.Series) -> Point:
 
     return [Point(y, x) for x, y in coordinates]
 
-def create_geodataframe(activity_dataframe: pandas.DataFrame):
+def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
     """
-    Create a pandas GeoDataFrame containing the name, ID, type, distance, total
+    Export a GeoJSON-encoded file of geospatial data from all activities.
+
+    The exported file contains the name, ID, type, distance, total
     elevation gain, and a LineString representing the trace of each
     activity.
 
     Arguments:
+    file_path - The path of the file to export the geospatial activity
+                data to.
     activity_dataframe - A pandas DataFrame containing the activity data.
     """
 
@@ -102,19 +106,6 @@ def create_geodataframe(activity_dataframe: pandas.DataFrame):
                                               'total_elevation_gain': 'total elevation gain (m)'},
                                      inplace=True)
 
-    return activity_map_geodataframe
-
-
-def export_geo_data_file(file_path: str, activity_geodataframe: GeoDataFrame):
-    """
-    Export a GeoJSON-encoded file of geospatial data from all activities.
-
-    Arguments:
-    file_path - The path of the file to export the geospatial activity
-                data to.
-    activity_geodataframe - A pandas DataFrame containing the activity data.
-    """
-
     # Export the GeoDataFrame to a file in GeoJSON format
-    print("[Geo]: Exporting geospatial data to '{}'".format(file_path))
-    activity_geodataframe.to_file(file_path, driver='GeoJSON', encoding='utf8')
+    print('[Geo]: Exporting geospatial data to {}'.format(file_path))
+    activity_map_geodataframe.to_file(file_path, driver='GeoJSON', encoding='utf8')
