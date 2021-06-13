@@ -8,6 +8,7 @@ Felix van Oost 2020
 # Standard library
 import argparse
 import datetime
+import pathlib
 import sys
 
 # Third-party
@@ -77,8 +78,8 @@ def main():
     config = toml.load(CONFIG_FILE_PATH)
 
     # Get a list of detailed data for all Strava activities
-    activity_data = strava_data.get_activity_data(config['paths']['tokens_file'],
-                                                  config['paths']['activity_data_file'],
+    activity_data = strava_data.get_activity_data(pathlib.Path(config['paths']['tokens_file']),
+                                                  pathlib.Path(config['paths']['activity_data_file']),
                                                   args.refresh_data)
 
     # Create a pandas DataFrame from the activity data
