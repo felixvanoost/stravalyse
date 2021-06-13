@@ -40,9 +40,7 @@ def _read_activity_data_from_file(file_path: pathlib.Path) -> pandas.DataFrame:
     An empty DataFrame if the file cannot be read from successfully.
     """
 
-    print("[Strava]: Reading activities from '{}'".format(file_path))
-
-    activities = pandas.DataFrame
+    activities = pandas.DataFrame()
 
     try:
         activities = pandas.read_json(file_path, lines=True, orient='records')
@@ -70,7 +68,7 @@ def _write_activity_data_to_file(file_path: pathlib.Path, activities: pandas.Dat
     file_dir.mkdir(parents=True, exist_ok=True)
 
     # Write the activities to the file
-    activities.to_json(file_path, lines=True, orient='records')
+    activities.to_json(file_path, lines=True, orient='records', date_format='iso')
 
 
 def _get_last_activity_start_time(activities: pandas.DataFrame) -> int:
@@ -87,12 +85,12 @@ def _get_last_activity_start_time(activities: pandas.DataFrame) -> int:
 
     last_activity_time_epoch = 0
 
-    if activities.empty == False:
+    if not activities.empty:
         # Get the start time of the last activity in the DataFrame
-        last_activity_time_iso = activities.iloc[-1]['start_date']
+        last_activity_time_iso = parser.isoparse(activities.iloc[-1]['start_date'])
 
         # Convert the ISO 8601-formatted start time into an epoch
-        last_activity_time_epoch = int(datetime.fromisoformat(last_activity_time_iso).timestamp())
+        last_activity_time_epoch = int(last_activity_time_iso.timestamp())
 
     return last_activity_time_epoch
 
@@ -116,41 +114,41 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path, activities
     # Get the start time of the last stored activity
     start_time = _get_last_activity_start_time(activities)
 
-    activities_updated = pandas.DataFrame(activities)
-
-    # Get and store any new activities in pages of 25
+    # Get and store any new activities in pages of 50
+    new_activities = []
     page_count = 1
-    while True:
-        page = api_instance.get_logged_in_athlete_activities(after=start_time,
+    try:
+        while True:
+            page = api_instance.get_logged_in_athlete_activities(after=start_time,
+                                                                    page=page_count,
+                                                                    per_page=50)
+
+            if page:
+                for activity in page:
+                    print("[Strava]: Getting detailed activity data for '{}'".format(activity.name))
+
+                    # Get detailed activity data for each activity in the page
+                    detailed_data = api_instance.get_activity_by_id(activity.id)
+
+                    # Convert the detailed activity data into a dictionary and append it to the list of
+                    # activity data from the current page
+                    new_activities.append(detailed_data.to_dict())
+
+                page_count += 1
+            else:
+                print('[Strava]: No new activities found')
+                break
+
+            page = api_instance.get_logged_in_athlete_activities(after=start_time,
                                                              page=page_count,
                                                              per_page=25)
 
-        if page:
-            activities_in_page = []
+    finally:
+        # Append the new activities to the existing DataFrame
+        activities_updated = activities.append(pandas.DataFrame(new_activities), ignore_index=True)
 
-            for activity in page:
-                print("[Strava]: Getting detailed activity data for '{}'".format(activity.name))
-
-                # Get detailed activity data for each activity in the page
-                detailed_data = api_instance.get_activity_by_id(activity.id)
-
-                # Convert the detailed activity data into a dictionary and append it to the list of
-                # activity data from the current page
-                activities_in_page.append(detailed_data.to_dict())
-
-            # Convert the page of activities into a pandas DataFrame
-            activities_page = pandas.DataFrame(activities_in_page)
-
-            # Append the current page of activity data to the existing DataFrame
-            activities_updated = activities_updated.append(activities_page, ignore_index=True)
-
-            # Write the updated activity data to the Strava activities file
-            _write_activity_data_to_file(file_path, activities_updated)
-
-            page_count += 1
-        else:
-            print('[Strava]: No new activities found')
-            break
+        # Write the updated activity data to the Strava activities file
+        _write_activity_data_to_file(file_path, activities_updated)
 
     return activities_updated
 
@@ -172,7 +170,7 @@ def get_activity_data(tokens_file_path: pathlib.Path, data_file_path: pathlib.Pa
     # Get an OAuth2 access token for the Strava v3 API
     access_token = strava_auth.get_access_token(tokens_file_path)
 
-    activities = pandas.DataFrame
+    activities = pandas.DataFrame()
 
     if refresh:
         print('[Strava]: Refreshing activity data')
