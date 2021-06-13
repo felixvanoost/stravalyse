@@ -9,8 +9,6 @@ Felix van Oost 2021
 """
 
 # Standard library
-from datetime import datetime
-import json
 import os
 import pathlib
 import sys
@@ -21,9 +19,9 @@ from dateutil import parser
 import pandas
 
 # Local
-import strava_auth
 sys.path.append(os.path.abspath('API'))
 import swagger_client
+import strava_auth
 
 API_RATE_LIMIT_ERROR = 429
 
@@ -95,7 +93,8 @@ def _get_last_activity_start_time(activities: pandas.DataFrame) -> int:
     return last_activity_time_epoch
 
 
-def _update_activity_data(access_token: str, file_path: pathlib.Path, activities: pandas.DataFrame) -> pandas.DataFrame:
+def _update_activity_data(access_token: str, file_path: pathlib.Path,
+                          activities: pandas.DataFrame) -> pandas.DataFrame:
     """
     Update the data file and activity DataFrame with any new activities uploaded to Strava since
     the last stored activity.
@@ -130,8 +129,8 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path, activities
                     # Get detailed activity data for each activity in the page
                     detailed_data = api_instance.get_activity_by_id(activity.id)
 
-                    # Convert the detailed activity data into a dictionary and append it to the list of
-                    # activity data from the current page
+                    # Convert the detailed activity data into a dictionary and append it to the list
+                    # of activity data from the current page
                     new_activities.append(detailed_data.to_dict())
 
                 page_count += 1
@@ -153,7 +152,8 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path, activities
     return activities_updated
 
 
-def get_activity_data(tokens_file_path: pathlib.Path, data_file_path: pathlib.Path, refresh: bool) -> pandas.DataFrame:
+def get_activity_data(tokens_file_path: pathlib.Path, data_file_path: pathlib.Path,
+                      refresh: bool) -> pandas.DataFrame:
     """
     Get and store a pandas DataFrame of detailed data for all Strava activities.
 
@@ -201,7 +201,6 @@ def get_activity_data(tokens_file_path: pathlib.Path, data_file_path: pathlib.Pa
 
                     print('[Strava]: API 15 minute rate limit exceeded. Retrying in 15 minutes.')
                     time.sleep(900)
-                    continue
                 else:
                     print(f'[Error]: {error.status}. Message: {error.reason}.')
                     break
