@@ -17,6 +17,7 @@ import time
 
 # Third-party
 from dateutil import parser
+import pandas
 
 # Local
 import strava_auth
@@ -60,35 +61,27 @@ class _DatetimeToIso(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
 
 
-def _read_activity_data_from_file(file_path: str) -> list:
+def _read_activity_data_from_file(file_path: str) -> pandas.DataFrame:
     """
-    Read the JSON-encoded activity data from a file and return it as a
-    list.
+    Read the activity data from a file and return it as a pandas
+    DataFrame.
 
     Arguments:
     file_path - The path of the file to read the activity data from.
 
     Return:
-    A list containing the activity data.
-    An empty list if the file cannot be read from successfully.
+    A pandas DataFrame containing the activity data.
+    An empty DataFrame if the file cannot be read from successfully.
     """
 
     print("[Strava]: Reading activities from '{}'".format(file_path))
 
-    activities = []
-    activities_read = 0
+    activities = pandas.DataFrame
+
     try:
-        with open(file_path, 'r', encoding='utf8') as file:
-            for line in file.readlines():
-                print('[Strava]: Reading activity {}'.format(activities_read), end='\r')
+        activities = pandas.read_csv(file_path)
 
-                # Decode each line and append it to the list
-                activities.append(json.loads(line, object_pairs_hook=_iso_to_datetime))
-                activities_read += 1
-
-        # Print an empty new line to prevent the activity count display
-        # from being overwritten
-        print(end='\n')
+        print("[Strava]: Read {} activities from '{}'".format(len(activities), file_path))
     except FileNotFoundError:
         print("[Strava]: No activity data found in '{}'".format(file_path))
 
@@ -97,7 +90,7 @@ def _read_activity_data_from_file(file_path: str) -> list:
 
 def _write_activity_data_to_file(file_path: str, activities: list):
     """
-    Write a list of activity data to a file in JSON format.
+    Write the activity data to a file in CSV format.
 
     Arguments:
     file_path - The path of the file to write the activity data to.
@@ -106,23 +99,25 @@ def _write_activity_data_to_file(file_path: str, activities: list):
 
     print("[Strava]: Writing activity data to '{}'".format(file_path))
 
+    df = pandas.DataFrame(activities)
+
     # Create the Data folder if it does not already exist
     if not os.path.exists('Data'):
-        os.makedirs('Data')
+        os.mkdir('Data')
 
-    # Append the activities to the file in JSON format
-    with open(file_path, 'a+', encoding='utf8') as file:
-        for activity in activities:
-            file.write(json.dumps(activity, cls=_DatetimeToIso, ensure_ascii=False))
-            file.write('\n')
+    if not os.path.exists(file_path):
+        df.to_csv(file_path, index=False)
+    else:
+        df.to_csv(file_path, mode='a', index=False, header=False)
 
 
-def _get_last_activity_start_time(activities: list) -> int:
+def _get_last_activity_start_time(activities: pandas.DataFrame) -> int:
     """
-    Get and return the start time of the last activity in the given list.
+    Get and return the start time of the last activity in the given
+    pandas DataFrame.
 
     Arguments:
-    activities - A list of activity data.
+    activities - A pandas DataFrame of activity data.
 
     Return:
     The start time of the last activity in the list as an int.
@@ -131,9 +126,9 @@ def _get_last_activity_start_time(activities: list) -> int:
 
     last_activity_time_epoch = 0
 
-    if activities:
-        # Get the start time of the last activity in the list
-        last_activity_time_iso = str(activities[len(activities) - 1]['start_date'])
+    if activities.empty == False:
+        # Get the start time of the last activity in the DataFrame
+        last_activity_time_iso = activities.iloc[-1]['start_date']
 
         # Convert the ISO 8601-formatted start time into an epoch
         last_activity_time_epoch = int(datetime.fromisoformat(last_activity_time_iso).timestamp())
@@ -141,7 +136,7 @@ def _get_last_activity_start_time(activities: list) -> int:
     return last_activity_time_epoch
 
 
-def _update_activity_data(access_token: str, file_path: str, activities: list):
+def _update_activity_data(access_token: str, file_path: str, activities: pandas.DataFrame):
     """
     Update the file and list of detailed activity data with any new
     activities uploaded to Strava since the last stored activity.
@@ -182,13 +177,16 @@ def _update_activity_data(access_token: str, file_path: str, activities: list):
                 # current page
                 activities_in_page.append(response.to_dict())
 
+            # Convert the page of activities into a pandas DataFrame
+            df = pandas.json_normalize(activities_in_page)
+
             # Write the current page of activity data to the Strava
             # activities file
-            _write_activity_data_to_file(file_path, activities_in_page)
+            _write_activity_data_to_file(file_path, df)
 
             # Append the current page of activity data to the master
             # list of activity data
-            activities += activities_in_page
+            activities.append(df, ignore_index=True)
 
             page_count += 1
         else:
@@ -198,7 +196,7 @@ def _update_activity_data(access_token: str, file_path: str, activities: list):
 
 def get_activity_data(tokens_file_path: str, data_file_path: str, refresh: bool) -> list:
     """
-    Get and store a list of detailed data for all Strava activities.
+    Get and store a pandas DataFrame of detailed data for all Strava activities.
 
     Arguments:
     tokens_file_path - The path of the file to store the Strava access
@@ -208,13 +206,13 @@ def get_activity_data(tokens_file_path: str, data_file_path: str, refresh: bool)
               stored activity data or get and store a fresh copy.
 
     Return:
-    A list of detailed activity data.
+    A pandas DataFrame of detailed activity data.
     """
 
     # Get an OAuth2 access token for the Strava v3 API
     access_token = strava_auth.get_access_token(tokens_file_path)
 
-    activities = []
+    activities = pandas.DataFrame
 
     if refresh:
         print('[Strava]: Refreshing activity data')
@@ -225,8 +223,7 @@ def get_activity_data(tokens_file_path: str, data_file_path: str, refresh: bool)
         except OSError:
             pass
     else:
-        # Read the existing activity data from the file and store a
-        # local copy as a list
+        # Read the existing activity data from the file
         activities = _read_activity_data_from_file(data_file_path)
 
     if access_token:
@@ -234,6 +231,7 @@ def get_activity_data(tokens_file_path: str, data_file_path: str, refresh: bool)
         while True:
             try:
                 _update_activity_data(access_token, data_file_path, activities)
+                print(data_file_path)
             except ApiException as error:
                 if error.status == API_RATE_LIMIT_ERROR:
                     daily_limit = int(error.headers['X-RateLimit-Limit'].split(',')[1])

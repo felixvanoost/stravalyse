@@ -10,6 +10,8 @@ Felix van Oost 2020
 
 # Third-party
 from geopandas import GeoDataFrame
+from geopy.extra.rate_limiter import RateLimiter
+from geopy.geocoders import Nominatim
 import pandas
 import polyline
 from shapely.geometry import Point, LineString
@@ -34,6 +36,7 @@ def _decode_polyline(x: pandas.Series) -> list:
 
     return map_coordinates
 
+
 def _create_shapely_point(coordinates: pandas.Series) -> Point:
     """
     Convert a pair of coordinates into a Shapely point.
@@ -46,6 +49,7 @@ def _create_shapely_point(coordinates: pandas.Series) -> Point:
     """
 
     return [Point(y, x) for x, y in coordinates]
+
 
 def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
     """
@@ -109,3 +113,17 @@ def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
     # Export the GeoDataFrame to a file in GeoJSON format
     print('[Geo]: Exporting geospatial data to {}'.format(file_path))
     activity_map_geodataframe.to_file(file_path, driver='GeoJSON', encoding='utf8')
+
+
+def reverse_geocode_start_locations(activity_dataframe: pandas.DataFrame):
+    """
+    """
+
+    geolocator = Nominatim(user_agent='Strava Analysis Tool')
+
+    #geocode = RateLimiter(geolocator.reverse, min_delay_seconds=0.01)
+    #activity_dataframe['start_city'] = activity_dataframe['start_latlng'].apply(geocode)
+    
+    print(geolocator.reverse([43.735451, -79.328995]).raw['address'])
+
+    print(activity_dataframe['start_city'])
