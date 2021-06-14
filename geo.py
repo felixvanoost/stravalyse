@@ -8,6 +8,9 @@ export_geo_data_file()
 Felix van Oost 2020
 """
 
+# Standard library
+import datetime
+
 # Third-party
 from geopandas import GeoDataFrame
 import pandas
@@ -49,7 +52,7 @@ def _create_shapely_point(coordinates: pandas.Series) -> Point:
     return [Point(y, x) for x, y in coordinates]
 
 
-def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
+def export_geo_data_file(file_path: str, activity_df: pandas.DataFrame):
     """
     Export a GeoJSON-encoded file of geospatial data from all activities.
 
@@ -60,7 +63,7 @@ def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
     Arguments:
     file_path - The path of the file to export the geospatial activity
                 data to.
-    activity_dataframe - A pandas DataFrame containing the activity data.
+    activity_df - A pandas DataFrame containing the activity data.
     """
 
     print('[Geo]: Processing geospatial data')
@@ -68,32 +71,41 @@ def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
     # Create a copy of the activity DataFrame containing only real
     # outdoor (non-trainer and non-virtual) activities
     exclude_list = ['VirtualRide', 'VirtualRun']
-    activity_map_dataframe = (activity_dataframe.loc[(activity_dataframe['trainer'] == False) &
-                                                     (~activity_dataframe['type']
+    activity_map_df = (activity_df.loc[(activity_df['trainer'] == False) &
+                                                     (~activity_df['type']
                                                       .isin(exclude_list))].copy())
 
+    # Create a pandas data frame from the Strava activities list
+    activity_df = pandas.DataFrame.from_records(activity_map_df)
+
+    # Format the activity start dates and moving / elapsed times
+    activity_df.loc[:, 'moving_time_formatted'] = (activity_df['moving_time']
+        .apply(lambda x: str(datetime.timedelta(seconds=x))))
+    activity_df.loc[:, 'elapsed_time_formatted'] = (activity_df['elapsed_time']
+        .apply(lambda x: str(datetime.timedelta(seconds=x))))
+
     # Convert the activity polylines into coordinates
-    activity_map_dataframe.loc[:, 'map_coordinates'] = (activity_map_dataframe.loc[:, 'map']
+    activity_map_df.loc[:, 'map_coordinates'] = (activity_map_df.loc[:, 'map']
                                                         .apply(_decode_polyline))
 
     # Select only activities with geospatial data
-    activity_map_dataframe = activity_map_dataframe.loc[activity_map_dataframe['map_coordinates']
+    activity_map_df = activity_map_df.loc[activity_map_df['map_coordinates']
                                                         .isnull() == False]
 
     # Convert the coordinates into Shapely points
-    activity_map_dataframe.loc[:, 'map_points'] = (activity_map_dataframe.loc[:, 'map_coordinates']
+    activity_map_df.loc[:, 'map_points'] = (activity_map_df.loc[:, 'map_coordinates']
                                                    .apply(_create_shapely_point))
 
     # Convert the Shapely points into LineStrings
-    activity_map_dataframe.loc[:, 'map_linestring'] = (activity_map_dataframe.loc[:, 'map_points']
+    activity_map_df.loc[:, 'map_linestring'] = (activity_map_df.loc[:, 'map_points']
                                                        .apply(LineString))
 
     # Convert the activity distances from m to km
-    activity_map_dataframe.loc[:, 'distance'] = activity_map_dataframe.loc[:, 'distance'] / 1000
+    activity_map_df.loc[:, 'distance'] = activity_map_df.loc[:, 'distance'] / 1000
 
     # Create a pandas GeoDataFrame from the activities map DataFrame and
     # format the column names
-    activity_map_geodataframe = GeoDataFrame(activity_map_dataframe[['name',
+    activity_map_geodataframe = GeoDataFrame(activity_map_df[['name',
                                                                      'id',
                                                                      'type',
                                                                      'start_date_local',
