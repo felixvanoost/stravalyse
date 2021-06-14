@@ -143,11 +143,15 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path,
                                                              per_page=25)
 
     finally:
-        # Append the new activities to the existing DataFrame
-        activities_updated = activities.append(pandas.DataFrame(new_activities), ignore_index=True)
+        if new_activities:
+            # Append the new activities to the existing DataFrame
+            activities_updated = activities.append(pandas.DataFrame(new_activities),
+                                                   ignore_index=True)
 
-        # Write the updated activity data to the Strava activities file
-        _write_activity_data_to_file(file_path, activities_updated)
+            # Write the updated activity data to the Strava activities file
+            _write_activity_data_to_file(file_path, activities_updated)
+        else:
+            activities_updated = activities
 
     return activities_updated
 
