@@ -5,7 +5,7 @@ Exports geospatial data for all Strava activities in GeoJSON format.
 Functions:
 export_geo_data_file()
 
-Felix van Oost 2020
+Felix van Oost 2021
 """
 
 # Standard library
@@ -105,21 +105,21 @@ def export_geo_data_file(file_path: str, activity_df: pandas.DataFrame):
 
     # Create a pandas GeoDataFrame from the activities map DataFrame and
     # format the column names
-    activity_map_geodataframe = GeoDataFrame(activity_map_df[['name',
-                                                                     'id',
-                                                                     'type',
-                                                                     'start_date_local',
-                                                                     'distance',
-                                                                     'moving_time_formatted',
-                                                                     'total_elevation_gain',
-                                                                     'map_linestring']],
-                                             geometry='map_linestring')
-    activity_map_geodataframe.rename(columns={'start_date_local': 'local start date',
-                                              'distance': 'distance (km)',
-                                              'moving_time_formatted': 'moving time',
-                                              'total_elevation_gain': 'total elevation gain (m)'},
-                                     inplace=True)
+    activity_map_gdf = GeoDataFrame(activity_map_df[['name',
+                                                     'id',
+                                                     'type',
+                                                     'start_date_local',
+                                                     'distance',
+                                                     'moving_time_formatted',
+                                                     'total_elevation_gain',
+                                                     'map_linestring']],
+                                    geometry='map_linestring')
+    activity_map_gdf.rename(columns={'start_date_local': 'local start date',
+                                     'distance': 'distance (km)',
+                                     'moving_time_formatted': 'moving time',
+                                     'total_elevation_gain': 'total elevation gain (m)'},
+                            inplace=True)
 
     # Export the GeoDataFrame to a file in GeoJSON format
     print('[Geo]: Exporting geospatial data to {}'.format(file_path))
-    activity_map_geodataframe.to_file(file_path, driver='GeoJSON', encoding='utf8')
+    activity_map_gdf.to_file(file_path, driver='GeoJSON', encoding='utf8')
