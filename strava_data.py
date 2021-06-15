@@ -9,6 +9,7 @@ Felix van Oost 2021
 """
 
 # Standard library
+import datetime
 import os
 import pathlib
 import sys
@@ -41,7 +42,8 @@ def _read_activity_data_from_file(file_path: pathlib.Path) -> pandas.DataFrame:
     activity_df = pandas.DataFrame()
 
     try:
-        activity_df = pandas.read_json(file_path, lines=True, orient='records')
+        activity_df = pandas.read_json(file_path, lines=True, orient='records',
+                                       convert_dates=['start_date', 'start_date_local'])
 
         print("[Strava]: Read {} activities from '{}'".format(len(activity_df), file_path))
     except (ValueError, TypeError, AssertionError):
@@ -77,7 +79,7 @@ def _get_last_activity_start_time(activity_df: pandas.DataFrame) -> int:
     activity_df - A pandas DataFrame containing the activity data.
 
     Return:
-    The start time of the last activity in the DataFrame as an int.
+    The start time of the last activity in the DataFrame as an POSIX timestamp.
     0 if the DataFrame is empty.
     """
 
@@ -85,10 +87,7 @@ def _get_last_activity_start_time(activity_df: pandas.DataFrame) -> int:
 
     if not activity_df.empty:
         # Get the start time of the last activity in the DataFrame
-        last_activity_time_iso = parser.isoparse(activity_df.iloc[-1]['start_date'])
-
-        # Convert the ISO 8601-formatted start time into an epoch
-        last_activity_time_epoch = int(last_activity_time_iso.timestamp())
+        last_activity_time_epoch = int(activity_df.iloc[-1]['start_date'].timestamp())
 
     return last_activity_time_epoch
 
@@ -119,8 +118,8 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path,
     try:
         while True:
             page = api_instance.get_logged_in_athlete_activities(after=start_time,
-                                                                    page=page_count,
-                                                                    per_page=50)
+                                                                 page=page_count,
+                                                                 per_page=50)
 
             if page:
                 for activity in page:
