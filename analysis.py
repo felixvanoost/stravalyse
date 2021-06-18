@@ -3,7 +3,6 @@
 Processes and analyses Strava athlete and activity data.
 
 Functions:
-create_activity_dataframe()
 display_summary_statistics()
 display_commute_statistics()
 display_commute_plots()
@@ -11,11 +10,8 @@ display_activity_count_plot()
 display_mean_distance_plot()
 display_moving_time_heatmap()
 
-Felix van Oost 2020
+Felix van Oost 2021
 """
-
-# Standard library
-import datetime
 
 # Third-party
 import matplotlib as mpl
@@ -251,17 +247,17 @@ def _generate_moving_time_heatmap(*args, **kwargs):
     sns.heatmap(data.pivot(index=args[1], columns=args[0], values=args[2]), **kwargs)
 
 
-def display_moving_time_heatmap(activity_dataframe: pd.DataFrame, colour_palette: list,
+def display_moving_time_heatmap(activity_df: pd.DataFrame, colour_palette: list,
                                 heatmap_column_wrap: int):
     """
     Generate and display a heatmap of activity moving time over time (by type).
 
     Arguments:
-    activity_dataframe - A pandas DataFrame containing the activity data.
+    activity_df - A pandas DataFrame containing the activity data.
     colour_palette - The colour palette to generate the heatmap with.
     """
 
-    activity_data = activity_dataframe[['type', 'moving_time', 'start_date_local']].copy()
+    activity_data = activity_df[['type', 'moving_time', 'start_date_local']].copy()
 
     # Convert the activity moving times from seconds to hours
     activity_data.loc[:, 'moving_time'] = activity_data.loc[:, 'moving_time'] / 3600
@@ -294,12 +290,12 @@ def display_moving_time_heatmap(activity_dataframe: pd.DataFrame, colour_palette
     plt.show()
 
 
-def display_mean_distance_plot(activity_dataframe: pd.DataFrame, colour_palette: list):
+def display_mean_distance_plot(activity_df: pd.DataFrame, colour_palette: list):
     """
     Generate and display a bar plot of mean activity distance over time (by type).
 
     Arguments:
-    activity_dataframe - A pandas DataFrame containing the activity data.
+    activity_df - A pandas DataFrame containing the activity data.
     colour_palette - The colour palette to generate the plot with.
     """
 
@@ -307,7 +303,7 @@ def display_mean_distance_plot(activity_dataframe: pd.DataFrame, colour_palette:
     exclude_list = ['Crossfit', 'RockClimbing', 'WeightTraining', 'Workout', 'Yoga']
 
     # Get only the activity distances, types, and start dates
-    activity_data = (activity_dataframe[~activity_dataframe['type'].isin(exclude_list)]
+    activity_data = (activity_df[~activity_df['type'].isin(exclude_list)]
                      [['distance', 'type', 'start_date_local']])
     activity_data = activity_data.set_index('start_date_local')
 
@@ -324,17 +320,17 @@ def display_mean_distance_plot(activity_dataframe: pd.DataFrame, colour_palette:
     plt.show()
 
 
-def display_activity_count_plot(activity_dataframe: pd.DataFrame, colour_palette: list):
+def display_activity_count_plot(activity_df: pd.DataFrame, colour_palette: list):
     """
     Generate and display a bar plot of activity counts over time (by type).
 
     Arguments:
-    activity_dataframe - A pandas DataFrame containing the activity data.
+    activity_df - A pandas DataFrame containing the activity data.
     colour_palette - The colour palette to generate the plot with.
     """
 
     # Get only the activity types and start dates
-    activity_data = activity_dataframe[['type', 'start_date_local']]
+    activity_data = activity_df[['type', 'start_date_local']]
     activity_data = activity_data.set_index('start_date_local')
 
     # Create an empty set of axes
@@ -347,7 +343,7 @@ def display_activity_count_plot(activity_dataframe: pd.DataFrame, colour_palette
     plt.show()
 
 
-def display_commute_plots(activity_dataframe: pd.DataFrame, colour_palette: list):
+def display_commute_plots(activity_df: pd.DataFrame, colour_palette: list):
     """
     Generate and display the following plots using data from activities
     marked as commutes:
@@ -357,12 +353,12 @@ def display_commute_plots(activity_dataframe: pd.DataFrame, colour_palette: list
     - Number of commutes per month (bar plot)
 
     Arguments:
-    activity_dataframe - A pandas DataFrame containing the activity data.
+    activity_df - A pandas DataFrame containing the activity data.
     colour_palette - The colour palette to generate the plot with.
     """
 
     # Get only commute data
-    commute_data = (activity_dataframe[activity_dataframe['commute'] == True]
+    commute_data = (activity_df[activity_df['commute'] == True]
                     [['distance', 'start_date_local']])
 
     if commute_data.empty:
@@ -388,18 +384,18 @@ def display_commute_plots(activity_dataframe: pd.DataFrame, colour_palette: list
     plt.show()
 
 
-def display_commute_statistics(activity_dataframe: pd.DataFrame):
+def display_commute_statistics(activity_df: pd.DataFrame):
     """
     Display basic commute statistics for each activity type.
 
     Arguments:
-    activity_dataframe - A pandas DataFrame containing the activity data.
+    activity_df - A pandas DataFrame containing the activity data.
     """
 
-    commute_dataframe = activity_dataframe[activity_dataframe['commute'] == True]
+    commute_df = activity_df[activity_df['commute'] == True]
 
-    if not commute_dataframe.empty:
-        commute_statistics = commute_dataframe.groupby('type').apply(_generate_commute_statistics)
+    if not commute_df.empty:
+        commute_statistics = commute_df.groupby('type').apply(_generate_commute_statistics)
 
         print('Commute statistics:')
         print()
@@ -409,16 +405,16 @@ def display_commute_statistics(activity_dataframe: pd.DataFrame):
         print('[Analysis]: No commutes found')
 
 
-def display_summary_statistics(activity_dataframe: pd.DataFrame):
+def display_summary_statistics(activity_df: pd.DataFrame):
     """
     Display basic statistics for each activity type.
 
     Arguments:
-    activity_dataframe - A pandas DataFrame containing the activity data.
+    activity_df - A pandas DataFrame containing the activity data.
     """
 
-    if not activity_dataframe.empty:
-        summary_statistics = activity_dataframe.groupby('type').apply(_generate_summary_statistics)
+    if not activity_df.empty:
+        summary_statistics = activity_df.groupby('type').apply(_generate_summary_statistics)
 
         print()
         print('Summary statistics:')
@@ -427,30 +423,3 @@ def display_summary_statistics(activity_dataframe: pd.DataFrame):
         print()
     else:
         print('[Analysis]: No activities found')
-
-
-def create_activity_dataframe(activity_data: list) -> pd.DataFrame:
-    """
-    Create and return a pandas DataFrame from the activity data list and
-    format the dates / times to simplify visual interpretation.
-
-    Arguments:
-    activity_data - A list of detailed activity data
-
-    Return:
-    A pandas DataFrame of formatted detailed activity data
-    """
-
-    # Configure pandas to display data to 2 decimal places
-    pd.set_option('precision', 2)
-
-    # Create a pandas data frame from the Strava activities list
-    activity_dataframe = pd.DataFrame.from_records(activity_data)
-
-    # Format the activity start dates and moving / elapsed times
-    activity_dataframe.loc[:, 'moving_time_formatted'] = (activity_dataframe['moving_time']
-        .apply(lambda x: str(datetime.timedelta(seconds=x))))
-    activity_dataframe.loc[:, 'elapsed_time_formatted'] = (activity_dataframe['elapsed_time']
-        .apply(lambda x: str(datetime.timedelta(seconds=x))))
-
-    return activity_dataframe

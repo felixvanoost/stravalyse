@@ -5,21 +5,21 @@ Authenticates access to the Strava v3 API using OAuth2.
 Functions:
 get_access_token()
 
-Felix van Oost 2019
+Felix van Oost 2021
 """
 
 # Standard library
 import os
+import pathlib
 import time
 import webbrowser
 import sys
 
 # Third-party
 import requests
-from requests import Request
 
 
-def _read_tokens_from_file(file_path: str) -> dict:
+def _read_tokens_from_file(file_path: pathlib.Path) -> dict:
     """
     Read the authentication tokens and expiry time from a text file and
     return them as a dictionary.
@@ -37,7 +37,7 @@ def _read_tokens_from_file(file_path: str) -> dict:
     tokens = {}
 
     try:
-        with open(file_path, 'r') as file:
+        with file_path.open(mode='r') as file:
             for line in file:
                 if line.startswith('STRAVA_ACCESS_TOKEN ='):
                     tokens['access_token'] = line.split('=')[1].strip()
@@ -53,7 +53,7 @@ def _read_tokens_from_file(file_path: str) -> dict:
     return tokens
 
 
-def _write_tokens_to_file(file_path: str, tokens: dict):
+def _write_tokens_to_file(file_path: pathlib.Path, tokens: dict):
     """
     Write the authentication tokens and expiry time to a text file.
 
@@ -67,12 +67,12 @@ def _write_tokens_to_file(file_path: str, tokens: dict):
 
     # Delete the tokens file to remove any expired tokens
     try:
-        os.remove(file_path)
+        file_path.unlink()
     except OSError:
         pass
 
     # Write the tokens and expiry time to a new file
-    with open(file_path, 'w') as file:
+    with file_path.open(mode='w') as file:
         file.write('STRAVA_ACCESS_TOKEN = {}\n'.format(tokens['access_token']))
         file.write('STRAVA_REFRESH_TOKEN = {}\n'.format(tokens['refresh_token']))
         file.write('STRAVA_TOKEN_EXPIRY_TIME = {}\n'.format(tokens['expiry_time']))
@@ -132,15 +132,13 @@ def _get_auth_code(client_info: dict) -> str:
                'approval_prompt': 'auto',
                'scope': 'activity:read_all'})
 
-    # Prepare the authorization code GET request and open it in a
-    # browser window
-    authorization_request = Request('GET', base_address, params=params).prepare()
+    # Prepare the authorization code GET request and open it in a browser window
+    authorization_request = requests.Request('GET', base_address, params=params).prepare()
     webbrowser.open(authorization_request.url)
 
 
-    # TODO: Get the authorization code back from the response
-    # automatically. Currently, the code must be manually copied from
-    # the URL response in the browser window.
+    # TODO: Get the authorization code back from the response automatically. Currently, the code
+    # must be manually copied from the URL response in the browser window.
     auth_code = str(input("Enter authorization code: "))
 
     return auth_code
@@ -192,15 +190,14 @@ def _get_initial_tokens(client_info: dict) -> dict:
 
     print('[Strava]: Getting initial authentication tokens')
 
-    # Get the authorization code and exchange it against the initial
-    # access and refresh tokens
+    # Get the authorization code and exchange it against the initial access and refresh tokens
     auth_code = _get_auth_code(client_info)
     tokens = _exchange_tokens(client_info, auth_code)
 
     return tokens
 
 
-def get_access_token(file_path: str) -> str:
+def get_access_token(file_path: pathlib.Path) -> str:
     """
     Obtain and return an OAuth2 access token for the Strava v3 API.
 
@@ -230,14 +227,12 @@ def get_access_token(file_path: str) -> str:
     # Read the authentication tokens and expiry time from the file
     tokens = _read_tokens_from_file(file_path)
     if tokens:
-        # Refresh the tokens if the access token has expired and write
-        # them to the file
+        # Refresh the tokens if the access token has expired and write them to the file
         if int(tokens['expiry_time']) <= time.time():
             tokens = _refresh_expired_tokens(client_info, tokens)
             _write_tokens_to_file(file_path, tokens)
     else:
-        # Get the initial authentication tokens and write them to the
-        # file
+        # Get the initial authentication tokens and write them to the file
         tokens = _get_initial_tokens(client_info)
         _write_tokens_to_file(file_path, tokens)
 
