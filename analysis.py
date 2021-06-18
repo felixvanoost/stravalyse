@@ -285,8 +285,8 @@ def display_moving_time_heatmap(activity_df: pd.DataFrame, colour_palette: list,
 
     # Create and plot a FacetGrid of heatmaps grouped by activity type
     fg = sns.FacetGrid(activity_data, col='type', col_wrap=heatmap_column_wrap)
-    fg = fg.map_df(_generate_moving_time_heatmap, 'year', 'month', 'moving_time',
-                   annot=True, cbar=True, cmap=colour_palette)
+    fg = fg.map_dataframe(_generate_moving_time_heatmap, 'year', 'month', 'moving_time',
+                          annot=True, cbar=True, cmap=colour_palette)
     plt.show()
 
 
