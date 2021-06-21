@@ -5,7 +5,7 @@ Exports geospatial data for all Strava activities in GeoJSON format.
 Functions:
 export_geo_data_file()
 
-Felix van Oost 2021
+Felix van Oost 2020
 """
 
 # Standard library
@@ -37,7 +37,6 @@ def _decode_polyline(x: pandas.Series) -> list:
 
     return map_coordinates
 
-
 def _create_shapely_point(coordinates: pandas.Series) -> Point:
     """
     Convert a pair of coordinates into a Shapely point.
@@ -51,8 +50,7 @@ def _create_shapely_point(coordinates: pandas.Series) -> Point:
 
     return [Point(y, x) for x, y in coordinates]
 
-
-def export_geo_data_file(file_path: str, activity_df: pandas.DataFrame):
+def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
     """
     Export a GeoJSON-encoded file of geospatial data from all activities.
 
@@ -63,7 +61,7 @@ def export_geo_data_file(file_path: str, activity_df: pandas.DataFrame):
     Arguments:
     file_path - The path of the file to export the geospatial activity
                 data to.
-    activity_df - A pandas DataFrame containing the activity data.
+    activity_dataframe - A pandas DataFrame containing the activity data.
     """
 
     print('[Geo]: Processing geospatial data')
@@ -71,17 +69,14 @@ def export_geo_data_file(file_path: str, activity_df: pandas.DataFrame):
     # Create a copy of the activity DataFrame containing only real
     # outdoor (non-trainer and non-virtual) activities
     exclude_list = ['VirtualRide', 'VirtualRun']
-    activity_map_df = (activity_df.loc[(activity_df['trainer'] == False) &
-                                                     (~activity_df['type']
-                                                      .isin(exclude_list))].copy())
-
-    # Create a pandas data frame from the Strava activities list
-    activity_df = pandas.DataFrame.from_records(activity_map_df)
+    activity_map_df = (activity_dataframe.loc[(activity_dataframe['trainer'] == False) &
+                                              (~activity_dataframe['type']
+                                              .isin(exclude_list))].copy())
 
     # Format the activity start dates and moving / elapsed times
-    activity_df.loc[:, 'moving_time_formatted'] = (activity_df['moving_time']
+    activity_map_df.loc[:, 'moving_time_formatted'] = (activity_map_df['moving_time']
         .apply(lambda x: str(datetime.timedelta(seconds=x))))
-    activity_df.loc[:, 'elapsed_time_formatted'] = (activity_df['elapsed_time']
+    activity_map_df.loc[:, 'elapsed_time_formatted'] = (activity_map_df['elapsed_time']
         .apply(lambda x: str(datetime.timedelta(seconds=x))))
 
     # Convert the activity polylines into coordinates
