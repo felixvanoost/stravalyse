@@ -136,16 +136,18 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path,
             else:
                 print('[Strava]: No new activities found')
                 break
-
-            page = api_instance.get_logged_in_athlete_activities(after=start_time,
-                                                             page=page_count,
-                                                             per_page=25)
-
     finally:
         if new_activities:
+            # Create a DataFrame with the new activities and parse the activity start dates into
+            # datetime objects
+            new_activities_df = pandas.DataFrame(new_activities)
+            new_activities_df['start_date'] = pandas.to_datetime(new_activities_df['start_date'],
+                                                                 utc=True)
+            new_activities_df['start_date_local'] = pandas.to_datetime(
+                new_activities_df['start_date_local'], utc=True)
+
             # Append the new activities to the existing DataFrame
-            activity_df_updated = activity_df.append(pandas.DataFrame(new_activities),
-                                                   ignore_index=True)
+            activity_df_updated = activity_df.append(new_activities_df, ignore_index=True)
 
             # Write the updated activity data to the Strava activities file
             _write_activity_data_to_file(file_path, activity_df_updated)
