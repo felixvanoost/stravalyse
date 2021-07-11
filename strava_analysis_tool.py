@@ -83,7 +83,8 @@ def main():
     # Get a list of detailed data for all Strava activities
     activity_df = strava_data.get_activity_data(pathlib.Path(config['paths']['tokens_file']),
                                                 pathlib.Path(config['paths']['activity_data_file']),
-                                                args.refresh_data)
+                                                args.refresh_data,
+                                                config['data']['enable_reverse_geocoding'])
 
     if args.date_range_start is not None or args.date_range_end is not None:
         date_mask = [True] * len(activity_df)

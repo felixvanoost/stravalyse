@@ -13,6 +13,7 @@ import datetime
 
 # Third-party
 from geopandas import GeoDataFrame
+from geopy.geocoders import Nominatim
 import pandas
 import polyline
 from shapely.geometry import Point, LineString
@@ -37,6 +38,7 @@ def _decode_polyline(x: pandas.Series) -> list:
 
     return map_coordinates
 
+
 def _create_shapely_point(coordinates: pandas.Series) -> Point:
     """
     Convert a pair of coordinates into a Shapely point.
@@ -49,6 +51,20 @@ def _create_shapely_point(coordinates: pandas.Series) -> Point:
     """
 
     return [Point(y, x) for x, y in coordinates]
+
+
+def get_address(coordinates: list) -> dict:
+    """
+    """
+
+    # Use the Openstreetmap Nominatim service
+    geolocator = Nominatim(user_agent="Strava Analysis Tool", timeout=10)
+
+    # Get the address for the given coordinates using the reverse geocoder
+    address = geolocator.reverse(coordinates).raw['address']
+
+    return address
+
 
 def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
     """

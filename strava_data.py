@@ -23,6 +23,8 @@ import pandas
 sys.path.append(os.path.abspath('API'))
 import swagger_client
 import strava_auth
+import geo
+
 
 API_RATE_LIMIT_ERROR = 429
 
@@ -93,7 +95,8 @@ def _get_last_activity_start_time(activity_df: pandas.DataFrame) -> int:
 
 
 def _update_activity_data(access_token: str, file_path: pathlib.Path,
-                          activity_df: pandas.DataFrame) -> pandas.DataFrame:
+                          activity_df: pandas.DataFrame,
+                          enable_reverse_geocoding: bool) -> pandas.DataFrame:
     """
     Update the data file and activity DataFrame with any new activities uploaded to Strava since
     the last stored activity.
@@ -101,6 +104,7 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path,
     Arguments:
     access_token - An OAuth2 access token for the Strava v3 API.
     activity_df - A pandas DataFrame containing the existing activity data.
+    enable_reverse_geocoding - Obtain the start and end address of each activity.
     """
 
     print('[Strava]: Checking for new activities')
@@ -125,12 +129,17 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path,
                 for activity in page:
                     print("[Strava]: Getting detailed activity data for '{}'".format(activity.name))
 
-                    # Get detailed activity data for each activity in the page
-                    detailed_data = api_instance.get_activity_by_id(activity.id)
+                    # Get detailed activity data for each activity in the page amd cpmvert it into
+                    # a dictionary
+                    detailed_data = api_instance.get_activity_by_id(activity.id).to_dict()
+
+                    if enable_reverse_geocoding:
+                        detailed_data['start_address'] = geo.get_address(detailed_data['start_latlng'])
+                        detailed_data['end_address'] = geo.get_address(detailed_data['end_latlng'])
 
                     # Convert the detailed activity data into a dictionary and append it to the list
                     # of activity data from the current page
-                    new_activities.append(detailed_data.to_dict())
+                    new_activities.append(detailed_data)
 
                 page_count += 1
             else:
@@ -158,15 +167,15 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path,
 
 
 def get_activity_data(tokens_file_path: pathlib.Path, data_file_path: pathlib.Path,
-                      refresh: bool) -> pandas.DataFrame:
+                      refresh: bool, enable_reverse_geocoding: bool) -> pandas.DataFrame:
     """
     Get and store a pandas DataFrame of detailed data for all Strava activities.
 
     Arguments:
     tokens_file_path - The path of the file to store the Strava access tokens to.
     data_file_path - The path of the file to store the activity data to.
-    refresh - A Boolean to select whether to use and update the locally stored activity data or get
-              and store a fresh copy.
+    refresh - Delete the existing activity data and get a fresh copy.
+    enable_reverse_geocoding - Obtain the start and end address of each activity.
 
     Return:
     A pandas DataFrame containing detailed activity data.
@@ -194,7 +203,8 @@ def get_activity_data(tokens_file_path: pathlib.Path, data_file_path: pathlib.Pa
         # Update the activity data
         while True:
             try:
-                activity_df = _update_activity_data(access_token, data_file_path, activity_df)
+                activity_df = _update_activity_data(access_token, data_file_path, activity_df,
+                                                    enable_reverse_geocoding)
             except swagger_client.rest.ApiException as error:
                 if error.status == API_RATE_LIMIT_ERROR:
                     daily_limit = int(error.headers['X-RateLimit-Limit'].split(',')[1])
