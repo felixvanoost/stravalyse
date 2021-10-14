@@ -9,14 +9,12 @@ Felix van Oost 2021
 """
 
 # Standard library
-import datetime
 import os
 import pathlib
 import sys
 import time
 
 # Third-party
-from dateutil import parser
 import pandas
 
 # Local
@@ -134,6 +132,7 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path,
                     detailed_data = api_instance.get_activity_by_id(activity.id).to_dict()
 
                     if enable_reverse_geocoding:
+                        # Get the activity start and end addresses
                         detailed_data['start_address'] = geo.get_address(detailed_data['start_latlng'])
                         detailed_data['end_address'] = geo.get_address(detailed_data['end_latlng'])
 
