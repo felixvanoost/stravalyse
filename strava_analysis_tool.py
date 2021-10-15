@@ -55,8 +55,8 @@ def main():
     parser.add_argument('-l', '--start_locations_plot',
                         action='store_true',
                         required=False,
-                        help='''Generate and display a plot of the number of activities started
-                                in each country''')
+                        help=('Generate and display a plot of the number of activities started'
+                              ' in each country'))
     parser.add_argument('-m', '--moving_time_heatmap',
                         action='store_true',
                         required=False,

@@ -43,16 +43,16 @@ def _generate_start_country_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
     colour_palette - The colour palette to generate the plot with.
     """
 
-    data = activity_data.groupby(['country']).size().to_frame('count').reset_index()
+    data = activity_data.groupby(['country', 'type']).size().to_frame('count').reset_index()
 
     # Generate and format the bar plot
     sns.barplot(x='country',
                 y='count',
+                hue='type',
                 data=data,
                 palette=colour_palette,
                 ax=ax)
     ax.set(title='Activities by country', ylabel='Number of activities', xlabel='Country')
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.grid(b=True, which='major', linewidth=1.0)
@@ -290,7 +290,7 @@ def display_start_country_plot(activity_df: pd.DataFrame, colour_palette: list):
 
     # Get the activity start address and extract the country from the dictionary
     activity_df['country'] = pd.DataFrame(activity_df['start_address']
-                             .apply(lambda row: row['city'] if 'city' in row else None))
+                             .apply(lambda row: row['country'] if 'country' in row else None))
 
     activity_data = activity_df[['type', 'country']].copy()
 

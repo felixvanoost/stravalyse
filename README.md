@@ -75,6 +75,7 @@ The following command line options are available:
 | `-d / --mean_distance_plot` | Generate and display a plot of the mean activity distance over time |
 | `-g / --export_geo_data` | Export the geospatial activity data in GeoJSON format |
 | `-gu / --export_upload_geo_data` | Export the geospatial activity data in GeoJSON format and upload it to the HERE XYZ mapping platform |
+| `-l / --start_locations_plot` | Generate and display a plot of the number of activities started in each country |
 | `-m / --moving_time_heatmap` | Generate and display a heatmap of moving time for each activity type |
 | `-r / --refresh_data` | Get and store a fresh copy of the activity data |
 | `--date_range_start` | Specify the start of a date range in ISO format |
@@ -95,5 +96,7 @@ From release v1.2.0 onwards, the tool is capable of generating some basic plots 
 ![Demo Commute Plots](Media/Demo%20Commute%20Plots.JPG)
 
 ![Demo Mean Distance Plot](Media/Demo%20Mean%20Distance%20Plot.JPG)
+
+![Demo Start Locations Plot](Media/Demo%20Start%20Locations%20Plot.JPG)
 
 ![Demo Moving Time Heatmap Plot](Media/Demo%20Moving%20Time%20Heatmap.jpeg)
