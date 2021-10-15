@@ -63,7 +63,7 @@ def get_address(coordinates: list) -> dict:
     coordinates - The coordinates to convert into an address.
     """
 
-    # Use the Openstreetmap Nominatim service
+    # Use the OpenStreetMap Nominatim service
     geolocator = Nominatim(user_agent="Strava Analysis Tool", timeout=10)
 
     # Get the address for the given coordinates using the reverse geocoder
