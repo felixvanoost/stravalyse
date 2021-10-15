@@ -6,7 +6,7 @@ activity_data_file = 'Data/StravaActivityData.json'
 geo_data_file = 'Data/StravaGeoData.geojson'
 
 [data]
-enable_reverse_geocoding = true
+enable_reverse_geocoding = false
 
 [analysis]
 plot_colour_palette = "Dark2"

@@ -144,9 +144,14 @@ def main():
                                             config['analysis']['plot_colour_palette'])
 
     if args.start_locations_plot:
-        # Generate and display a plot of the number of activities started in each country
-        analysis.display_start_country_plot(activity_df,
-                                            config['analysis']['plot_colour_palette'])
+        if config['data']['enable_reverse_geocoding']:
+            # Generate and display a plot of the number of activities started in each country
+            analysis.display_start_country_plot(activity_df,
+                                                config['analysis']['plot_colour_palette'])
+        else:
+            print("Reverse geocoding must be enabled to generate this plot.",
+                  f"Set 'enable_reverse_geocoding' in {CONFIG_FILE_PATH} to 'true',",
+                  "then refresh the activity data using the argument '-r'.")
 
     if args.moving_time_heatmap:
         # Generate and display a heatmap of moving time for each activity type
