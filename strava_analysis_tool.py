@@ -52,6 +52,11 @@ def main():
                         required=False,
                         help=('Export the geospatial activity data in GeoJSON format and upload it'
                               ' to the HERE XYZ mapping platform'))
+    parser.add_argument('-l', '--start_locations_plot',
+                        action='store_true',
+                        required=False,
+                        help='''Generate and display a plot of the number of activities started
+                                in each country''')
     parser.add_argument('-m', '--moving_time_heatmap',
                         action='store_true',
                         required=False,
@@ -136,6 +141,11 @@ def main():
     if args.mean_distance_plot:
         # Generate and display a plot of the mean activity distance over time
         analysis.display_mean_distance_plot(activity_df,
+                                            config['analysis']['plot_colour_palette'])
+
+    if args.start_locations_plot:
+        # Generate and display a plot of the number of activities started in each country
+        analysis.display_start_country_plot(activity_df,
                                             config['analysis']['plot_colour_palette'])
 
     if args.moving_time_heatmap:
