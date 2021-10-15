@@ -9,6 +9,7 @@ display_commute_plots()
 display_activity_count_plot()
 display_mean_distance_plot()
 display_moving_time_heatmap()
+display_start_country_plot()
 
 Felix van Oost 2021
 """
@@ -20,6 +21,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
+
+def _generate_moving_time_heatmap(*args, **kwargs):
+    """
+    Generate a heatmap of moving time for a single activity type.
+    """
+    data = kwargs.pop('data')
+    sns.heatmap(data.pivot(index=args[1], columns=args[0], values=args[2]), **kwargs)
 
 
 def _generate_start_country_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
@@ -267,14 +276,6 @@ def _generate_summary_statistics(x: pd.Series) -> pd.Series:
                                     'Average speed (km/h)'])
 
     return series
-
-
-def _generate_moving_time_heatmap(*args, **kwargs):
-    """
-    Generate a heatmap of moving time for a single activity type.
-    """
-    data = kwargs.pop('data')
-    sns.heatmap(data.pivot(index=args[1], columns=args[0], values=args[2]), **kwargs)
 
 
 def display_start_country_plot(activity_df: pd.DataFrame, colour_palette: list):
