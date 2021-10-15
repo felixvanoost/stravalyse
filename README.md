@@ -97,6 +97,6 @@ From release v1.2.0 onwards, the tool is capable of generating some basic plots 
 
 ![Demo Mean Distance Plot](Media/Demo%20Mean%20Distance%20Plot.JPG)
 
-![Demo Start Locations Plot](Media/Demo%20Start%20Locations%20Plot.JPG)
+![Demo Start Locations Plot](Media/Demo%20Start%20Locations%20Plot.jpeg)
 
 ![Demo Moving Time Heatmap Plot](Media/Demo%20Moving%20Time%20Heatmap.jpeg)
