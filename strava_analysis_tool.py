@@ -52,6 +52,11 @@ def main():
                         required=False,
                         help=('Export the geospatial activity data in GeoJSON format and upload it'
                               ' to the HERE XYZ mapping platform'))
+    parser.add_argument('-l', '--start_locations_plot',
+                        action='store_true',
+                        required=False,
+                        help=('Generate and display a plot of the number of activities started'
+                              ' in each country'))
     parser.add_argument('-m', '--moving_time_heatmap',
                         action='store_true',
                         required=False,
@@ -83,7 +88,8 @@ def main():
     # Get a list of detailed data for all Strava activities
     activity_df = strava_data.get_activity_data(pathlib.Path(config['paths']['tokens_file']),
                                                 pathlib.Path(config['paths']['activity_data_file']),
-                                                args.refresh_data)
+                                                args.refresh_data,
+                                                config['data']['enable_reverse_geocoding'])
 
     if args.date_range_start is not None or args.date_range_end is not None:
         date_mask = [True] * len(activity_df)
@@ -136,6 +142,16 @@ def main():
         # Generate and display a plot of the mean activity distance over time
         analysis.display_mean_distance_plot(activity_df,
                                             config['analysis']['plot_colour_palette'])
+
+    if args.start_locations_plot:
+        if config['data']['enable_reverse_geocoding']:
+            # Generate and display a plot of the number of activities started in each country
+            analysis.display_start_country_plot(activity_df,
+                                                config['analysis']['plot_colour_palette'])
+        else:
+            print("Reverse geocoding must be enabled to generate this plot.",
+                  f"Set 'enable_reverse_geocoding' in {CONFIG_FILE_PATH} to 'true',",
+                  "then refresh the activity data using the argument '-r'.")
 
     if args.moving_time_heatmap:
         # Generate and display a heatmap of moving time for each activity type

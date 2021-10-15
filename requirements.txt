@@ -1,4 +1,5 @@
 geopandas
+geopy
 matplotlib
 numpy
 pandas

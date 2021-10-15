@@ -9,16 +9,55 @@ display_commute_plots()
 display_activity_count_plot()
 display_mean_distance_plot()
 display_moving_time_heatmap()
+display_start_country_plot()
 
 Felix van Oost 2021
 """
 
 # Third-party
+import datetime
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
+
+def _generate_moving_time_heatmap(*args, **kwargs):
+    """
+    Generate a heatmap of moving time for a single activity type.
+    """
+    data = kwargs.pop('data')
+    sns.heatmap(data.pivot(index=args[1], columns=args[0], values=args[2]), **kwargs)
+
+
+def _generate_start_country_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
+                                 colour_palette: list):
+    """
+    Generate a bar plot of the number of activities started in each country (by
+    type).
+
+    Arguments:
+    activity data - A pandas DataFrame containing the activity data.
+    ax - A set of matplotlib axes to generate the plot on.
+    colour_palette - The colour palette to generate the plot with.
+    """
+
+    data = activity_data.groupby(['country', 'type']).size().to_frame('count').reset_index()
+
+    # Generate and format the bar plot
+    sns.barplot(x='country',
+                y='count',
+                hue='type',
+                data=data,
+                palette=colour_palette,
+                ax=ax)
+    ax.set(title='Activities by country', ylabel='Number of activities', xlabel='Country')
+    ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.grid(b=True, which='major', linewidth=1.0)
+    ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
+    ax.set_axisbelow(True)
 
 
 def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
@@ -239,12 +278,30 @@ def _generate_summary_statistics(x: pd.Series) -> pd.Series:
     return series
 
 
-def _generate_moving_time_heatmap(*args, **kwargs):
+def display_start_country_plot(activity_df: pd.DataFrame, colour_palette: list):
     """
-    Generate a heatmap of moving time for a single activity type.
+    Generate and display a bar plot of the number of activities started in each
+    country (by type).
+
+    Arguments:
+    activity_df - A pandas DataFrame containing the activity data.
+    colour_palette - The colour palette to generate the heatmap with.
     """
-    data = kwargs.pop('data')
-    sns.heatmap(data.pivot(index=args[1], columns=args[0], values=args[2]), **kwargs)
+
+    # Get the activity start address and extract the country from the dictionary
+    activity_df['country'] = pd.DataFrame(activity_df['start_address']
+                             .apply(lambda row: row['country'] if 'country' in row else None))
+
+    activity_data = activity_df[['type', 'country']].copy()
+
+    # Create an empty set of axes
+    fig = plt.figure()
+    fig.set_tight_layout(True)
+    ax = fig.add_subplot(1, 1, 1)
+
+    # Generate and display the plot
+    _generate_start_country_plot(activity_data, ax, colour_palette)
+    plt.show()
 
 
 def display_moving_time_heatmap(activity_df: pd.DataFrame, colour_palette: list,
