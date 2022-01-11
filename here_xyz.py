@@ -85,6 +85,11 @@ def _get_here_iml(here_creds_file_path: pathlib.Path) -> IML:
 
 def upload_geo_data(geo_data_file_path: pathlib.Path, here_creds_file_path: pathlib.Path):
     """
+    Upload the geospatial activity data to an interactive mapping layer (IML)
+    on the HERE platform. This layer can be used by the map created in HERE
+    Studio.
+
+    Arguments:
     geo_data_file_path - Path of the file containing the geospatial activity
                          data in GeoJSON format.
     here_creds_file_path - Path of the file containing the HERE platform
