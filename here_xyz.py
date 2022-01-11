@@ -6,76 +6,103 @@ mapping platform.
 Functions:
 upload_geo_data()
 
-Felix van Oost 2021
+Felix van Oost 2022
 """
 
 # Standard library
-import os
+import geojson
+import json
+import pathlib
 import sys
 
 # Third-party
-import xyzspaces
+from xyzspaces import IML
+from xyzspaces.iml.credentials import Credentials
 
 
-def _get_space(xyz) -> object:
+HERE_CATALOG_ID = "strava-analysis-tool"
+HERE_LAYER_ID = "strava-activity-data"
+
+
+def _get_here_iml(here_creds_file_path: pathlib.Path) -> IML:
     """
-    Get and return an instance of the space containing the Strava activity data
-    or create a new space if one does not currently exist.
-
-    Return:
-    An instance of the space containing the Strava activity data.
-    """
-
-    print('[HERE XYZ]: Locating the Strava activity data space')
-
-    # Get a list of existing spaces
-    spaces_list = xyz.spaces.list(owner='me')
-
-    # Search for an existing space with the name 'Strava Activity Data'
-    for space in spaces_list:
-        if space['title'] == 'Strava Activity Data':
-            space_id = space['id']
-
-            print("[HERE XYZ]: Found space with ID '{}'".format(space_id))
-
-            space_obj = xyz.spaces.from_id(space_id)
-            break
-
-    if not space_obj:
-        print('[HERE XYZ]: No existing space found')
-
-        # Create a new space
-        space_obj = xyz.spaces.new(title='Strava Activity Data',
-                                   description='Created by Strava Analysis Tool')
-
-        print("[HERE XYZ]: Created new space with ID '{}'".format(space_obj.info['id']))
-
-    return space_obj
-
-
-def upload_geo_data(file_path: str):
-    """
-    Upload the geospatial data from Strava activities to the HERE XYZ mapping
-    platform.
+    Return an IML object for the HERE interactive map layer that belongs to the
+    Strava Analysis Tool. Create a new IML if one does not exist,
 
     Arguments:
-    file_path - The path of the file containing the geospatial activity
-                data in GeoJSON format.
+    here_creds_file_path - Path of the file containing the HERE platform
+                           credentials.
     """
 
+    # Get the HERE platform credentials
+    credentials = Credentials.from_credentials_file(here_creds_file_path)
+
+    # Attempt to load an instance of the existing interactive map layer (if
+    # one exists)
     try:
-        xyz_token = os.environ['XYZ_TOKEN']
-    except KeyError:
-        sys.exit('[ERROR]: Add XYZ_TOKEN to your environment variables')
+        print("[HERE] Locating the HERE interactive map layer for Strava "
+              "Analysis Tool")
 
-    xyz = xyzspaces.XYZ(credentials=xyz_token)
+        iml = IML.from_catalog_hrn_and_layer_id(
+        catalog_hrn=f"hrn:here:data:::{HERE_CATALOG_ID}",
+        layer_id=HERE_LAYER_ID,
+        credentials=credentials)
 
-    # Get the space containing the geospatial activity data
-    space = _get_space(xyz)
+        print("[HERE] Found an existing HERE interactive map layer with ID "
+              f"'{HERE_LAYER_ID}'")
+    except Exception as error:
+        print("[HERE] No existing HERE interactive map layer found. Creating a "
+              "new catalog and IML for Strava Analysis Tool.")
 
-    print("[HERE XYZ]: Uploading geospatial data to space ID '{}'".format(space.info['id']))
+        # Attempt to create a new catalog and IML for Strava Analysis Tool
+        try:
+            layer_details = {
+            "id": HERE_LAYER_ID,
+            "name": "Strava Activity Data",
+            "summary": "Strava Activity Data",
+            "description": "Strava data collected by Strava Analysis Tool",
+            "layerType": "interactivemap",
+            "interactiveMapProperties": {},
+            }
 
-    # Upload the geospatial data to the space
-    space.add_features_geojson(file_path, encoding='utf-8', features_size=500, chunk_size=5)
+            iml = IML.new(
+            catalog_id=HERE_CATALOG_ID,
+            catalog_name="Strava Analysis Tool",
+            catalog_summary="Strava Analysis Tool",
+            catalog_description="Strava data collected by Strava Analysis "
+                                "Tool",
+            layer_details=layer_details,
+            credentials=credentials,
+            )
 
-    print("[HERE XYZ]: Data successfully uploaded to space ID '{}'".format(space.info['id']))
+            print(f"[HERE] Created a new catalog with ID '{HERE_CATALOG_ID}' "
+                  f"and interactive map layer with ID '{HERE_LAYER_ID}'")
+        except Exception as error:
+            sys.exit(f'[ERROR]: HERE returned the following error: {error}')
+
+    return iml
+
+
+def upload_geo_data(geo_data_file_path: pathlib.Path, here_creds_file_path: pathlib.Path):
+    """
+    Upload the geospatial activity data to an interactive mapping layer (IML)
+    on the HERE platform. This layer can be used by the map created in HERE
+    Studio.
+
+    Arguments:
+    geo_data_file_path - Path of the file containing the geospatial activity
+                         data in GeoJSON format.
+    here_creds_file_path - Path of the file containing the HERE platform
+                           credentials.
+    """
+
+    # Get a HERE IML object for the Strava Analysis Tool layer
+    iml = _get_here_iml(here_creds_file_path=here_creds_file_path)
+
+    # Read the contents of the geo data file
+    with geo_data_file_path.open('r', encoding='utf-8') as geo_data_file:
+        geo_data = geojson.load(geo_data_file)
+
+        if geo_data:
+            # Upload all the data
+            iml.layer.write_features(features=geo_data)

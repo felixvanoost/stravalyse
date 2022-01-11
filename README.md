@@ -52,13 +52,20 @@ After authorizing access, the browser will redirect to an invalid page (`http://
 When prompted, copy the `code` portion of the URL (`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`) and paste it into the console. The tool will get and refresh its own OAuth2 tokens, so this only needs to be done once.
 
 ### 3. HERE account
-You will need to register for a free HERE developer account if you want the tool to leverage the capabilities of the [HERE Studio](https://studio.here.com/) mapping platform. HERE Studio provides a very slick way to visualise your Strava data with a variety of map styles and customized formatting rules. Here's a basic example:
+You will need to register for a free HERE platform account [here](https://platform.here.com/) if you want the tool to leverage the capabilities of [HERE Studio](https://platform.here.com/studio/). HERE Studio provides a very slick way to visualise your Strava data with a variety of map styles and customized formatting rules. Here's a basic example:
 
 [![Demo Activity Map](Media/Demo%20Activity%20Map.JPG)](https://studio.here.com/viewer/?project_id=d99c795f-b247-47f9-a67e-972255a02017)
 
 Once configured, the tool can automatically upload your Strava data to HERE to generate an up-to-date map of your activities. You can set rules to colour-code activities (by type or moving time, for instance) within the HERE Studio web app, and clicking on an activity will bring up some useful basic information (try it!).
 
-After creating a developer account, generate a new access token with all permissions for all spaces using [this](https://xyz.api.here.com/token-ui/accessmgmt.html) link and copy the token into an environment variable named `XYZ_TOKEN`.
+After creating an account, create a new HERE project + app and generate OAuth credentials as follows:
+
+1. From the main HERE platform page, click on 'HERE Studio'.
+2. Click on 'Create new map' and give your map a name. This will also create a HERE project with the same name.
+3. Return to the main HERE platform page, click on 'Access Manager', then navigate to the 'Apps' tab at the top of the page.
+4. Click on 'Register new app', then give it a name (e.g. 'Strava Analysis Tool').
+5. In the 'Default access to a project' section, select the project (map) you created in HERE Studio then click 'Register'.
+6. Click on the app you just created, then create a new set of OAuth 2.0 credentials using the 'Create credentials' button. Download and save the generated file to the `/Credentials` folder in your local copy of this repository.
 
 ## Usage
 
