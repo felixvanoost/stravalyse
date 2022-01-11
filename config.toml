@@ -1,12 +1,13 @@
 # Configuration file for the Strava Analysis Tool.
 
 [paths]
-tokens_file = 'Tokens.txt'
+strava_tokens_file = 'Credentials/Tokens.txt'
+here_creds_file = 'Credentials/credentials.properties'
 activity_data_file = 'Data/StravaActivityData.json'
 geo_data_file = 'Data/StravaGeoData.geojson'
 
 [data]
-enable_reverse_geocoding = false
+enable_reverse_geocoding = true
 
 [analysis]
 plot_colour_palette = "Dark2"

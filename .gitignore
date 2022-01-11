@@ -103,8 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# Strava API tokens
-*Tokens.txt
+# Strava and HERE credentials
+/credentials
 
 # Strava activity data
 /Data

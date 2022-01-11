@@ -86,7 +86,7 @@ def main():
     pandas.set_option('precision', 2)
 
     # Get a list of detailed data for all Strava activities
-    activity_df = strava_data.get_activity_data(pathlib.Path(config['paths']['tokens_file']),
+    activity_df = strava_data.get_activity_data(pathlib.Path(config['paths']['strava_tokens_file']),
                                                 pathlib.Path(config['paths']['activity_data_file']),
                                                 args.refresh_data,
                                                 config['data']['enable_reverse_geocoding'])
@@ -125,8 +125,11 @@ def main():
         geo.export_geo_data_file(config['paths']['geo_data_file'], activity_df)
 
         if args.export_upload_geo_data:
-            # Upload the geospatial data to HERE XYZ
-            here_xyz.upload_geo_data(config['paths']['geo_data_file'])
+            # Upload the geospatial data to HERE
+            here_xyz.upload_geo_data(
+            geo_data_file_path=pathlib.Path(config['paths']['geo_data_file']),
+            here_creds_file_path=pathlib.Path(config['paths']['here_creds_file'])
+            )
 
     if args.activity_count_plot:
         # Generate and display a plot of activity counts over time
