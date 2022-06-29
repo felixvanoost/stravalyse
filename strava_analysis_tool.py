@@ -128,7 +128,8 @@ def main():
             # Upload the geospatial data to HERE
             here_xyz.upload_geo_data(
             geo_data_file_path=pathlib.Path(config['paths']['geo_data_file']),
-            here_creds_file_path=pathlib.Path(config['paths']['here_creds_file'])
+            here_creds_file_path=pathlib.Path(config['paths']['here_creds_file']),
+            refresh=args.refresh_data
             )
 
     if args.activity_count_plot:
