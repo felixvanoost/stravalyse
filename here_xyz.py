@@ -11,7 +11,6 @@ Felix van Oost 2022
 
 # Standard library
 import geojson
-import json
 import pathlib
 import sys
 
@@ -22,6 +21,7 @@ from xyzspaces.iml.credentials import Credentials
 
 HERE_CATALOG_ID = "strava-analysis-tool"
 HERE_LAYER_ID = "strava-activity-data"
+HERE_FEATURE_IDS_CHUNK_SIZE = 100
 
 
 def _get_here_iml(here_creds_file_path: pathlib.Path) -> IML:
@@ -83,7 +83,8 @@ def _get_here_iml(here_creds_file_path: pathlib.Path) -> IML:
     return iml
 
 
-def upload_geo_data(geo_data_file_path: pathlib.Path, here_creds_file_path: pathlib.Path):
+def upload_geo_data(geo_data_file_path: pathlib.Path, here_creds_file_path: pathlib.Path,
+                    refresh: bool):
     """
     Upload the geospatial activity data to an interactive mapping layer (IML)
     on the HERE platform. This layer can be used by the map created in HERE
@@ -94,15 +95,39 @@ def upload_geo_data(geo_data_file_path: pathlib.Path, here_creds_file_path: path
                          data in GeoJSON format.
     here_creds_file_path - Path of the file containing the HERE platform
                            credentials.
+    refresh - Delete the existing activity data from the IML and upload a fresh
+              copy.
     """
 
     # Get a HERE IML object for the Strava Analysis Tool layer
     iml = _get_here_iml(here_creds_file_path=here_creds_file_path)
+
+    if refresh:
+        # Get a list of all uploaded activities (features) in the IML
+        feature_collection = iml.layer.search_features(params={"id=gte": "0"}).to_geojson()
+
+        # Create a list of feature IDs and split it into chunks
+        feature_ids = []
+        for feature in feature_collection['features']:
+            feature_ids.append(feature['id'])
+
+        feature_ids_chunks = ([feature_ids[i:i + HERE_FEATURE_IDS_CHUNK_SIZE] for i in
+                              range(0, len(feature_ids), HERE_FEATURE_IDS_CHUNK_SIZE)])
+
+        print("[HERE] Deleting all existing activities from the HERE "
+              "interactive map layer")
+
+        for chunk in feature_ids_chunks:
+            # Delete the uploaded activities in the IML in chunks
+            iml.layer.delete_features(chunk)
 
     # Read the contents of the geo data file
     with geo_data_file_path.open('r', encoding='utf-8') as geo_data_file:
         geo_data = geojson.load(geo_data_file)
 
         if geo_data:
-            # Upload all the data
+            print(f"[HERE] Uploading activities from '{geo_data_file_path}' to "
+                  "the HERE interactive map layer")
+
+            # Upload all the activities in the file
             iml.layer.write_features(features=geo_data)
