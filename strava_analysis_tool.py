@@ -2,7 +2,7 @@
 
 Main module for the Strava Analysis Tool.
 
-Felix van Oost 2021
+Felix van Oost 2022
 """
 
 # Standard library
@@ -82,8 +82,8 @@ def main():
     # Load the TOML configuration
     config = toml.load(CONFIG_FILE_PATH)
 
-    # Configure pandas to display data to 2 decimal places
-    pandas.set_option('precision', 2)
+    # Configure pandas to display float values to 2 decimal places
+    pandas.options.display.float_format = "{:,.2f}".format
 
     # Get a list of detailed data for all Strava activities
     activity_df = strava_data.get_activity_data(pathlib.Path(config['paths']['strava_tokens_file']),
