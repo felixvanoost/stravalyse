@@ -55,6 +55,7 @@ def _generate_start_country_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
     ax.set(title='Activities by country', ylabel='Number of activities', xlabel='Country')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
     ax.grid(b=True, which='major', linewidth=1.0)
     ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
     ax.set_axisbelow(True)
@@ -264,7 +265,7 @@ def _generate_summary_statistics(x: pd.Series) -> pd.Series:
             'Average moving time (mins)': x['moving_time'].mean() / 60,
             'Total elevation gain (km)': x['total_elevation_gain'].sum() / 1000,
             'Average elevation gain (m)': x['total_elevation_gain'].mean(),
-            'Average speed (km/h)': x['average_speed'].mean() * 3.6}
+            'Average speed (km/h)': (x['distance'].sum() / x['moving_time'].sum()) * 3.6}
 
     series = pd.Series(rows, index=['Number of activities',
                                     'Total distance (km)',
@@ -287,6 +288,8 @@ def display_start_country_plot(activity_df: pd.DataFrame, colour_palette: list):
     activity_df - A pandas DataFrame containing the activity data.
     colour_palette - The colour palette to generate the heatmap with.
     """
+
+    # TODO: Exclude virtual activities
 
     # Get the activity start address and extract the country from the dictionary
     activity_df['country'] = pd.DataFrame(activity_df['start_address']
