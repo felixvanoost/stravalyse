@@ -4,7 +4,12 @@
 	"customizations": {
 		"vscode": {
 				"extensions": [
-						"streetsidesoftware.code-spell-checker"
+					"ms-python.autopep8",
+					"ms-python.pylint",
+					"streetsidesoftware.code-spell-checker",
+					"tamasfe.even-better-toml",
+					"VisualStudioExptTeam.vscodeintellicode-completions",
+					"VisualStudioExptTeam.vscodeintellicode"
 				]
 		}
 	},

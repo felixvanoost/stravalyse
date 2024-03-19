@@ -1,0 +1,19 @@
+{
+    "folders": [{
+        "path": "./"
+    }],
+    "settings": {
+        "cSpell.allowCompoundWords": true,
+        "cSpell.language": "en-GB",
+        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.formatOnSave": true,
+        "editor.rulers": [100],
+        "problems.autoReveal": true,
+        "python.analysis.inlayHints.functionReturnTypes": true,
+        "python.analysis.inlayHints.variableTypes": true,
+        "cSpell.words": [
+            "strava",
+            "stravalyse"
+        ]
+    }
+}
