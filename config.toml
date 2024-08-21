@@ -1,10 +1,9 @@
 # Configuration file for the Strava Analysis Tool.
 
 [paths]
-strava_tokens_file = 'Credentials/Tokens.txt'
-here_creds_file = 'Credentials/credentials.properties'
-activity_data_file = 'Data/StravaActivityData.json'
-geo_data_file = 'Data/StravaGeoData.geojson'
+strava_tokens_file = 'tokens.txt'
+activity_data_file = 'data/strava-activities.json'
+geo_data_file = 'data/strava_activities.geojson'
 
 [data]
 enable_reverse_geocoding = true

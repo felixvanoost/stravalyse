@@ -155,7 +155,8 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path,
                 new_activities_df['start_date_local'], utc=True)
 
             # Append the new activities to the existing DataFrame
-            activity_df_updated = activity_df.append(new_activities_df, ignore_index=True)
+            activity_df_updated = pandas.concat(
+                [activity_df, new_activities_df], ignore_index=True)
 
             # Write the updated activity data to the Strava activities file
             _write_activity_data_to_file(file_path, activity_df_updated)

@@ -159,8 +159,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# Strava and HERE credentials
-/credentials
+# Stravalyse credentials
+tokens.txt
 
 # Strava activity data
-/Data
+/data

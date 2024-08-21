@@ -1,8 +1,8 @@
 """ strava_analysis_tool.py
 
-Main module for the Strava Analysis Tool.
+Main module for Stravalyse.
 
-Felix van Oost 2022
+Felix van Oost 2024
 """
 
 # Standard library
@@ -17,7 +17,6 @@ import toml
 
 # Local
 import analysis
-import here_xyz
 import geo
 import strava_data
 
@@ -27,7 +26,7 @@ CONFIG_FILE_PATH = 'config.toml'
 
 def main():
     """
-    Main method for the Strava Analysis Tool.
+    Main method for Stravalyse.
     """
 
     parser = argparse.ArgumentParser(description=__doc__)
@@ -87,7 +86,8 @@ def main():
 
     # Get a list of detailed data for all Strava activities
     activity_df = strava_data.get_activity_data(pathlib.Path(config['paths']['strava_tokens_file']),
-                                                pathlib.Path(config['paths']['activity_data_file']),
+                                                pathlib.Path(
+                                                    config['paths']['activity_data_file']),
                                                 args.refresh_data,
                                                 config['data']['enable_reverse_geocoding'])
 
@@ -96,7 +96,8 @@ def main():
 
         if args.date_range_start is not None:
             # Add timezone information to the start date
-            args.date_range_start = args.date_range_start.replace(tzinfo=datetime.timezone.utc)
+            args.date_range_start = args.date_range_start.replace(
+                tzinfo=datetime.timezone.utc)
 
             # Add the start date to the date mask
             date_mask = (date_mask &
@@ -104,7 +105,8 @@ def main():
 
         if args.date_range_end is not None:
             # Add timezone information to the end date
-            args.date_range_end = args.date_range_end.replace(tzinfo=datetime.timezone.utc)
+            args.date_range_end = args.date_range_end.replace(
+                tzinfo=datetime.timezone.utc)
 
             if args.date_range_start is not None and args.date_range_end < args.date_range_start:
                 sys.exit('[ERROR]: End date must be later than start date')
@@ -127,9 +129,11 @@ def main():
         if args.export_upload_geo_data:
             # Upload the geospatial data to HERE
             here_xyz.upload_geo_data(
-            geo_data_file_path=pathlib.Path(config['paths']['geo_data_file']),
-            here_creds_file_path=pathlib.Path(config['paths']['here_creds_file']),
-            refresh=args.refresh_data
+                geo_data_file_path=pathlib.Path(
+                    config['paths']['geo_data_file']),
+                here_creds_file_path=pathlib.Path(
+                    config['paths']['here_creds_file']),
+                refresh=args.refresh_data
             )
 
     if args.activity_count_plot:
@@ -154,7 +158,8 @@ def main():
                                                 config['analysis']['plot_colour_palette'])
         else:
             print("Reverse geocoding must be enabled to generate this plot.",
-                  f"Set 'enable_reverse_geocoding' in {CONFIG_FILE_PATH} to 'true',",
+                  f"Set 'enable_reverse_geocoding' in {
+                      CONFIG_FILE_PATH} to 'true',",
                   "then refresh the activity data using the argument '-r'.")
 
     if args.moving_time_heatmap:

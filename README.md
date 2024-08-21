@@ -1,8 +1,8 @@
-# Strava Analysis Tool
+# Stravalyse
 A Python tool to analyse and display Strava activity data.
 
 ## Introduction
-The Strava Analysis Tool tool aims to use the data collected by Strava to offer a new insight into your activities and workouts. Its original purpose was to create a personal activity heatmap (similar to the paid Strava feature for Summit members), but now encompasses a greater variety of data analysis and visualization options.
+Stravalyse aims to use the data collected by Strava to offer a new insight into your activities and workouts. Its original purpose was to create a personal activity heatmap (similar to the paid Strava feature for Summit members), but now encompasses a greater variety of data analysis and visualization options.
 
 A full list of features and known issues is covered in the notes for each release.
 
@@ -10,8 +10,6 @@ A full list of features and known issues is covered in the notes for each releas
 
 ### 1. Python + Dependencies
 The tool is developed with Python 3.9. Its dependencies are tracked in `requirements.txt` (for Pip) and `environment.yml` (for the [Anaconda](https://www.anaconda.com/distribution/) distribution).
-
-Anaconda is recommended for Windows users as it comes pre-installed with many of the required packages. It is also the preferred method for installing `GeoPandas`, which is leveraged for the processing and exporting of geospatial activity data. See the GeoPandas [Installation](http://geopandas.org/install.html) page for more information.
 
 #### Option 1: Environment setup using Python
 
