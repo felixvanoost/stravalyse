@@ -16,10 +16,10 @@ dependencies = [
     "matplotlib>=3.8",
     "pandas>=2.2",
     "polyline>=2.0",
+    "python-dotenv>=1.0",
     "seaborn>=0.13",
     "stravalib>=1.6",
-    "toml>=0.10",
-    "xyzspaces==0.7.2"]
+    "toml>=0.10"]
 [project.scripts]
 stravalyse = "stravalyse.stravalyse:main"
 

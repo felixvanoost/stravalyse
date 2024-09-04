@@ -1,6 +1,6 @@
 """strava_auth.py
 
-Authenticates access to the Strava v3 API using OAuth2.
+Authenticates access to the Strava API using OAuth2.
 
 Felix van Oost 2024
 """
@@ -29,7 +29,7 @@ def _read_tokens_from_file(file_path: pathlib.Path) -> AccessInfo:
     An empty dictionary if the file cannot be read from successfully.
     """
 
-    print(f"[Strava]: Reading authentication tokens from '{file_path}'")
+    print(f"Reading authentication tokens from '{file_path}'")
 
     tokens: AccessInfo = {}
 
@@ -45,7 +45,7 @@ def _read_tokens_from_file(file_path: pathlib.Path) -> AccessInfo:
                 else:
                     pass
     except IOError:
-        print('[Strava]: No authentication tokens found')
+        print('No authentication tokens found')
 
     return tokens
 
@@ -59,7 +59,7 @@ def _write_tokens_to_file(file_path: pathlib.Path, tokens: AccessInfo):
     tokens - The tokens to write to the file.
     """
 
-    print(f"[Strava]: Writing authentication tokens to '{file_path}'")
+    print(f"Writing authentication tokens to '{file_path}'")
 
     # Delete the file to remove any expired tokens
     try:
@@ -86,11 +86,11 @@ def _get_initial_tokens(client: Client, client_id: int, client_secret: str) -> A
         time.
         """
 
-    print('[Strava]: Getting initial authentication tokens')
+    print('Getting initial authentication tokens')
 
     # Generate the authorization URL and open it in a browser
     url = client.authorization_url(client_id=client_id,
-                                   redirect_uri='http://localhost')
+                                   redirect_uri='http://localhost', scope=['activity:read_all', 'profile:read_all'])
     webbrowser.open(url)
 
     # TODO: Get the authorization code back from the response automatically. Currently, the code
@@ -105,44 +105,38 @@ def _get_initial_tokens(client: Client, client_id: int, client_secret: str) -> A
     return token_response
 
 
-def get_access_token(file_path: pathlib.Path) -> str:
+def authenticate(tokens_file_path: pathlib.Path) -> Client:
     """
-    Obtain and return an OAuth2 access token for the Strava API.
+    Authenticate the given stravalib client with the Strava API.
 
     Arguments:
-    file_path - The path of the file to store the access tokens to.
+    tokens_file_path - The path of the file to store the Strava access tokens in.
 
     Return:
-    The access token as a string if access to the API is successfully
-    authenticated.
-    None if an access token cannot be generated.
+    A stravalib Client.
     """
 
     load_dotenv()
-
     client_id = os.environ.get('STRAVA_CLIENT_ID')
     client_secret = os.environ.get('STRAVA_CLIENT_SECRET')
 
-    client = Client()
-
     # Read the authentication tokens and expiry time from the file
-    existing_tokens = _read_tokens_from_file(file_path)
+    existing_tokens = _read_tokens_from_file(tokens_file_path)
     if existing_tokens:
         # Refresh the tokens if they have expired and write the new tokens to the file
-        if int(existing_tokens['expires_at']) <= time.time():
+        if time.time() >= int(existing_tokens['expires_at']):
+            client = Client()
             new_tokens = client.refresh_access_token(client_id=client_id,
                                                      client_secret=client_secret,
                                                      refresh_token=existing_tokens['refresh_token'])
-            _write_tokens_to_file(file_path, new_tokens)
-            access_token = new_tokens['access_token']
+            _write_tokens_to_file(tokens_file_path, new_tokens)
         else:
-            access_token = existing_tokens['access_token']
+            client = Client(access_token=existing_tokens['access_token'])
     else:
         # Get the initial authentication tokens and write them to the file
+        client = Client()
         initial_tokens = _get_initial_tokens(client, client_id, client_secret)
-        _write_tokens_to_file(file_path, initial_tokens)
-        access_token = initial_tokens['access_token']
+        _write_tokens_to_file(tokens_file_path, initial_tokens)
 
-    print('[Strava]: Access to the API authenticated')
-
-    return access_token
+    print('Access to the API authenticated')
+    return client

@@ -13,11 +13,13 @@ import sys
 
 # Third-party
 import pandas
+from stravalib import Client
 import toml
 
 # Local
 import analysis
 import geo
+import strava_auth
 import strava_data
 
 # Configuration file path
@@ -84,12 +86,15 @@ def main():
     # Configure pandas to display float values to 2 decimal places
     pandas.options.display.float_format = "{:,.2f}".format
 
+    # Authenticate with the Strava API
+    client: Client = strava_auth.authenticate(pathlib.Path(
+        config['paths']['strava_tokens_file']))
+
     # Get a list of detailed data for all Strava activities
-    activity_df = strava_data.get_activity_data(pathlib.Path(config['paths']['strava_tokens_file']),
+    activity_df = strava_data.get_activity_data(client,
                                                 pathlib.Path(
                                                     config['paths']['activity_data_file']),
-                                                args.refresh_data,
-                                                config['data']['enable_reverse_geocoding'])
+                                                args.refresh_data)
 
     if args.date_range_start is not None or args.date_range_end is not None:
         date_mask = [True] * len(activity_df)

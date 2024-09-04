@@ -2,10 +2,6 @@
 
 Exports geospatial data for all Strava activities in GeoJSON format.
 
-Functions:
-get_address()
-export_geo_data_file()
-
 Felix van Oost 2021
 """
 
@@ -54,24 +50,6 @@ def _create_shapely_point(coordinates: pandas.Series) -> Point:
     return [Point(y, x) for x, y in coordinates]
 
 
-def get_address(coordinates: list) -> dict:
-    """
-    Get the address of a location from the given coordinates using reverse
-    geocoding.
-
-    Arguments:
-    coordinates - The coordinates to convert into an address.
-    """
-
-    # Use the OpenStreetMap Nominatim service
-    geolocator = Nominatim(user_agent="Strava Analysis Tool", timeout=10)
-
-    # Get the address for the given coordinates using the reverse geocoder
-    address = geolocator.reverse(coordinates).raw['address']
-
-    return address
-
-
 def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
     """
     Export a GeoJSON-encoded file of geospatial data from all activities.
@@ -97,28 +75,29 @@ def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
 
     # Format the activity start dates and moving / elapsed times
     activity_map_df.loc[:, 'moving_time_formatted'] = (activity_map_df['moving_time']
-        .apply(lambda x: str(datetime.timedelta(seconds=x))))
+                                                       .apply(lambda x: str(datetime.timedelta(seconds=x))))
     activity_map_df.loc[:, 'elapsed_time_formatted'] = (activity_map_df['elapsed_time']
-        .apply(lambda x: str(datetime.timedelta(seconds=x))))
+                                                        .apply(lambda x: str(datetime.timedelta(seconds=x))))
 
     # Convert the activity polylines into coordinates
     activity_map_df.loc[:, 'map_coordinates'] = (activity_map_df.loc[:, 'map']
-                                                        .apply(_decode_polyline))
+                                                 .apply(_decode_polyline))
 
     # Select only activities with geospatial data
     activity_map_df = activity_map_df.loc[activity_map_df['map_coordinates']
-                                                        .isnull() == False]
+                                          .isnull() == False]
 
     # Convert the coordinates into Shapely points
     activity_map_df.loc[:, 'map_points'] = (activity_map_df.loc[:, 'map_coordinates']
-                                                   .apply(_create_shapely_point))
+                                            .apply(_create_shapely_point))
 
     # Convert the Shapely points into LineStrings
     activity_map_df.loc[:, 'map_linestring'] = (activity_map_df.loc[:, 'map_points']
-                                                       .apply(LineString))
+                                                .apply(LineString))
 
     # Convert the activity distances from m to km
-    activity_map_df.loc[:, 'distance'] = activity_map_df.loc[:, 'distance'] / 1000
+    activity_map_df.loc[:,
+                        'distance'] = activity_map_df.loc[:, 'distance'] / 1000
 
     # Create a pandas GeoDataFrame from the activities map DataFrame and
     # format the column names

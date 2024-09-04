@@ -1,33 +1,20 @@
 """strava_data.py
 
-Gets and stores Strava athlete and activity data using the Strava v3 API.
+Gets and stores Strava athlete and activity data using the Strava API.
 
-Functions:
-get_activity_data()
-
-Felix van Oost 2021
+Felix van Oost 2024
 """
 
 # Standard library
-import os
 import pathlib
-import sys
-import time
+from datetime import datetime
 
 # Third-party
-import pandas
-
-# Local
-sys.path.append(os.path.abspath('API'))
-import swagger_client
-import strava_auth
-import geo
+import pandas as pd
+from stravalib import Client
 
 
-API_RATE_LIMIT_ERROR = 429
-
-
-def _read_activity_data_from_file(file_path: pathlib.Path) -> pandas.DataFrame:
+def _read_activity_data_from_file(file_path: pathlib.Path) -> pd.DataFrame:
     """
     Read the activity data from a file and return it as a pandas DataFrame.
 
@@ -39,20 +26,20 @@ def _read_activity_data_from_file(file_path: pathlib.Path) -> pandas.DataFrame:
     An empty DataFrame if the file cannot be read from successfully.
     """
 
-    activity_df = pandas.DataFrame()
+    activity_df = pd.DataFrame()
 
     try:
-        activity_df = pandas.read_json(file_path, lines=True, orient='records',
-                                       convert_dates=['start_date', 'start_date_local'])
+        activity_df = pd.read_json(file_path, lines=True, orient='records',
+                                   convert_dates=['start_date', 'start_date_local'])
 
-        print("[Strava]: Read {} activities from '{}'".format(len(activity_df), file_path))
+        print(f"Read {len(activity_df)} activities from '{file_path}'")
     except (ValueError, TypeError, AssertionError):
-        print("[Strava]: Could not read activity data from '{}'".format(file_path))
+        print(f"[Strava]: Could not read activity data from '{file_path}'")
 
     return activity_df
 
 
-def _write_activity_data_to_file(file_path: pathlib.Path, activity_df: pandas.DataFrame):
+def _write_activity_data_to_file(file_path: pathlib.Path, activity_df: pd.DataFrame) -> None:
     """
     Write the activity data to a file in JSON format.
 
@@ -61,17 +48,18 @@ def _write_activity_data_to_file(file_path: pathlib.Path, activity_df: pandas.Da
     activity_df - A pandas DataFrame containing the activity data.
     """
 
-    print("[Strava]: Writing activity data to '{}'".format(file_path))
+    print(f"Writing activity data to '{file_path}'")
 
     # Create the output directory if it doesn't already exist
     file_dir = pathlib.Path(pathlib.Path.cwd() / file_path).parent
     file_dir.mkdir(parents=True, exist_ok=True)
 
     # Write the activity DataFrame to the file
-    activity_df.to_json(file_path, lines=True, orient='records', date_format='iso')
+    activity_df.to_json(file_path, lines=True,
+                        orient='records', date_format='iso')
 
 
-def _get_last_activity_start_time(activity_df: pandas.DataFrame) -> int:
+def _get_last_activity_start_time(activity_df: pd.DataFrame) -> datetime:
     """
     Get and return the start time of the last activity in the given pandas DataFrame.
 
@@ -79,22 +67,20 @@ def _get_last_activity_start_time(activity_df: pandas.DataFrame) -> int:
     activity_df - A pandas DataFrame containing the activity data.
 
     Return:
-    The start time of the last activity in the DataFrame as an POSIX timestamp.
-    0 if the DataFrame is empty.
+    The start time of the last activity in the DataFrame as a datetime object.
     """
 
-    last_activity_time_epoch = 0
-
-    if not activity_df.empty:
+    if activity_df.empty:
+        last_activity_time = "1970-01-01"
+    else:
         # Get the start time of the last activity in the DataFrame
-        last_activity_time_epoch = int(activity_df.iloc[-1]['start_date'].timestamp())
+        last_activity_time = activity_df.iloc[-1]['start_date']
 
-    return last_activity_time_epoch
+    return last_activity_time
 
 
-def _update_activity_data(access_token: str, file_path: pathlib.Path,
-                          activity_df: pandas.DataFrame,
-                          enable_reverse_geocoding: bool) -> pandas.DataFrame:
+def _update_activity_data(client: Client, file_path: pathlib.Path,
+                          activity_df: pd.DataFrame) -> pd.DataFrame:
     """
     Update the data file and activity DataFrame with any new activities uploaded to Strava since
     the last stored activity.
@@ -102,60 +88,36 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path,
     Arguments:
     access_token - An OAuth2 access token for the Strava v3 API.
     activity_df - A pandas DataFrame containing the existing activity data.
-    enable_reverse_geocoding - Obtain the start and end address of each activity.
     """
 
-    print('[Strava]: Checking for new activities')
-
-    # Create an instance of the Activities API class
-    api_instance = swagger_client.ActivitiesApi()
-    api_instance.api_client.configuration.access_token = access_token
+    print('Checking for new activities')
 
     # Get the start time of the last stored activity
     start_time = _get_last_activity_start_time(activity_df)
 
-    # Get and store any new activities in pages of 50
     new_activities = []
-    page_count = 1
     try:
-        while True:
-            page = api_instance.get_logged_in_athlete_activities(after=start_time,
-                                                                 page=page_count,
-                                                                 per_page=50)
+        activities = client.get_activities(after=start_time)
 
-            if page:
-                for activity in page:
-                    print("[Strava]: Getting detailed activity data for '{}'".format(activity.name))
+        for activity in activities:
+            print(f"Getting detailed activity data for '{
+                activity.name}'")
 
-                    # Get detailed activity data for each activity in the page amd cpmvert it into
-                    # a dictionary
-                    detailed_data = api_instance.get_activity_by_id(activity.id).to_dict()
-
-                    if enable_reverse_geocoding:
-                        # Get the activity start and end addresses
-                        detailed_data['start_address'] = geo.get_address(detailed_data['start_latlng'])
-                        detailed_data['end_address'] = geo.get_address(detailed_data['end_latlng'])
-
-                    # Convert the detailed activity data into a dictionary and append it to the list
-                    # of activity data from the current page
-                    new_activities.append(detailed_data)
-
-                page_count += 1
-            else:
-                print('[Strava]: No new activities found')
-                break
+            # Get detailed activity data for each activity in the page and store it as a dictionary
+            new_activities.append(
+                client.get_activity(activity.id).model_dump())
     finally:
         if new_activities:
             # Create a DataFrame with the new activities and parse the activity start dates into
             # datetime objects
-            new_activities_df = pandas.DataFrame(new_activities)
-            new_activities_df['start_date'] = pandas.to_datetime(new_activities_df['start_date'],
-                                                                 utc=True)
-            new_activities_df['start_date_local'] = pandas.to_datetime(
+            new_activities_df = pd.DataFrame(new_activities)
+            new_activities_df['start_date'] = pd.to_datetime(new_activities_df['start_date'],
+                                                             utc=True)
+            new_activities_df['start_date_local'] = pd.to_datetime(
                 new_activities_df['start_date_local'], utc=True)
 
             # Append the new activities to the existing DataFrame
-            activity_df_updated = pandas.concat(
+            activity_df_updated = pd.concat(
                 [activity_df, new_activities_df], ignore_index=True)
 
             # Write the updated activity data to the Strava activities file
@@ -166,13 +128,13 @@ def _update_activity_data(access_token: str, file_path: pathlib.Path,
     return activity_df_updated
 
 
-def get_activity_data(tokens_file_path: pathlib.Path, data_file_path: pathlib.Path,
-                      refresh: bool, enable_reverse_geocoding: bool) -> pandas.DataFrame:
+def get_activity_data(client: Client, data_file_path: pathlib.Path,
+                      refresh: bool) -> pd.DataFrame:
     """
     Get and store a pandas DataFrame of detailed data for all Strava activities.
 
     Arguments:
-    tokens_file_path - The path of the file to store the Strava access tokens to.
+    client - The stravalib client.
     data_file_path - The path of the file to store the activity data to.
     refresh - Delete the existing activity data and get a fresh copy.
     enable_reverse_geocoding - Obtain the start and end address of each activity.
@@ -181,13 +143,10 @@ def get_activity_data(tokens_file_path: pathlib.Path, data_file_path: pathlib.Pa
     A pandas DataFrame containing detailed activity data.
     """
 
-    # Get an OAuth2 access token for the Strava v3 API
-    access_token = strava_auth.get_access_token(tokens_file_path)
-
-    activity_df = pandas.DataFrame()
+    activity_df = pd.DataFrame()
 
     if refresh:
-        print('[Strava]: Refreshing activity data')
+        print('Refreshing activity data')
 
         # Force the activity data to be refreshed by deleting the file
         try:
@@ -199,29 +158,6 @@ def get_activity_data(tokens_file_path: pathlib.Path, data_file_path: pathlib.Pa
             # Read the existing activity data from the file
             activity_df = _read_activity_data_from_file(data_file_path)
 
-    if access_token:
-        # Update the activity data
-        while True:
-            try:
-                activity_df = _update_activity_data(access_token, data_file_path, activity_df,
-                                                    enable_reverse_geocoding)
-            except swagger_client.rest.ApiException as error:
-                if error.status == API_RATE_LIMIT_ERROR:
-                    daily_limit = int(error.headers['X-RateLimit-Limit'].split(',')[1])
-                    daily_usage = int(error.headers['X-RateLimit-Usage'].split(',')[1])
-
-                    if daily_usage >= daily_limit:
-                        print('[Strava]: API daily rate limit exceeded. Exiting.')
-                        break
-
-                    print('[Strava]: API 15 minute rate limit exceeded. Retrying in 15 minutes.')
-                    time.sleep(900)
-                else:
-                    print(f'[Error]: {error.status}. Message: {error.reason}.')
-                    break
-            break
-    else:
-        print('[Strava]: Access to the API could not be authenticated.',
-              'Only existing locally-stored activities will be processed.')
+    activity_df = _update_activity_data(client, data_file_path, activity_df)
 
     return activity_df

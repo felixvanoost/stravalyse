@@ -5,9 +5,6 @@ strava_tokens_file = 'tokens.txt'
 activity_data_file = 'data/strava-activities.json'
 geo_data_file = 'data/strava_activities.geojson'
 
-[data]
-enable_reverse_geocoding = true
-
 [analysis]
 plot_colour_palette = "Dark2"
 heatmap_colour_palette = "viridis"
