@@ -2,15 +2,6 @@
 
 Processes and analyses Strava athlete and activity data.
 
-Functions:
-display_summary_statistics()
-display_commute_statistics()
-display_commute_plots()
-display_activity_count_plot()
-display_mean_distance_plot()
-display_moving_time_heatmap()
-display_start_country_plot()
-
 Felix van Oost 2021
 """
 
@@ -27,7 +18,8 @@ def _generate_moving_time_heatmap(*args, **kwargs):
     Generate a heatmap of moving time for a single activity type.
     """
     data = kwargs.pop('data')
-    sns.heatmap(data.pivot(index=args[1], columns=args[0], values=args[2]), **kwargs)
+    sns.heatmap(data.pivot(
+        index=args[1], columns=args[0], values=args[2]), **kwargs)
 
 
 def _generate_start_country_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
@@ -42,7 +34,8 @@ def _generate_start_country_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
     colour_palette - The colour palette to generate the plot with.
     """
 
-    data = activity_data.groupby(['country', 'type']).size().to_frame('count').reset_index()
+    data = activity_data.groupby(
+        ['country', 'type']).size().to_frame('count').reset_index()
 
     # Generate and format the bar plot
     sns.barplot(x='country',
@@ -51,10 +44,12 @@ def _generate_start_country_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
                 data=data,
                 palette=colour_palette,
                 ax=ax)
-    ax.set(title='Activities by country', ylabel='Number of activities', xlabel='Country')
+    ax.set(title='Activities by country',
+           ylabel='Number of activities', xlabel='Country')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45,
+                       horizontalalignment='right')
     ax.grid(b=True, which='major', linewidth=1.0)
     ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
     ax.set_axisbelow(True)
@@ -72,7 +67,8 @@ def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
     """
 
     # Group the activity data by month and calculate the mean distance of each activity type
-    data = activity_data.groupby([activity_data.index.to_period('Y'), 'type']).mean().reset_index()
+    data = activity_data.groupby(
+        [activity_data.index.to_period('Y'), 'type']).mean().reset_index()
 
     # Generate and format the bar plot
     sns.barplot(x='start_date_local',
@@ -81,8 +77,10 @@ def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
                 data=data,
                 palette=colour_palette,
                 ax=ax)
-    ax.set(title='Mean activity distance over time', ylabel='Mean distance (km)', xlabel='Year')
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+    ax.set(title='Mean activity distance over time',
+           ylabel='Mean distance (km)', xlabel='Year')
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45,
+                       horizontalalignment='right')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.grid(b=True, which='major', linewidth=1.0)
@@ -112,8 +110,10 @@ def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes
                 data=data,
                 palette=colour_palette,
                 ax=ax)
-    ax.set(title='Activities over time', ylabel='Number of activities', xlabel='Month')
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+    ax.set(title='Activities over time',
+           ylabel='Number of activities', xlabel='Month')
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45,
+                       horizontalalignment='right')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.grid(b=True, which='major', linewidth=1.0)
@@ -141,7 +141,8 @@ def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
                 color=colour_palette[0],
                 ax=ax)
     ax.set(ylabel='Number of commutes', xlabel='Month')
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45,
+                       horizontalalignment='right')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.grid(b=True, which='major', linewidth=1.0)
@@ -183,7 +184,8 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
                  color=colour_palette[1],
                  marker='o',
                  ax=ax_mean)
-    ax_mean.set_ylabel('Average commute distance (km)', color=colour_palette[1])
+    ax_mean.set_ylabel('Average commute distance (km)',
+                       color=colour_palette[1])
 
 
 def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
@@ -198,7 +200,8 @@ def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
     """
 
     # Group the commute data by day
-    data = commute_data.groupby(commute_data.index.to_period('D')).agg({'distance': 'mean'})
+    data = commute_data.groupby(
+        commute_data.index.to_period('D')).agg({'distance': 'mean'})
 
     # Generate and format the line plot
     sns.lineplot(x=data.index.year.value_counts().index,
@@ -292,7 +295,7 @@ def display_start_country_plot(activity_df: pd.DataFrame, colour_palette: list):
 
     # Get the activity start address and extract the country from the dictionary
     activity_df['country'] = pd.DataFrame(activity_df['start_address']
-                             .apply(lambda row: row['country'] if 'country' in row else None))
+                                          .apply(lambda row: row['country'] if 'country' in row else None))
 
     activity_data = activity_df[['type', 'country']].copy()
 
@@ -316,10 +319,12 @@ def display_moving_time_heatmap(activity_df: pd.DataFrame, colour_palette: list,
     colour_palette - The colour palette to generate the heatmap with.
     """
 
-    activity_data = activity_df[['type', 'moving_time', 'start_date_local']].copy()
+    activity_data = activity_df[[
+        'type', 'moving_time', 'start_date_local']].copy()
 
     # Convert the activity moving times from seconds to hours
-    activity_data.loc[:, 'moving_time'] = activity_data.loc[:, 'moving_time'] / 3600
+    activity_data.loc[:, 'moving_time'] = activity_data.loc[:,
+                                                            'moving_time'] / 3600
 
     # Get the range of activity start years and unique activity types in the data set
     year_min = activity_data['start_date_local'].dt.year.min()
@@ -331,7 +336,8 @@ def display_moving_time_heatmap(activity_df: pd.DataFrame, colour_palette: list,
     activity_data.loc[:, 'month'] = activity_data['start_date_local'].dt.month
 
     # Group the activity data by activity type, year, and month
-    activity_data = activity_data.groupby(['type', 'year', 'month']).sum().reset_index()
+    activity_data = activity_data.groupby(
+        ['type', 'year', 'month']).sum().reset_index()
     activity_data = activity_data.set_index(['type', 'year', 'month'])
 
     # Fill in missing values in the activity data
@@ -359,7 +365,8 @@ def display_mean_distance_plot(activity_df: pd.DataFrame, colour_palette: list):
     """
 
     # Create a list of stationary activities to exclude from the plot
-    exclude_list = ['Crossfit', 'RockClimbing', 'WeightTraining', 'Workout', 'Yoga']
+    exclude_list = ['Crossfit', 'RockClimbing',
+                    'WeightTraining', 'Workout', 'Yoga']
 
     # Get only the activity distances, types, and start dates
     activity_data = (activity_df[~activity_df['type'].isin(exclude_list)]
@@ -454,7 +461,8 @@ def display_commute_statistics(activity_df: pd.DataFrame):
     commute_df = activity_df[activity_df['commute'] == True]
 
     if not commute_df.empty:
-        commute_statistics = commute_df.groupby('type').apply(_generate_commute_statistics)
+        commute_statistics = commute_df.groupby(
+            'type').apply(_generate_commute_statistics)
 
         print('Commute statistics:')
         print()
@@ -473,7 +481,8 @@ def display_summary_statistics(activity_df: pd.DataFrame):
     """
 
     if not activity_df.empty:
-        summary_statistics = activity_df.groupby('type').apply(_generate_summary_statistics)
+        summary_statistics = activity_df.groupby(
+            'type').apply(_generate_summary_statistics)
 
         print()
         print('Summary statistics:')

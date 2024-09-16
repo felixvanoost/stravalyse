@@ -116,7 +116,9 @@ def authenticate(tokens_file_path: pathlib.Path) -> Client:
     A stravalib Client.
     """
 
-    load_dotenv()
+    dotenv_path = pathlib.Path().resolve() / ".env"
+    load_dotenv(str(dotenv_path))
+
     client_id = os.environ.get('STRAVA_CLIENT_ID')
     client_secret = os.environ.get('STRAVA_CLIENT_SECRET')
 

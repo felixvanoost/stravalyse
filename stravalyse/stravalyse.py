@@ -17,10 +17,10 @@ from stravalib import Client
 import toml
 
 # Local
-import analysis
-import geo
-import strava_auth
-import strava_data
+import stravalyse.analysis as analysis
+import stravalyse.geo as geo
+import stravalyse.strava_auth as strava_auth
+import stravalyse.strava_data as strava_data
 
 # Configuration file path
 CONFIG_FILE_PATH = 'config.toml'
@@ -129,17 +129,8 @@ def main():
 
     if args.export_geo_data or args.export_upload_geo_data:
         # Export the geospatial data from all activities in GeoJSON format
-        geo.export_geo_data_file(config['paths']['geo_data_file'], activity_df)
-
-        if args.export_upload_geo_data:
-            # Upload the geospatial data to HERE
-            here_xyz.upload_geo_data(
-                geo_data_file_path=pathlib.Path(
-                    config['paths']['geo_data_file']),
-                here_creds_file_path=pathlib.Path(
-                    config['paths']['here_creds_file']),
-                refresh=args.refresh_data
-            )
+        geo.export_geo_data_file(
+            config['paths']['geo_data_file'], activity_df)
 
     if args.activity_count_plot:
         # Generate and display a plot of activity counts over time
