@@ -2,8 +2,18 @@
 
 [paths]
 strava_tokens_file = 'tokens.txt'
-activity_data_file = 'data/strava-activities.json'
+activity_data_file = 'data/strava_activities.json'
 geo_data_file = 'data/strava_activities.geojson'
+
+[[data.description_tags]]
+tag_name = 'Boat:'
+column_name = 'boat_type'
+activity_types = ["Sail"]
+
+[[data.description_tags]]
+tag_name = 'Canoe:'
+column_name = 'canoe_type'
+activity_types = ["Canoeing"]
 
 [analysis]
 plot_colour_palette = "Dark2"

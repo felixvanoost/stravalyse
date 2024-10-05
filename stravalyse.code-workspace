@@ -11,7 +11,9 @@
         "problems.autoReveal": true,
         "python.analysis.inlayHints.functionReturnTypes": true,
         "python.analysis.inlayHints.variableTypes": true,
+        "cSpell.caseSensitive": false,
         "cSpell.words": [
+            "mapbox",
             "strava",
             "stravalyse"
         ]

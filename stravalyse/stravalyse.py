@@ -12,7 +12,7 @@ import pathlib
 import sys
 
 # Third-party
-import pandas
+import pandas as pd
 from stravalib import Client
 import toml
 
@@ -84,17 +84,18 @@ def main():
     config = toml.load(CONFIG_FILE_PATH)
 
     # Configure pandas to display float values to 2 decimal places
-    pandas.options.display.float_format = "{:,.2f}".format
+    pd.options.display.float_format = "{:,.2f}".format
 
     # Authenticate with the Strava API
     client: Client = strava_auth.authenticate(pathlib.Path(
         config['paths']['strava_tokens_file']))
 
-    # Get a list of detailed data for all Strava activities
-    activity_df = strava_data.get_activity_data(client,
-                                                pathlib.Path(
-                                                    config['paths']['activity_data_file']),
-                                                args.refresh_data)
+    # Create a pandas DataFrame of detailed Strava activity data
+    activity_df: pd.DataFrame = strava_data.get_activity_data(client,
+                                                              pathlib.Path(
+                                                                  config['paths']['activity_data_file']),
+                                                              config['data']['description_tags'],
+                                                              args.refresh_data)
 
     if args.date_range_start is not None or args.date_range_end is not None:
         date_mask = [True] * len(activity_df)

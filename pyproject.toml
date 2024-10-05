@@ -11,14 +11,13 @@ requires-python = ">=3.9"
 authors = [{name = "Felix van Oost"}]
 dependencies = [
     "geojson>=3.1",
-    "geopandas>=0.14",
-    "geopy>=2.4",
-    "matplotlib>=3.8",
+    "geopandas>=1.0",
+    "matplotlib>=3.9",
     "pandas>=2.2",
     "polyline>=2.0",
     "python-dotenv>=1.0",
     "seaborn>=0.13",
-    "stravalib>=1.6",
+    "stravalib>=2.0",
     "toml>=0.10"]
 [project.scripts]
 stravalyse = "stravalyse.stravalyse:main"

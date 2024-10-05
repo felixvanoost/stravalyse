@@ -14,6 +14,32 @@ import pandas as pd
 from stravalib import Client
 
 
+def _parse_description_tag(activity_df: pd.DataFrame, tag_str: str, column_name: str, activity_types: list[str]) -> pd.DataFrame:
+    """
+    Parse the string that follows the given tag (key) in activity descriptions and store it as a new
+    column in the given DataFrame.
+
+    Arguments:
+    activity_df - A pandas DataFrame containing the activity data.
+    tag_str - The tag (key) to search for in the activity descriptions.
+    column_name - The name of the column in the DataFrame that will contain the parsed data.
+    activity_types - The types of activities that contain the given tag.
+
+    Return:
+    The activity_df with the new column added.
+    """
+
+    # Get a Series of descriptions for the applicable activity types
+    activity_desc = activity_df.loc[activity_df['sport_type'].isin(
+        activity_types)]['description']
+
+    # Parse the tag from the activity descriptions and store it as a new column in the DataFrame
+    activity_df[column_name] = activity_desc.apply(
+        lambda desc: desc.partition(tag_str)[2].splitlines()[0] if tag_str in desc else None)
+
+    return activity_df
+
+
 def _read_activity_data_from_file(file_path: pathlib.Path) -> pd.DataFrame:
     """
     Read the activity data from a file and return it as a pandas DataFrame.
@@ -128,7 +154,7 @@ def _update_activity_data(client: Client, file_path: pathlib.Path,
     return activity_df_updated
 
 
-def get_activity_data(client: Client, data_file_path: pathlib.Path,
+def get_activity_data(client: Client, data_file_path: pathlib.Path, description_tags: list[dict],
                       refresh: bool) -> pd.DataFrame:
     """
     Get and store a pandas DataFrame of detailed data for all Strava activities.
@@ -136,8 +162,8 @@ def get_activity_data(client: Client, data_file_path: pathlib.Path,
     Arguments:
     client - The stravalib client.
     data_file_path - The path of the file to store the activity data to.
+    description_tags - List of description tags to parse.
     refresh - Delete the existing activity data and get a fresh copy.
-    enable_reverse_geocoding - Obtain the start and end address of each activity.
 
     Return:
     A pandas DataFrame containing detailed activity data.
@@ -159,5 +185,10 @@ def get_activity_data(client: Client, data_file_path: pathlib.Path,
             activity_df = _read_activity_data_from_file(data_file_path)
 
     activity_df = _update_activity_data(client, data_file_path, activity_df)
+
+    if description_tags:
+        for tag in description_tags:
+            _parse_description_tag(
+                activity_df, tag['tag_name'], tag['column_name'], tag['activity_types'])
 
     return activity_df
