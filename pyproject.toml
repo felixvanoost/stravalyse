@@ -11,6 +11,7 @@ requires-python = ">=3.9"
 authors = [{name = "Felix van Oost"}]
 dependencies = [
     "geojson>=3.1",
+    "geopy>=2.4",
     "geopandas>=1.0",
     "matplotlib>=3.9",
     "pandas>=2.2",

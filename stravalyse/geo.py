@@ -2,7 +2,7 @@
 
 Exports geospatial data for all Strava activities in GeoJSON format.
 
-Felix van Oost 2021
+Felix van Oost 2024
 """
 
 # Standard library
@@ -10,6 +10,7 @@ import datetime
 
 # Third-party
 from geopandas import GeoDataFrame
+from geopy.geocoders import Nominatim
 import pandas
 import polyline
 from shapely.geometry import Point, LineString
@@ -47,6 +48,21 @@ def _create_shapely_point(coordinates: pandas.Series) -> Point:
     """
 
     return [Point(y, x) for x, y in coordinates]
+
+
+def get_address(coordinates: list) -> dict:
+    """
+    Get the address of a location from the given coordinates using the Nominatim reverse geocoding
+    service.
+
+    Arguments:
+    coordinates - The coordinates to convert into an address.
+    """
+
+    geolocator = Nominatim(user_agent="Stravalyse", timeout=5)
+    address = geolocator.reverse(coordinates).raw['address']
+
+    return address
 
 
 def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):

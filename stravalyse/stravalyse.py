@@ -95,6 +95,7 @@ def main():
                                                               pathlib.Path(
                                                                   config['paths']['activity_data_file']),
                                                               config['data']['description_tags'],
+                                                              config["data"]['reverse_geocoding'],
                                                               args.refresh_data)
 
     if args.date_range_start is not None or args.date_range_end is not None:

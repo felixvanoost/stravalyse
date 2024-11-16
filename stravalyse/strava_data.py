@@ -13,6 +13,9 @@ from datetime import datetime
 import pandas as pd
 from stravalib import Client
 
+# Local
+import stravalyse.geo as geo
+
 
 def _parse_description_tag(activity_df: pd.DataFrame, tag_str: str, column_name: str, activity_types: list[str]) -> pd.DataFrame:
     """
@@ -105,7 +108,7 @@ def _get_last_activity_start_time(activity_df: pd.DataFrame) -> datetime:
     return last_activity_time
 
 
-def _update_activity_data(client: Client, file_path: pathlib.Path,
+def _update_activity_data(client: Client, file_path: pathlib.Path, reverse_geocoding: bool,
                           activity_df: pd.DataFrame) -> pd.DataFrame:
     """
     Update the data file and activity DataFrame with any new activities uploaded to Strava since
@@ -113,6 +116,7 @@ def _update_activity_data(client: Client, file_path: pathlib.Path,
 
     Arguments:
     access_token - An OAuth2 access token for the Strava v3 API.
+    reverse_geocoding - Get and store the activity start and end addresses.
     activity_df - A pandas DataFrame containing the existing activity data.
     """
 
@@ -130,8 +134,17 @@ def _update_activity_data(client: Client, file_path: pathlib.Path,
                 activity.name}'")
 
             # Get detailed activity data for each activity in the page and store it as a dictionary
-            new_activities.append(
-                client.get_activity(activity.id).model_dump())
+            detailed_data = client.get_activity(activity.id).model_dump()
+
+            if reverse_geocoding:
+                # Get the activity start and end addresses
+                detailed_data['start_address'] = geo.get_address(
+                    detailed_data['start_latlng'])
+                detailed_data['end_address'] = geo.get_address(
+                    detailed_data['end_latlng'])
+
+            new_activities.append(detailed_data)
+
     finally:
         if new_activities:
             # Create a DataFrame with the new activities and parse the activity start dates into
@@ -155,7 +168,8 @@ def _update_activity_data(client: Client, file_path: pathlib.Path,
 
 
 def get_activity_data(client: Client, data_file_path: pathlib.Path, description_tags: list[dict],
-                      refresh: bool) -> pd.DataFrame:
+                      reverse_geocoding: bool = False,
+                      refresh: bool = False) -> pd.DataFrame:
     """
     Get and store a pandas DataFrame of detailed data for all Strava activities.
 
@@ -163,6 +177,7 @@ def get_activity_data(client: Client, data_file_path: pathlib.Path, description_
     client - The stravalib client.
     data_file_path - The path of the file to store the activity data to.
     description_tags - List of description tags to parse.
+    reverse_geocoding - Get and store the activity start and end addresses.
     refresh - Delete the existing activity data and get a fresh copy.
 
     Return:
@@ -184,7 +199,8 @@ def get_activity_data(client: Client, data_file_path: pathlib.Path, description_
             # Read the existing activity data from the file
             activity_df = _read_activity_data_from_file(data_file_path)
 
-    activity_df = _update_activity_data(client, data_file_path, activity_df)
+    activity_df = _update_activity_data(
+        client, data_file_path, reverse_geocoding, activity_df)
 
     if description_tags:
         for tag in description_tags:
