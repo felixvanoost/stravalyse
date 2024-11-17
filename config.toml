@@ -7,6 +7,7 @@ geo_data_file = 'data/strava_activities.geojson'
 
 [data]
 reverse_geocoding = true
+update_existing_activities = true
 
 [[data.description_tags]]
 tag_name = 'Boat:'

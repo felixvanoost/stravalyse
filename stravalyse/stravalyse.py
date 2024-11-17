@@ -1,4 +1,4 @@
-""" strava_analysis_tool.py
+""" stravalyse.py
 
 Main module for Stravalyse.
 
@@ -7,14 +7,14 @@ Felix van Oost 2024
 
 # Standard library
 import argparse
-import datetime
-import pathlib
+from datetime import datetime
+from pathlib import Path
 import sys
 
 # Third-party
 import pandas as pd
 from stravalib import Client
-import toml
+from toml import load
 
 # Local
 import stravalyse.analysis as analysis
@@ -70,32 +70,31 @@ def main():
                         action='store',
                         default=None,
                         required=False,
-                        type=datetime.datetime.fromisoformat,
+                        type=datetime.fromisoformat,
                         help='Specify the start of a date range in ISO format')
     parser.add_argument('--date_range_end',
                         action='store',
                         default=None,
                         required=False,
-                        type=datetime.datetime.fromisoformat,
+                        type=datetime.fromisoformat,
                         help='Specify the end of a date range in ISO format')
     args = parser.parse_args()
 
     # Load the TOML configuration
-    config = toml.load(CONFIG_FILE_PATH)
+    config = load(CONFIG_FILE_PATH)
 
     # Configure pandas to display float values to 2 decimal places
     pd.options.display.float_format = "{:,.2f}".format
 
     # Authenticate with the Strava API
-    client: Client = strava_auth.authenticate(pathlib.Path(
+    client: Client = strava_auth.authenticate(Path(
         config['paths']['strava_tokens_file']))
 
     # Create a pandas DataFrame of detailed Strava activity data
     activity_df: pd.DataFrame = strava_data.get_activity_data(client,
-                                                              pathlib.Path(
+                                                              Path(
                                                                   config['paths']['activity_data_file']),
-                                                              config['data']['description_tags'],
-                                                              config["data"]['reverse_geocoding'],
+                                                              config['data'],
                                                               args.refresh_data)
 
     if args.date_range_start is not None or args.date_range_end is not None:

@@ -6,7 +6,7 @@ Felix van Oost 2024
 """
 
 # Standard library
-import pathlib
+from pathlib import Path
 from datetime import datetime
 
 # Third-party
@@ -43,7 +43,41 @@ def _parse_description_tag(activity_df: pd.DataFrame, tag_str: str, column_name:
     return activity_df
 
 
-def _read_activity_data_from_file(file_path: pathlib.Path) -> pd.DataFrame:
+def _get_activity_start_addr(activity) -> pd.DataFrame:
+    """
+    Get the activity start address.
+
+    Arguments:
+    activity - The activity to get the start address for.
+    """
+
+    if activity['start_address'] is None and activity['start_latlng'] is not None:
+        print(f"Getting start address for {activity['name']}")
+        address = geo.get_address(activity['start_latlng'])
+    else:
+        address = activity['start_address']
+
+    return address
+
+
+def _get_activity_end_addr(activity) -> pd.DataFrame:
+    """
+    Get the activity end address.
+
+    Arguments:
+    activity - The activity to get the end address for.
+    """
+
+    if activity['end_address'] is None and activity['end_latlng'] is not None:
+        print(f"Getting end address for {activity['name']}")
+        address = geo.get_address(activity['end_latlng'])
+    else:
+        address = activity['end_address']
+
+    return address
+
+
+def _read_activity_data_from_file(file_path: Path) -> pd.DataFrame:
     """
     Read the activity data from a file and return it as a pandas DataFrame.
 
@@ -63,12 +97,12 @@ def _read_activity_data_from_file(file_path: pathlib.Path) -> pd.DataFrame:
 
         print(f"Read {len(activity_df)} activities from '{file_path}'")
     except (ValueError, TypeError, AssertionError):
-        print(f"[Strava]: Could not read activity data from '{file_path}'")
+        print(f"Could not read activity data from '{file_path}'")
 
     return activity_df
 
 
-def _write_activity_data_to_file(file_path: pathlib.Path, activity_df: pd.DataFrame) -> None:
+def _write_activity_data_to_file(file_path: Path, activity_df: pd.DataFrame) -> None:
     """
     Write the activity data to a file in JSON format.
 
@@ -80,7 +114,7 @@ def _write_activity_data_to_file(file_path: pathlib.Path, activity_df: pd.DataFr
     print(f"Writing activity data to '{file_path}'")
 
     # Create the output directory if it doesn't already exist
-    file_dir = pathlib.Path(pathlib.Path.cwd() / file_path).parent
+    file_dir = Path(Path.cwd() / file_path).parent
     file_dir.mkdir(parents=True, exist_ok=True)
 
     # Write the activity DataFrame to the file
@@ -108,7 +142,7 @@ def _get_last_activity_start_time(activity_df: pd.DataFrame) -> datetime:
     return last_activity_time
 
 
-def _update_activity_data(client: Client, file_path: pathlib.Path, reverse_geocoding: bool,
+def _update_activity_data(client: Client, file_path: Path, reverse_geocoding: bool,
                           activity_df: pd.DataFrame) -> pd.DataFrame:
     """
     Update the data file and activity DataFrame with any new activities uploaded to Strava since
@@ -137,7 +171,11 @@ def _update_activity_data(client: Client, file_path: pathlib.Path, reverse_geoco
             detailed_data = client.get_activity(activity.id).model_dump()
 
             if reverse_geocoding:
-                # Get the activity start and end addresses
+                # Get the activity start and end addresses. This is done using a reverse geocoder
+                # with low API rate limits, so fetch the addresses per-activity before conversion
+                # into a DataFrame in the otherwise wasted time spent waiting between the Strava API
+                # 15-minute rate limits. This reduces the combined fetch time for activities +
+                # addresses for larger datasets that are frequently rate-limited.
                 detailed_data['start_address'] = geo.get_address(
                     detailed_data['start_latlng'])
                 detailed_data['end_address'] = geo.get_address(
@@ -167,8 +205,7 @@ def _update_activity_data(client: Client, file_path: pathlib.Path, reverse_geoco
     return activity_df_updated
 
 
-def get_activity_data(client: Client, data_file_path: pathlib.Path, description_tags: list[dict],
-                      reverse_geocoding: bool = False,
+def get_activity_data(client: Client, data_file_path: Path, config_data: dict,
                       refresh: bool = False) -> pd.DataFrame:
     """
     Get and store a pandas DataFrame of detailed data for all Strava activities.
@@ -176,8 +213,7 @@ def get_activity_data(client: Client, data_file_path: pathlib.Path, description_
     Arguments:
     client - The stravalib client.
     data_file_path - The path of the file to store the activity data to.
-    description_tags - List of description tags to parse.
-    reverse_geocoding - Get and store the activity start and end addresses.
+    config_data - The configuration data.
     refresh - Delete the existing activity data and get a fresh copy.
 
     Return:
@@ -196,14 +232,23 @@ def get_activity_data(client: Client, data_file_path: pathlib.Path, description_
             pass
     else:
         if data_file_path.is_file():
-            # Read the existing activity data from the file
             activity_df = _read_activity_data_from_file(data_file_path)
 
-    activity_df = _update_activity_data(
-        client, data_file_path, reverse_geocoding, activity_df)
+            # Get start and end addresses for the existing activities
+            if config_data['reverse_geocoding'] and config_data['update_existing_activities']:
+                print('Getting start and end addresses for existing activities')
+                activity_df['start_address'] = activity_df.apply(
+                    _get_activity_start_addr, axis='columns')
+                activity_df['end_address'] = activity_df.apply(
+                    _get_activity_end_addr, axis='columns')
 
-    if description_tags:
-        for tag in description_tags:
+                _write_activity_data_to_file(data_file_path, activity_df)
+
+    activity_df = _update_activity_data(
+        client, data_file_path, config_data['reverse_geocoding'], activity_df)
+
+    if config_data['description_tags']:
+        for tag in config_data['description_tags']:
             _parse_description_tag(
                 activity_df, tag['tag_name'], tag['column_name'], tag['activity_types'])
 

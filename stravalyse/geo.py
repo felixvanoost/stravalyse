@@ -10,13 +10,18 @@ import datetime
 
 # Third-party
 from geopandas import GeoDataFrame
+from geopy.extra.rate_limiter import RateLimiter
 from geopy.geocoders import Nominatim
-import pandas
-import polyline
+from pandas import DataFrame, Series
+from polyline import decode
 from shapely.geometry import Point, LineString
 
 
-def _decode_polyline(x: pandas.Series) -> list:
+geolocator = Nominatim(user_agent="Stravalyse")
+reverse_geocode = RateLimiter(geolocator.reverse, min_delay_seconds=1)
+
+
+def _decode_polyline(x: Series) -> list:
     """
     Convert a Google polyline into a list of coordinates.
 
@@ -31,12 +36,12 @@ def _decode_polyline(x: pandas.Series) -> list:
     if not x['polyline'] or x['polyline'] is None:
         map_coordinates = None
     else:
-        map_coordinates = polyline.decode(x['polyline'])
+        map_coordinates = decode(x['polyline'])
 
     return map_coordinates
 
 
-def _create_shapely_point(coordinates: pandas.Series) -> Point:
+def _create_shapely_point(coordinates: Series) -> Point:
     """
     Convert a pair of coordinates into a Shapely point.
 
@@ -59,13 +64,15 @@ def get_address(coordinates: list) -> dict:
     coordinates - The coordinates to convert into an address.
     """
 
-    geolocator = Nominatim(user_agent="Stravalyse", timeout=5)
-    address = geolocator.reverse(coordinates).raw['address']
+    address = None
+
+    if coordinates:
+        address = reverse_geocode(coordinates).raw['address']
 
     return address
 
 
-def export_geo_data_file(file_path: str, activity_dataframe: pandas.DataFrame):
+def export_geo_data_file(file_path: str, activity_dataframe: DataFrame):
     """
     Export a GeoJSON-encoded file of geospatial data from all activities.
 
