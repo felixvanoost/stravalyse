@@ -7,7 +7,7 @@ Felix van Oost 2024
 
 # Standard library
 import argparse
-from datetime import datetime
+import datetime
 from pathlib import Path
 import sys
 
@@ -70,13 +70,13 @@ def main():
                         action='store',
                         default=None,
                         required=False,
-                        type=datetime.fromisoformat,
+                        type=datetime.datetime.fromisoformat,
                         help='Specify the start of a date range in ISO format')
     parser.add_argument('--date_range_end',
                         action='store',
                         default=None,
                         required=False,
-                        type=datetime.fromisoformat,
+                        type=datetime.datetime.fromisoformat,
                         help='Specify the end of a date range in ISO format')
     args = parser.parse_args()
 
