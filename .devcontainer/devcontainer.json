@@ -7,6 +7,7 @@
 					"ms-python.autopep8",
 					"ms-python.pylint",
 					"ms-python.python",
+					"ms-toolsai.jupyter",
 					"streetsidesoftware.code-spell-checker",
 					"tamasfe.even-better-toml",
 					"VisualStudioExptTeam.vscodeintellicode-completions",

@@ -50,8 +50,8 @@ def _generate_start_country_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45,
                        horizontalalignment='right')
-    ax.grid(b=True, which='major', linewidth=1.0)
-    ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
+    ax.grid(visible=True, which='major', linewidth=1.0)
+    ax.yaxis.grid(visible=True, which='minor', linewidth=0.5)
     ax.set_axisbelow(True)
 
 
@@ -83,8 +83,8 @@ def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
                        horizontalalignment='right')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax.grid(b=True, which='major', linewidth=1.0)
-    ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
+    ax.grid(visible=True, which='major', linewidth=1.0)
+    ax.yaxis.grid(visible=True, which='minor', linewidth=0.5)
     ax.set_axisbelow(True)
 
 
@@ -116,13 +116,13 @@ def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes
                        horizontalalignment='right')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax.grid(b=True, which='major', linewidth=1.0)
-    ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
+    ax.grid(visible=True, which='major', linewidth=1.0)
+    ax.yaxis.grid(visible=True, which='minor', linewidth=0.5)
     ax.set_axisbelow(True)
 
 
 def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
-                                 colour_palette: list):
+                                 colour_palette: sns.color_palette):
     """
     Generate a bar plot of number of commutes per month.
 
@@ -145,13 +145,13 @@ def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
                        horizontalalignment='right')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax.grid(b=True, which='major', linewidth=1.0)
-    ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
+    ax.grid(visible=True, which='major', linewidth=1.0)
+    ax.yaxis.grid(visible=True, which='minor', linewidth=0.5)
     ax.set_axisbelow(True)
 
 
 def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
-                                    colour_palette: list):
+                                    colour_palette: sns.color_palette):
     """
     Generate a line plot of total and mean commute distance per year.
 
@@ -174,8 +174,8 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
     ax.set_ylabel('Total commute distance (km)', color=colour_palette[0])
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax.grid(b=True, which='major', linewidth=1.0)
-    ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
+    ax.grid(visible=True, which='major', linewidth=1.0)
+    ax.yaxis.grid(visible=True, which='minor', linewidth=0.5)
 
     # Generate and format the mean distance line plot
     ax_mean = ax.twinx()
@@ -189,7 +189,7 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
 
 
 def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
-                                colour_palette: list):
+                                colour_palette: sns.color_palette):
     """
     Generate a line plot of commute days per year.
 
@@ -206,14 +206,14 @@ def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
     # Generate and format the line plot
     sns.lineplot(x=data.index.year.value_counts().index,
                  y=data.index.year.value_counts(),
-                 palette=colour_palette,
+                 color=colour_palette[0],
                  marker='o',
                  ax=ax)
     ax.set(ylabel='Commute days', xlabel='Year')
     ax.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
     ax.get_yaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
-    ax.grid(b=True, which='major', linewidth=1.0)
-    ax.yaxis.grid(b=True, which='minor', linewidth=0.5)
+    ax.grid(visible=True, which='major', linewidth=1.0)
+    ax.yaxis.grid(visible=True, which='minor', linewidth=0.5)
 
 
 def _generate_commute_statistics(x: pd.Series) -> pd.Series:
@@ -294,8 +294,12 @@ def display_start_country_plot(activity_df: pd.DataFrame, colour_palette: list):
     # TODO: Exclude virtual activities
 
     # Get the activity start address and extract the country from the dictionary
-    activity_df['country'] = pd.DataFrame(activity_df['start_address']
-                                          .apply(lambda row: row['country'] if 'country' in row else None))
+    activity_df['country'] = pd.DataFrame(
+        activity_df['start_address'].apply(
+            lambda row: row['country'] if row is not None and 'country' in row
+            else None
+        )
+    )
 
     activity_data = activity_df[['type', 'country']].copy()
 
@@ -337,12 +341,12 @@ def display_moving_time_heatmap(activity_df: pd.DataFrame, colour_palette: list,
 
     # Group the activity data by activity type, year, and month
     activity_data = activity_data.groupby(
-        ['type', 'year', 'month']).sum().reset_index()
+        ['type', 'year', 'month']).sum(numeric_only=True).reset_index()
     activity_data = activity_data.set_index(['type', 'year', 'month'])
 
     # Fill in missing values in the activity data
-    years = np.arange(year_min, year_max + 1, dtype=np.int)
-    months = np.arange(1, 12 + 1, dtype=np.int)
+    years = np.arange(year_min, year_max + 1, dtype=int)
+    months = np.arange(1, 12 + 1, dtype=int)
     activity_data = activity_data.reindex(index=pd.MultiIndex.from_product([types, years, months],
                                           names=activity_data.index.names),
                                           fill_value=0)
@@ -443,10 +447,13 @@ def display_commute_plots(activity_df: pd.DataFrame, colour_palette: list):
     # Format the global plot
     plt.suptitle('Commutes', size=16)
 
+    # Parse the colour palette
+    palette = sns.color_palette(colour_palette)
+
     # Generate and display the plots
-    _generate_commute_days_plot(commute_data, ax1, colour_palette)
-    _generate_commute_distance_plot(commute_data, ax2, colour_palette)
-    _generate_commute_count_plot(commute_data, ax3, colour_palette)
+    _generate_commute_days_plot(commute_data, ax1, palette)
+    _generate_commute_distance_plot(commute_data, ax2, palette)
+    _generate_commute_count_plot(commute_data, ax3, palette)
     plt.show()
 
 

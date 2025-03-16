@@ -90,7 +90,8 @@ def _get_initial_tokens(client: Client, client_id: int, client_secret: str) -> A
 
     # Generate the authorization URL and open it in a browser
     url = client.authorization_url(client_id=client_id,
-                                   redirect_uri='http://localhost', scope=['activity:read_all', 'profile:read_all'])
+                                   redirect_uri='http://localhost', scope=['activity:read_all',
+                                                                           'profile:read_all'])
     webbrowser.open(url)
 
     # TODO: Get the authorization code back from the response automatically. Currently, the code

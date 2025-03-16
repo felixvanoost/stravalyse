@@ -184,6 +184,8 @@ def _update_activity_data(client: Client, file_path: Path, reverse_geocoding: bo
             new_activities.append(detailed_data)
 
     finally:
+        print(f'Fetched {len(new_activities)} new activities')
+
         if new_activities:
             # Create a DataFrame with the new activities and parse the activity start dates into
             # datetime objects
