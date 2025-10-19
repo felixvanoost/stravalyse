@@ -2,7 +2,7 @@
 
 Processes and analyses Strava athlete and activity data.
 
-Felix van Oost 2021
+Felix van Oost 2019-2021
 """
 
 # Third-party

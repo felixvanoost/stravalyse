@@ -19,6 +19,7 @@ dependencies = [
     "python-dotenv>=1.0",
     "seaborn>=0.13",
     "stravalib>=2.0",
+    "tippecanoe>=2.27",
     "toml>=0.10"]
 [project.scripts]
 stravalyse = "stravalyse.stravalyse:main"

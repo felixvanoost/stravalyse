@@ -2,7 +2,7 @@
 
 Authenticates access to the Strava API using OAuth2.
 
-Felix van Oost 2024
+Felix van Oost 2019-2024
 """
 
 # Standard library

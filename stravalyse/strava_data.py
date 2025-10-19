@@ -2,7 +2,7 @@
 
 Gets and stores Strava athlete and activity data using the Strava API.
 
-Felix van Oost 2024
+Felix van Oost 2019-2024
 """
 
 # Standard library

@@ -9,6 +9,10 @@ geo_data_file = 'data/strava_activities.geojson'
 reverse_geocoding = true
 update_existing_activities = true
 
+[mapbox]
+tileset_name = 'YOUR_NAME.StravaGeoData'
+tileset_zoom_level = 16
+
 [[data.description_tags]]
 tag_name = 'Boat:'
 column_name = 'boat_type'

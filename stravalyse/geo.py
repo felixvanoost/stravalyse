@@ -2,7 +2,7 @@
 
 Exports geospatial data for all Strava activities in GeoJSON format.
 
-Felix van Oost 2024
+Felix van Oost 2019-2025
 """
 
 # Standard library
@@ -13,6 +13,7 @@ from geopandas import GeoDataFrame
 from geopy.extra.rate_limiter import RateLimiter
 from geopy.geocoders import Nominatim
 from pandas import DataFrame, Series
+from pathlib import Path
 from polyline import decode
 from shapely.geometry import Point, LineString
 
@@ -72,7 +73,7 @@ def get_address(coordinates: list) -> dict:
     return address
 
 
-def export_geo_data_file(file_path: str, activity_dataframe: DataFrame):
+def export_geo_data_file(file_path: Path, activity_dataframe: DataFrame) -> None:
     """
     Export a GeoJSON-encoded file of geospatial data from all activities.
 
@@ -88,41 +89,45 @@ def export_geo_data_file(file_path: str, activity_dataframe: DataFrame):
 
     print('Processing geospatial data')
 
-    # Create a copy of the activity DataFrame containing only real
-    # outdoor (non-trainer and non-virtual) activities
-    exclude_list = ['VirtualRide', 'VirtualRun']
-    activity_map_df = (activity_dataframe.loc[(activity_dataframe['trainer'] == False) &
-                                              (~activity_dataframe['type']
-                                              .isin(exclude_list))].copy())
+    # Create a copy of the activity DataFrame containing only real outdoor (non-trainer and non-
+    # virtual) activities.
+    exclude_list: list[str] = ['VirtualRide', 'VirtualRun']
+    activity_map_df: DataFrame = (activity_dataframe.loc[(activity_dataframe['trainer'] == False) &
+                                                         (~activity_dataframe['type']
+                                                          .isin(exclude_list))].copy())
 
-    # Format the activity start dates and moving / elapsed times
-    activity_map_df.loc[:, 'moving_time_formatted'] = (activity_map_df['moving_time']
-                                                       .apply(lambda x: str(datetime.timedelta(seconds=x))))
-    activity_map_df.loc[:, 'elapsed_time_formatted'] = (activity_map_df['elapsed_time']
-                                                        .apply(lambda x: str(datetime.timedelta(seconds=x))))
+    # Format the activity start dates and moving / elapsed times.
+    activity_map_df.loc[:, 'moving_time_formatted'] = (
+        activity_map_df['moving_time']
+        .apply(lambda x: str(datetime.timedelta(seconds=x)))
+    )
+    activity_map_df.loc[:, 'elapsed_time_formatted'] = (
+        activity_map_df['elapsed_time']
+        .apply(lambda x: str(datetime.timedelta(seconds=x)))
+    )
 
-    # Convert the activity polylines into coordinates
+    # Convert the activity polylines into coordinates.
     activity_map_df.loc[:, 'map_coordinates'] = (activity_map_df.loc[:, 'map']
                                                  .apply(_decode_polyline))
 
-    # Select only activities with geospatial data
+    # Select only activities with geospatial data.
     activity_map_df = activity_map_df.loc[activity_map_df['map_coordinates']
                                           .isnull() == False]
 
-    # Convert the coordinates into Shapely points
+    # Convert the coordinates into Shapely points.
     activity_map_df.loc[:, 'map_points'] = (activity_map_df.loc[:, 'map_coordinates']
                                             .apply(_create_shapely_point))
 
-    # Convert the Shapely points into LineStrings
+    # Convert the Shapely points into LineStrings.
     activity_map_df.loc[:, 'map_linestring'] = (activity_map_df.loc[:, 'map_points']
                                                 .apply(LineString))
 
-    # Convert the activity distances from m to km
+    # Convert the activity distances from m to km.
     activity_map_df.loc[:,
                         'distance'] = activity_map_df.loc[:, 'distance'] / 1000
 
     # Create a pandas GeoDataFrame from the activities map DataFrame and
-    # format the column names
+    # format the column names.
     activity_map_gdf = GeoDataFrame(activity_map_df[['name',
                                                      'id',
                                                      'type',
@@ -138,6 +143,6 @@ def export_geo_data_file(file_path: str, activity_dataframe: DataFrame):
                                      'total_elevation_gain': 'total elevation gain (m)'},
                             inplace=True)
 
-    # Export the GeoDataFrame to a file in GeoJSON format
+    # Export the GeoDataFrame to a file in GeoJSON format.
     print(f'Exporting geospatial data to {file_path}')
     activity_map_gdf.to_file(file_path, driver='GeoJSON', encoding='utf8')

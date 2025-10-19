@@ -4,20 +4,21 @@
     }],
     "settings": {
         "cSpell.allowCompoundWords": true,
-        "cSpell.language": "en-GB",
-        "editor.defaultFormatter": "ms-python.autopep8",
-        "editor.formatOnSave": true,
-        "editor.rulers": [100],
-        "problems.autoReveal": true,
-        "python.analysis.inlayHints.functionReturnTypes": true,
-        "python.analysis.inlayHints.variableTypes": true,
         "cSpell.caseSensitive": false,
+        "cSpell.language": "en-GB",
         "cSpell.words": [
             "dotenv",
             "mapbox",
             "strava",
             "stravalib",
             "stravalyse"
-        ]
+        ],
+        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.formatOnSave": true,
+        "editor.rulers": [100],
+        "problems.autoReveal": true,
+        "python.analysis.inlayHints.functionReturnTypes": true,
+        "python.analysis.inlayHints.variableTypes": true,
+        "python.analysis.typeCheckingMode": "standard"
     }
 }
