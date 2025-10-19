@@ -42,7 +42,7 @@ def _decode_polyline(x: Series) -> list:
     return map_coordinates
 
 
-def _create_shapely_point(coordinates: Series) -> Point:
+def _create_shapely_point(coordinates: Series) -> list[Point]:
     """
     Convert a pair of coordinates into a Shapely point.
 
@@ -143,6 +143,9 @@ def export_geo_data_file(file_path: Path, activity_dataframe: DataFrame) -> None
                                      'total_elevation_gain': 'total elevation gain (m)'},
                             inplace=True)
 
+    # Set the coordinate reference system (CRS) of the GeoDataFrame. Strava uses EPSG:4326 (WGS84).
+    activity_map_gdf: GeoDataFrame = activity_map_gdf.set_crs(epsg=4326)
+
     # Export the GeoDataFrame to a file in GeoJSON format.
-    print(f'Exporting geospatial data to {file_path}')
     activity_map_gdf.to_file(file_path, driver='GeoJSON', encoding='utf8')
+    print(f'Exported geospatial data to {file_path}')
