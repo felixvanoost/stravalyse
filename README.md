@@ -130,9 +130,11 @@ heatmap_column_wrap = 5
 
 ### Mapbox Studio
 
-When using the `-gu` option, Stravalyse generates an `MBTiles` tileset of your activity data and uploads it to Mapbox Studio. From there, you can create a base map with the colour theme of your choice, add your activity data as a layer, and use the included metadata (name, activity type, distance, elevation gain, or description) to format the activity traces however you want. In the following example, the activities are colour-coded by type (mountain biking in red, hiking in blue, and stand-up paddleboarding in black):
+When using the `-gu` option, Stravalyse generates an `MBTiles` tileset of your activity data and uploads it to Mapbox Studio. From there, you can create a base map with the colour theme of your choice, add your activity data as a layer, and use the included metadata (name, activity type, distance, elevation gain, or description) to format the activity traces however you want. In the following examples, the activities are colour-coded by type (mountain biking in red, hiking in blue, stand-up paddleboarding in black, and skiing in purple):
 
-![demo_activity_map](media/demo_activity_map.png)
+![demo_activity_map_1](media/demo_activity_map_1.png)
+
+![demo_activity_map_2](media/demo_activity_map_2.png)
 
 Refer to the [Mapbox Documentation](https://docs.mapbox.com/) for more information on how to create your maps.
 
