@@ -128,16 +128,24 @@ heatmap_colour_palette = "viridis"
 heatmap_column_wrap = 5
 ```
 
+### Mapbox Studio
+
+When using the `-gu` option, Stravalyse generates an `MBTiles` tileset of your activity data and uploads it to Mapbox Studio. From there, you can create a base map with the colour theme of your choice, add your activity data as a layer, and use the included metadata (name, activity type, distance, elevation gain, or description) to format the activity traces however you want. In the following example, the activities are colour-coded by type (mountain biking in red, hiking in blue, and stand-up paddleboarding in black):
+
+![demo_activity_map](media/demo_activity_map.png)
+
+Refer to the [Mapbox Documentation](https://docs.mapbox.com/) for more information on how to create your maps.
+
 ### Plots
 
 From release v1.2.0 onwards, the tool is capable of generating some basic plots from your Strava data. The types of plots currently supported are described in the release notes, but here are some examples:
 
-![Demo Activity Counts Plot](Media/Demo%20Activity%20Counts%20Plot.JPG)
+![demo_activity_counts_plot](media/demo_activity_counts_plot.jpg)
 
-![Demo Commute Plots](Media/Demo%20Commute%20Plots.JPG)
+![demo_commute_plots](media/demo_commute_plots.jpg)
 
-![Demo Mean Distance Plot](Media/Demo%20Mean%20Distance%20Plot.JPG)
+![demo_mean_distance_plot](media/demo_mean_distance_plot.jpg)
 
-![Demo Start Locations Plot](Media/Demo%20Start%20Locations%20Plot.jpeg)
+![demo_start_locations_plot](media/demo_start_locations_plot.jpg)
 
-![Demo Moving Time Heatmap Plot](Media/Demo%20Moving%20Time%20Heatmap.jpeg)
+![demo_moving_time_heatmap](media/demo_moving_time_heatmap.jpg)
