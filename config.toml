@@ -9,21 +9,16 @@ geo_data_file = 'data/strava_activities.geojson'
 reverse_geocoding = true
 update_existing_activities = true
 
+[[data.description_tags]]
+tag_name = 'Skis:'
+column_name = 'ski_type'
+activity_types = ["AlpineSki", "BackcountrySki", "NordicSki"]
+
 [mapbox]
 tileset_name = 'YOUR_NAME.StravaGeoData'
 tileset_zoom_level = 16
 
-[[data.description_tags]]
-tag_name = 'Boat:'
-column_name = 'boat_type'
-activity_types = ["Sail"]
-
-[[data.description_tags]]
-tag_name = 'Canoe:'
-column_name = 'canoe_type'
-activity_types = ["Canoeing"]
-
-[analysis]
+[plots]
 plot_colour_palette = "Dark2"
 heatmap_colour_palette = "viridis"
 heatmap_column_wrap = 5

@@ -141,23 +141,23 @@ def main():
     if args.activity_count_plot:
         # Generate and display a plot of activity counts over time.
         analysis.display_activity_count_plot(activity_df,
-                                             config['analysis']['plot_colour_palette'])
+                                             config['plots']['plot_colour_palette'])
 
     if args.commute_plots:
         # Generate and display plots of the commute data.
         analysis.display_commute_plots(activity_df,
-                                       config['analysis']['plot_colour_palette'])
+                                       config['plots']['plot_colour_palette'])
 
     if args.mean_distance_plot:
         # Generate and display a plot of the mean activity distance over time.
         analysis.display_mean_distance_plot(activity_df,
-                                            config['analysis']['plot_colour_palette'])
+                                            config['plots']['plot_colour_palette'])
 
     if args.start_locations_plot:
         if config['data']['reverse_geocoding']:
             # Generate and display a plot of the number of activities started in each country.
             analysis.display_start_country_plot(activity_df,
-                                                config['analysis']['plot_colour_palette'])
+                                                config['plots']['plot_colour_palette'])
         else:
             print("Reverse geocoding must be enabled to generate this plot.",
                   f"Set 'reverse_geocoding' in {
@@ -167,8 +167,8 @@ def main():
     if args.moving_time_heatmap:
         # Generate and display a heatmap of moving time for each activity type.
         analysis.display_moving_time_heatmap(activity_df,
-                                             config['analysis']['heatmap_colour_palette'],
-                                             config['analysis']['heatmap_column_wrap'])
+                                             config['plots']['heatmap_colour_palette'],
+                                             config['plots']['heatmap_column_wrap'])
 
 
 if __name__ == "__main__":

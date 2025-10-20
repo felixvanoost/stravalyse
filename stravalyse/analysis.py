@@ -13,7 +13,7 @@ import pandas as pd
 import seaborn as sns
 
 
-def _generate_moving_time_heatmap(*args, **kwargs):
+def _generate_moving_time_heatmap(*args, **kwargs) -> None:
     """
     Generate a heatmap of moving time for a single activity type.
     """
@@ -23,7 +23,7 @@ def _generate_moving_time_heatmap(*args, **kwargs):
 
 
 def _generate_start_country_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
-                                 colour_palette: list):
+                                 colour_palette: list) -> None:
     """
     Generate a bar plot of the number of activities started in each country (by
     type).
@@ -56,7 +56,7 @@ def _generate_start_country_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
 
 
 def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
-                                 colour_palette: list):
+                                 colour_palette: list) -> None:
     """
     Generate a bar plot of mean activity distance over time (by type).
 
@@ -89,7 +89,7 @@ def _generate_mean_distance_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
 
 
 def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes,
-                                  colour_palette: list):
+                                  colour_palette: list) -> None:
     """
     Generate a bar plot of activity counts over time (by type).
 
@@ -122,7 +122,7 @@ def _generate_activity_count_plot(activity_data: pd.DataFrame, ax: mpl.axes.Axes
 
 
 def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
-                                 colour_palette: sns.color_palette):
+                                 colour_palette: sns.color_palette) -> None:
     """
     Generate a bar plot of number of commutes per month.
 
@@ -151,7 +151,7 @@ def _generate_commute_count_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
 
 
 def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
-                                    colour_palette: sns.color_palette):
+                                    colour_palette: sns.color_palette) -> None:
     """
     Generate a line plot of total and mean commute distance per year.
 
@@ -189,7 +189,7 @@ def _generate_commute_distance_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axe
 
 
 def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
-                                colour_palette: sns.color_palette):
+                                colour_palette: sns.color_palette) -> None:
     """
     Generate a line plot of commute days per year.
 

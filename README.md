@@ -1,96 +1,132 @@
 # Stravalyse
-A Python tool to analyse and display Strava activity data.
+
+A Python tool to help analyse and visualise Strava activity data using Pandas and [Mapbox Studio](https://www.mapbox.com/mapbox-studio).
 
 ## Introduction
-Stravalyse aims to use the data collected by Strava to offer a new insight into your activities and workouts. Its original purpose was to create a personal activity heatmap (similar to the paid Strava feature for Summit members), but now encompasses a greater variety of data analysis and visualization options.
 
-A full list of features and known issues is covered in the notes for each release.
+Stravalyse offers a simple way to gather, store, and process your Strava activity data. It stores everything in human-readable JSON, enabling you to uncover new training insights using Pandas, export the geospatial data as GeoJSON, or generate a tileset and upload it to Mapbox to create personalised maps of your adventures.
+
+Stravalyse further enriches the data provided by Strava by:
+
+- Looking up and storing the activity start and end addresses using reverse geocoding.
+- Parsing and extracting custom data embedded in your activity descriptions with user-defined tags.
+
+The tool includes a limited set of analysis features to use as inspiration, though these are not actively maintained.
 
 ## Installation
 
-### 1. Python + Dependencies
-The tool is developed with Python 3.9. Its dependencies are tracked in `requirements.txt` (for Pip) and `environment.yml` (for the [Anaconda](https://www.anaconda.com/distribution/) distribution).
+Stravalyse is developed with Python 3.12. Simply clone and open the repository locally and install the Python package using `pip`:
 
-#### Option 1: Environment setup using Python
-
-Create and activate a new virtual environment in Python using the commands:
-
-```
-python -m venv [path-to-environment]
-python [path-to-environment]/bin/activate
+```sh
+cd stravalyse
+pip install . 
 ```
 
-Then install the required dependencies using:
+### Strava API access
 
-```
-pip install -r requirements.txt
-```
-
-#### Option 2: Environment setup using Anaconda
-
-Create and activate a new environment in Anaconda with the required dependencies using the commands:
-
-```
-conda env create -f environment.yml
-conda activate strava-analysis-tool-env
-```
-
-### 2. Strava API Access
-The tool needs to be registered as an app with Strava to obtain access the Strava API. You can do this as follows:
+The tool needs to be registered as an app with Strava to access the Strava API. This takes a few steps:
 
 1. From https://www.strava.com/settings/api, create a new application and set the 'Authorization Callback Domain' field to `localhost`.
-2. Copy the generated client ID and store it on your local machine as an environment variable named `STRAVA_CLIENT_ID`. Do the same for the client secret and store it as an environment variable named `STRAVA_CLIENT_SECRET`.
+2. Create a `.env` file in the Stravalyse root directory.
+2. Copy the generated client ID and store it in the `.env` file with the key `STRAVA_CLIENT_ID`. Do the same for the client secret with the key `STRAVA_CLIENT_SECRET`:
 
-When it is first run, the tool will open a browser window and redirect to a Strava app permissions page. Click 'Authorize' to give it access to your Strava data (this includes activities marked as 'private'). Note that only read permissions are requested; the tool is not capable of adding, modifying, or deleting any activities from your personal profile.
+```python
+STRAVA_CLIENT_ID = "YOUR_CLIENT_ID"
+STRAVA_CLIENT_SECRET = "YOUR_CLIENT_SECRET"
+```
 
-After authorizing access, the browser will redirect to an invalid page (`http://localhost`) and return an error. The returned URL, however, is still valid and contains the access code required for the tool to authenticate itself with the Strava API. The URL will be of the form:
+When you run Stravalyse for the first time, it will open a browser window and request permission to connect to Strava. Click 'Authorize' to give it access to your Strava data (this includes activities marked as 'private'). Note that only read permissions are requested; the tool is not capable of adding, modifying, or deleting any activities from your personal profile.
+
+After authorizing access, the browser will redirect to an invalid page (`http://localhost`) and return an error. The returned URL, however, is valid and contains the access code required for Stravalyse to authenticate itself with the Strava API. The URL will be in the form:
 
 `http://localhost/?state=&code=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&scope=read,activity:read_all`
 
-When prompted, copy the `code` portion of the URL (`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`) and paste it into the console. The tool will get and refresh its own OAuth2 tokens, so this only needs to be done once.
+When prompted, copy the `&code=` portion of the URL (`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`) and paste it into the console. The tool will get and refresh its own OAuth2 tokens, so you only need to do this once.
 
-### 3. HERE account
-You will need to register for a free HERE platform account [here](https://platform.here.com/) if you want the tool to leverage the capabilities of [HERE Studio](https://platform.here.com/studio/). HERE Studio provides a very slick way to visualise your Strava data with a variety of map styles and customized formatting rules. Here's a basic example:
+### Mapbox Studio API access
 
-[![Demo Activity Map](Media/Demo%20Activity%20Map.JPG)](https://studio.here.com/viewer/?project_id=d99c795f-b247-47f9-a67e-972255a02017)
+If you want Stravalyse to upload your data to Mapbox Studio, you will need to create a Mapbox [account](https://account.mapbox.com/) and generate an API access token from the [access tokens](https://console.mapbox.com/account/access-tokens/) page. Store it in the same `.env` file as your Strava credentials with the key `MAPBOX_TOKEN`:
 
-Once configured, the tool can automatically upload your Strava data to HERE to generate an up-to-date map of your activities. You can set rules to colour-code activities (by type or moving time, for instance) within the HERE Studio web app, and clicking on an activity will bring up some useful basic information (try it!).
+```python
+STRAVA_CLIENT_ID = "YOUR_CLIENT_ID"
+STRAVA_CLIENT_SECRET = "YOUR_CLIENT_SECRET"
 
-After creating an account, create a new HERE project + app and generate OAuth credentials as follows:
-
-1. From the main HERE platform page, click on 'HERE Studio'.
-2. Click on 'Create new map' and give your map a name. This will also create a HERE project with the same name.
-3. Return to the main HERE platform page, click on 'Access Manager', then navigate to the 'Apps' tab at the top of the page.
-4. Click on 'Register new app', then give it a name (e.g. 'Strava Analysis Tool').
-5. In the 'Default access to a project' section, select the project (map) you created in HERE Studio then click 'Register'.
-6. Click on the app you just created, then create a new set of OAuth 2.0 credentials using the 'Create credentials' button. Download and save the generated file to the `/Credentials` folder in your local copy of this repository.
+MAPBOX_TOKEN = "YOUR_TOKEN"
+```
 
 ## Usage
 
-Run the tool using the command:
+Once installed, run the tool by calling it in a terminal window:
 
-`python strava_analysis_tool.py`
+```sh
+stravalyse
+```
 
 The following command line options are available:
 
 | Command | Description |
 | ------- | ------------|
-| `-a / --activity_counts_plot` | Generate and display a plot of activity counts over time |
-| `-c / --commute_plots` | Generate and display plots of the commute data |
-| `-d / --mean_distance_plot` | Generate and display a plot of the mean activity distance over time |
-| `-g / --export_geo_data` | Export the geospatial activity data in GeoJSON format |
-| `-gu / --export_upload_geo_data` | Export the geospatial activity data in GeoJSON format and upload it to the HERE XYZ mapping platform |
-| `-l / --start_locations_plot` | Generate and display a plot of the number of activities started in each country |
-| `-m / --moving_time_heatmap` | Generate and display a heatmap of moving time for each activity type |
-| `-r / --refresh_data` | Get and store a fresh copy of the activity data |
-| `--date_range_start` | Specify the start of a date range in ISO format |
-| `--date_range_end` | Specify the end of a date range in ISO format |
+| `-a / --activity_count_plot` | Generate and display a plot of activity counts over time. |
+| `-c / --commute_plots` | Generate and display plots of the commute data. |
+| `-d / --mean_distance_plot` | Generate and display a plot of the mean activity distance over time. |
+| `-g / --export_geo_data` | Export the geospatial activity data in GeoJSON format. |
+| `-gu / --export_upload_geo_data` | Export the geospatial activity data in GeoJSON format and upload it to Mapbox Studio. |
+| `-l / --start_locations_plot` | Generate and display a plot of the number of activities started in each country. |
+| `-m / --moving_time_heatmap` | Generate and display a heatmap of moving time for each activity type. |
+| `-r / --refresh_data` | Get and store a fresh copy of the activity data. |
+| `--date_range_start` | Specify the start of a date range in ISO format. |
+| `--date_range_end` | Specify the end of a date range in ISO format. |
 
-These options can also be displayed from within the command line using the help command:
+You can also see the list of options using the `-h` or `--help` option.
 
-`python strava_analysis_tool.py -h` or `python strava_analysis_tool.py --help`
+### Configuration
 
-All user-configurable parameters, such as file paths and the colour palette used to generate any plots, are stored in the file `config.toml`.
+All user-configurable parameters are stored within the `config.toml` file in the root directory.
+
+The `[paths]` section allows you to choose where to store the data files:
+
+```toml
+[paths]
+strava_tokens_file = ''
+activity_data_file = ''
+geo_data_file = ''
+```
+
+The `[data]` section allows you to enable reverse geocoding and to apply it to activities that were previously fetched with reverse geocoding disabled. Note that reverse geocoding increase the time taken to download your activity data from Strava, as it uses a free service with low rate limits:
+
+```toml
+[data]
+reverse_geocoding = true
+update_existing_activities = true
+```
+
+You can define an arbitrary number of custom description tags using the following format:
+
+```toml
+[[data.description_tags]]
+tag_name = 'Skis:'
+column_name = 'ski_type'
+activity_types = ["AlpineSki", "BackcountrySki", "NordicSki"]
+```
+
+In this example, Stravalyse will look through all new activities marked as a `AlpineSki`, `BackcountrySki` or `NordicSki`, extract the line of text immediately following the tag 'Skis:' in the activity descriptions, and store the data in the column `ski_type` in the Pandas dataframe. You can use this feature to store almost any data you find relevant: the skis you used for a ski activity, your final race position during a sailing regatta, or the types of rapids you ran during a whitewater kayak.
+
+The `[mapbox]` section gives you control over the name and zoom level of the tileset uploaded to Mapbox Studio. A zoom level of 16 provides the highest level of detailed currently supported by Mapbox (~1 m resolution), but you may incur data processing fees depending on how large your tileset is and how frequently you upload it. As a reference, a relatively large dataset of 5,500 activities in 12+ countries can be uploaded twice a month with a zoom level of 16 without incurring any charges. Reducing the zoom level to <=15 should ensure you avoid any fees if your dataset is much larger or you want to upload it more frequently. 
+
+```toml
+[mapbox]
+tileset_name = 'YOUR_NAME.StravaGeoData'
+tileset_zoom_level = 16
+```
+
+The `[plots]` section lets you choose the colour palettes and wrapping style used for the generated plots:
+
+```toml
+[plots]
+plot_colour_palette = "Dark2"
+heatmap_colour_palette = "viridis"
+heatmap_column_wrap = 5
+```
 
 ### Plots
 

@@ -126,8 +126,7 @@ def export_geo_data_file(file_path: Path, activity_dataframe: DataFrame) -> None
     activity_map_df.loc[:,
                         'distance'] = activity_map_df.loc[:, 'distance'] / 1000
 
-    # Create a pandas GeoDataFrame from the activities map DataFrame and
-    # format the column names.
+    # Create a pandas GeoDataFrame from the activities map DataFrame and format the column names.
     activity_map_gdf = GeoDataFrame(activity_map_df[['name',
                                                      'id',
                                                      'type',
