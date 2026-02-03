@@ -38,7 +38,7 @@ def _parse_description_tag(activity_df: pd.DataFrame, tag_str: str, column_name:
 
     # Parse the tag from the activity descriptions and store it as a new column in the DataFrame
     activity_df[column_name] = activity_desc.apply(
-        lambda desc: desc.partition(tag_str)[2].splitlines()[0] if tag_str in desc else None)
+        lambda desc: desc.partition(tag_str)[2].splitlines()[0] if isinstance(desc, str) and tag_str in desc else None)
 
     return activity_df
 
