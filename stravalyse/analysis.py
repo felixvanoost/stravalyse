@@ -216,12 +216,12 @@ def _generate_commute_days_plot(commute_data: pd.DataFrame, ax: mpl.axes.Axes,
     ax.yaxis.grid(visible=True, which='minor', linewidth=0.5)
 
 
-def _generate_commute_statistics(x: pd.Series) -> pd.Series:
+def _generate_commute_statistics(x: pd.DataFrame) -> pd.Series:
     """
-    Generate basic commute statistics from a given pandas Series.
+    Generate basic commute statistics from a given pandas DataFrame group.
 
     Arguments:
-    x - The Series to generate basic commute statistics from.
+    x - The DataFrame group to generate basic commute statistics from.
 
     Return:
     A Series containing the following commute statistics:
@@ -229,28 +229,22 @@ def _generate_commute_statistics(x: pd.Series) -> pd.Series:
     - Total and average commute distance
     - Total and average commute time
     """
-
-    rows = {'Number of commutes': x['type'].count(),
-            'Total commute distance (km)': x['distance'].sum() / 1000,
-            'Average commute distance (km)': x['distance'].mean() / 1000,
-            'Total commute moving time (hours)': x['moving_time'].sum() / 3600,
-            'Average commute moving time (mins)': x['moving_time'].mean() / 60}
-
-    series = pd.Series(rows, index=['Number of commutes',
-                                    'Total commute distance (km)',
-                                    'Average commute distance (km)',
-                                    'Total commute moving time (hours)',
-                                    'Average commute moving time (mins)'])
-
-    return series
+    rows = {
+        'Number of commutes': len(x),
+        'Total commute distance (km)': x['distance'].sum() / 1000,
+        'Average commute distance (km)': x['distance'].mean() / 1000,
+        'Total commute moving time (hours)': x['moving_time'].sum() / 3600,
+        'Average commute moving time (mins)': x['moving_time'].mean() / 60
+    }
+    return pd.Series(rows)
 
 
-def _generate_summary_statistics(x: pd.Series) -> pd.Series:
+def _generate_summary_statistics(x: pd.DataFrame) -> pd.Series:
     """
-    Generate basic statistics from a given pandas Series.
+    Generate summary statistics from a given pandas DataFrame group.
 
     Arguments:
-    x - The Series to generate basic commute statistics from.
+    x - The DataFrame group to generate summary statistics from.
 
     Return:
     A Series containing the following statistics:
@@ -259,26 +253,17 @@ def _generate_summary_statistics(x: pd.Series) -> pd.Series:
     - Total and average elevation gain
     - Average speed
     """
-
-    rows = {'Number of activities': x['type'].count(),
-            'Total distance (km)': x['distance'].sum() / 1000,
-            'Average distance (km)': x['distance'].mean() / 1000,
-            'Total moving time (hours)': x['moving_time'].sum() / 3600,
-            'Average moving time (mins)': x['moving_time'].mean() / 60,
-            'Total elevation gain (km)': x['total_elevation_gain'].sum() / 1000,
-            'Average elevation gain (m)': x['total_elevation_gain'].mean(),
-            'Average speed (km/h)': (x['distance'].sum() / x['moving_time'].sum()) * 3.6}
-
-    series = pd.Series(rows, index=['Number of activities',
-                                    'Total distance (km)',
-                                    'Average distance (km)',
-                                    'Total moving time (hours)',
-                                    'Average moving time (mins)',
-                                    'Total elevation gain (km)',
-                                    'Average elevation gain (m)',
-                                    'Average speed (km/h)'])
-
-    return series
+    rows = {
+        'Number of activities': len(x),
+        'Total distance (km)': x['distance'].sum() / 1000,
+        'Average distance (km)': x['distance'].mean() / 1000,
+        'Total moving time (hours)': x['moving_time'].sum() / 3600,
+        'Average moving time (mins)': x['moving_time'].mean() / 60,
+        'Total elevation gain (km)': x['total_elevation_gain'].sum() / 1000,
+        'Average elevation gain (m)': x['total_elevation_gain'].mean(),
+        'Average speed (km/h)': (x['distance'].sum() / x['moving_time'].sum()) * 3.6
+    }
+    return pd.Series(rows)
 
 
 def display_start_country_plot(activity_df: pd.DataFrame, colour_palette: list):
@@ -469,7 +454,7 @@ def display_commute_statistics(activity_df: pd.DataFrame):
 
     if not commute_df.empty:
         commute_statistics = commute_df.groupby(
-            'type').apply(_generate_commute_statistics)
+            'type').apply(_generate_commute_statistics, include_groups=False)
 
         print('Commute statistics:')
         print()
@@ -489,7 +474,7 @@ def display_summary_statistics(activity_df: pd.DataFrame):
 
     if not activity_df.empty:
         summary_statistics = activity_df.groupby(
-            'type').apply(_generate_summary_statistics)
+            'type').apply(_generate_summary_statistics, include_groups=False)
 
         print()
         print('Summary statistics:')
