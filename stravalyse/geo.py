@@ -18,7 +18,7 @@ from polyline import decode
 from shapely.geometry import Point, LineString
 
 
-geolocator = Nominatim(user_agent="Stravalyse")
+geolocator = Nominatim(user_agent="Stravalyse", timeout=10)
 reverse_geocode = RateLimiter(geolocator.reverse, min_delay_seconds=1)
 
 
@@ -68,7 +68,10 @@ def get_address(coordinates: list) -> dict:
     address = None
 
     if coordinates:
-        address = reverse_geocode(coordinates).raw['address']
+        try:
+            address = reverse_geocode(coordinates).raw['address']
+        except (GeocoderUnavailable, GeocoderTimedOut) as e:
+            print(f"Geocoding failed for coordinates '{coordinates}': {e}")
 
     return address
 
