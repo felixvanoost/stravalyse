@@ -123,23 +123,25 @@ def authenticate(tokens_file_path: pathlib.Path) -> Client:
     client_id = os.environ.get('STRAVA_CLIENT_ID')
     client_secret = os.environ.get('STRAVA_CLIENT_SECRET')
 
-    # Read the authentication tokens and expiry time from the file
     existing_tokens = _read_tokens_from_file(tokens_file_path)
     if existing_tokens:
-        # Refresh the tokens if they have expired and write the new tokens to the file
-        if time.time() >= int(existing_tokens['expires_at']):
-            client = Client()
-            new_tokens = client.refresh_access_token(client_id=client_id,
-                                                     client_secret=client_secret,
-                                                     refresh_token=existing_tokens['refresh_token'])
-            _write_tokens_to_file(tokens_file_path, new_tokens)
-        else:
-            client = Client(access_token=existing_tokens['access_token'])
+        client = Client(access_token=existing_tokens['access_token'],
+                        refresh_token=existing_tokens['refresh_token'],
+                        token_expires=int(existing_tokens['expires_at']))
     else:
         # Get the initial authentication tokens and write them to the file
         client = Client()
         initial_tokens = _get_initial_tokens(client, client_id, client_secret)
         _write_tokens_to_file(tokens_file_path, initial_tokens)
+
+    # If the tokens have been refreshed, update the file with the new tokens and expiry time.
+    if existing_tokens and client.token_expires != int(existing_tokens['expires_at']):
+        updated_tokens = {
+            'access_token': client.access_token,
+            'refresh_token': client.refresh_token,
+            'expires_at': str(client.token_expires)
+        }
+        _write_tokens_to_file(tokens_file_path, updated_tokens)
 
     print('Access to the API authenticated')
     return client
