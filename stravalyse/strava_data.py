@@ -7,7 +7,7 @@ Felix van Oost 2019-2024
 
 # Standard library
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Third-party
 import pandas as pd
@@ -134,7 +134,7 @@ def _get_last_activity_start_time(activity_df: pd.DataFrame) -> datetime:
     """
 
     if activity_df.empty:
-        last_activity_time = "1970-01-01"
+        last_activity_time = datetime(1970, 1, 1, tzinfo=timezone.utc)
     else:
         # Get the start time of the last activity in the DataFrame
         last_activity_time = activity_df.iloc[-1]['start_date']
@@ -157,7 +157,7 @@ def _update_activity_data(client: Client, file_path: Path, reverse_geocoding: bo
     print('Checking for new activities')
 
     # Get the start time of the last stored activity
-    start_time = _get_last_activity_start_time(activity_df)
+    start_time: datetime = _get_last_activity_start_time(activity_df)
 
     new_activities = []
     try:
@@ -195,7 +195,7 @@ def _update_activity_data(client: Client, file_path: Path, reverse_geocoding: bo
             new_activities_df['start_date_local'] = pd.to_datetime(
                 new_activities_df['start_date_local'], utc=True)
 
-            # Drop empty or all-NA columns from the new activities DataFrame.
+            # Drop empty or all-NA columns from the new activities DataFrame
             new_activities_df = new_activities_df.dropna(axis=1, how='all')
 
             # Append the new activities to the existing DataFrame
