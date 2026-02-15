@@ -195,6 +195,9 @@ def _update_activity_data(client: Client, file_path: Path, reverse_geocoding: bo
             new_activities_df['start_date_local'] = pd.to_datetime(
                 new_activities_df['start_date_local'], utc=True)
 
+            # Drop empty or all-NA columns from the new activities DataFrame.
+            new_activities_df = new_activities_df.dropna(axis=1, how='all')
+
             # Append the new activities to the existing DataFrame
             activity_df_updated = pd.concat(
                 [activity_df, new_activities_df], ignore_index=True)
