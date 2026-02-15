@@ -129,14 +129,19 @@ def authenticate(tokens_file_path: pathlib.Path) -> Client:
                         refresh_token=existing_tokens['refresh_token'],
                         token_expires=int(existing_tokens['expires_at']))
     else:
-        # Get the initial authentication tokens and write them to the file
-        client = Client()
-        initial_tokens = _get_initial_tokens(client, client_id, client_secret)
-        _write_tokens_to_file(tokens_file_path, initial_tokens)
+        if client_id and client_secret:
+            # Get the initial authentication tokens and write them to the file
+            client = Client()
+            initial_tokens = _get_initial_tokens(
+                client, int(client_id), client_secret)
+            _write_tokens_to_file(tokens_file_path, initial_tokens)
+        else:
+            raise ValueError("Strava client ID and secret must be set in the .env file "
+                             "to get the initial tokens")
 
     # If the tokens have been refreshed, update the file with the new tokens and expiry time.
     if existing_tokens and client.token_expires != int(existing_tokens['expires_at']):
-        updated_tokens = {
+        updated_tokens: AccessInfo = {
             'access_token': client.access_token,
             'refresh_token': client.refresh_token,
             'expires_at': str(client.token_expires)
